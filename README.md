@@ -1,36 +1,76 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Barrancas FC — MVP Demo
 
-## Getting Started
+Sistema de gestión integral del club (jugadores, cobranza, asistencia, portal del padre).
 
-First, run the development server:
+> MVP para demo de cierre. Stack: Next.js 14, TypeScript, Tailwind + shadcn/ui, Prisma + Postgres, Clerk, Uploadthing.
 
+## Setup local
+
+### 1. Requisitos
+- Node 20+ (probado en 22)
+- Postgres local o Railway
+
+### 2. Instalar
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+cp .env.example .env
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Completar `.env`:
+- `DATABASE_URL` — Postgres
+- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY` — desde dashboard.clerk.com
+- `UPLOADTHING_TOKEN` — desde uploadthing.com (opcional para demo)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Base de datos
+```bash
+npm run db:push       # aplica schema sin migración formal
+npm run db:seed       # carga datos demo (1 club, 8 categorías, 80 jugadores)
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 4. Correr
+```bash
+npm run dev
+```
+→ http://localhost:3000
 
-## Learn More
+## Usuarios demo
 
-To learn more about Next.js, take a look at the following resources:
+| Rol      | Email                  | Password   |
+|----------|------------------------|------------|
+| Admin    | admin@barrancas.com    | demo1234   |
+| Profesor | profe@barrancas.com    | demo1234   |
+| Padre    | padre@barrancas.com    | demo1234   |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+> Hay que crear esos 3 usuarios en Clerk con esos emails. El seed los linkea por email al `User` correspondiente.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Deploy a Railway
 
-## Deploy on Vercel
+1. Crear proyecto en Railway con Postgres
+2. Conectar repo de GitHub
+3. Setear variables de entorno
+4. Comando de build: `npm run build`
+5. Comando de start: `npm start`
+6. Después del primer deploy: correr `npm run db:push` y `npm run db:seed`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Estructura
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+src/
+  app/
+    (admin)/admin/           Dashboard admin
+    (profesor)/profesor/     Asistencia profesor
+    (padre)/padre/           Portal padre (mobile-first)
+    sign-in, sign-up         Clerk
+  components/ui/             shadcn/ui base
+  lib/                       prisma.ts, utils.ts
+prisma/
+  schema.prisma, seed.ts
+```
+
+## Roadmap del sistema final (no en MVP)
+- Pasarela de pago real (Mercado Pago)
+- WhatsApp API real para recordatorios
+- 7 roles (admin, tesorería, coordinador, profesor, DT, médico, padre)
+- Multi-club
+- Firma digital de documentación
+- Módulo médico ampliado, scouting, boletines

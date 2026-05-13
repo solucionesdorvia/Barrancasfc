@@ -1,0 +1,193 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  PROFESOR
+  PADRE
+}
+
+enum CategoryType {
+  INFANTIL
+  JUVENIL
+}
+
+enum PlayerStatus {
+  ACTIVE
+  INJURED
+  INACTIVE
+  SUSPENDED
+}
+
+enum ScholarshipType {
+  FULL
+  PARTIAL_50
+  PARTIAL_25
+  NONE
+}
+
+enum PaymentPlan {
+  MONTHLY
+  ANNUAL
+  SCHOLARSHIP
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  OVERDUE
+  IN_PLAN
+}
+
+enum DocumentType {
+  BIRTH_CERT
+  DNI
+  MEDICAL
+  REPORT_CARD
+  OTHER
+}
+
+model Club {
+  id         String     @id @default(cuid())
+  name       String
+  logo       String?
+  createdAt  DateTime   @default(now())
+  players    Player[]
+  categories Category[]
+  users      User[]
+}
+
+model User {
+  id        String   @id @default(cuid())
+  clerkId   String?  @unique
+  email     String   @unique
+  name      String
+  role      Role
+  clubId    String
+  club      Club     @relation(fields: [clubId], references: [id])
+  children  Player[] @relation("ParentChildren")
+  createdAt DateTime @default(now())
+
+  @@index([clubId])
+  @@index([role])
+}
+
+model Category {
+  id      String       @id @default(cuid())
+  name    String
+  type    CategoryType
+  year    Int
+  clubId  String
+  club    Club         @relation(fields: [clubId], references: [id])
+  players Player[]
+
+  @@index([clubId])
+}
+
+model Player {
+  id                    String           @id @default(cuid())
+  firstName             String
+  lastName              String
+  dni                   String           @unique
+  birthDate             DateTime
+  photo                 String?
+  nationality           String           @default("Argentina")
+  address               String?
+  emergencyContact      String?
+  schoolName            String?
+  schoolSchedule        Json?
+  status                PlayerStatus     @default(ACTIVE)
+  scholarshipType       ScholarshipType? @default(NONE)
+  scholarshipPercent    Int?
+  paymentPlan           PaymentPlan      @default(MONTHLY)
+  monthlyFee            Decimal          @default(0)
+  healthInsurance       String?
+  healthInsuranceNumber String?
+  fitnessExpiry         DateTime?
+  afaRegistration       String?
+  categoryId            String
+  category              Category         @relation(fields: [categoryId], references: [id])
+  parents               User[]           @relation("ParentChildren")
+  payments              Payment[]
+  attendances           Attendance[]
+  documents             Document[]
+  clubId                String
+  club                  Club             @relation(fields: [clubId], references: [id])
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+
+  @@index([clubId])
+  @@index([categoryId])
+  @@index([status])
+}
+
+model Payment {
+  id            String        @id @default(cuid())
+  playerId      String
+  player        Player        @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  amount        Decimal
+  month         Int
+  year          Int
+  status        PaymentStatus @default(PENDING)
+  dueDate       DateTime
+  paidAt        DateTime?
+  paymentMethod String?
+  receiptUrl    String?
+  notes         String?
+  createdAt     DateTime      @default(now())
+
+  @@index([playerId])
+  @@index([status])
+  @@index([year, month])
+}
+
+model Attendance {
+  id        String   @id @default(cuid())
+  playerId  String
+  player    Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  date      DateTime
+  present   Boolean
+  notes     String?
+  createdAt DateTime @default(now())
+
+  @@unique([playerId, date])
+  @@index([date])
+}
+
+model Document {
+  id         String       @id @default(cuid())
+  playerId   String
+  player     Player       @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  type       DocumentType
+  name       String
+  url        String
+  uploadedAt DateTime     @default(now())
+  uploadedBy String
+
+  @@index([playerId])
+}
+
+model Notice {
+  id        String   @id @default(cuid())
+  title     String
+  body      String
+  createdAt DateTime @default(now())
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  entityType String
+  entityId   String
+  action     String
+  changes    Json
+  userId     String
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
+}
