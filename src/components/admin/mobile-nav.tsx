@@ -38,7 +38,7 @@ export function AdminMobileNav() {
             className="absolute right-0 top-0 h-full w-72 bg-sidebar text-sidebar-foreground p-4"
             onClick={(e) => e.stopPropagation()}
           >
-            <BrandLogo className="text-white mb-6" />
+            <BrandLogo textTone="light" className="mb-6" size={32} />
             <nav className="space-y-1">
               {nav.map((item) => {
                 const Icon = item.icon;

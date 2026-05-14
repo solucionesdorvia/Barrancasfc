@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { auth } from "@clerk/nextjs/server";
@@ -5,7 +6,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 
 export default async function Home() {
-  const { userId } = await auth();
+  const { userId } = auth();
 
   if (userId) {
     const user = await prisma.user.findUnique({ where: { clerkId: userId } }).catch(() => null);
@@ -17,13 +18,17 @@ export default async function Home() {
   return (
     <main className="min-h-dvh bg-gradient-to-br from-barrancas-dark via-zinc-950 to-zinc-900 text-white">
       <div className="container mx-auto flex min-h-dvh max-w-5xl flex-col items-center justify-center px-6 text-center">
-        <div className="mb-6 inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-medium uppercase tracking-wider text-zinc-300">
-          <span className="h-2 w-2 rounded-full bg-barrancas-red" />
-          Barrancas FC · MVP Demo
-        </div>
-        <h1 className="text-5xl font-bold tracking-tight md:text-7xl">
-          Gestión integral del club,<br />
-          <span className="text-barrancas-red">simple y unificada.</span>
+        <Image
+          src="/logo.png"
+          alt="Barrancas FC"
+          width={120}
+          height={160}
+          priority
+          className="mb-6 drop-shadow-2xl"
+        />
+        <h1 className="text-4xl font-bold tracking-tight md:text-6xl">
+          Barrancas FC<br />
+          <span className="text-barrancas-red">Gestión integral.</span>
         </h1>
         <p className="mt-6 max-w-2xl text-lg text-zinc-400">
           Una sola plataforma para jugadores, cobranza y comunicación con padres.

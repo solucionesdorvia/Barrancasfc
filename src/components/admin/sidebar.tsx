@@ -21,7 +21,7 @@ export function AdminSidebar({ userName }: { userName: string }) {
   return (
     <aside className="hidden md:flex md:flex-col md:w-64 md:fixed md:inset-y-0 md:left-0 bg-sidebar text-sidebar-foreground border-r border-sidebar-border">
       <div className="flex items-center gap-2 px-5 h-16 border-b border-sidebar-border">
-        <BrandLogo className="text-white" />
+        <BrandLogo textTone="light" size={32} />
       </div>
       <nav className="flex-1 px-3 py-4 space-y-1">
         {nav.map((item) => {
