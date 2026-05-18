@@ -3,16 +3,18 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { prisma } from "@/lib/prisma";
+import { getDbUser } from "@/lib/auth";
 
 export default async function Home() {
   const { userId } = auth();
 
   if (userId) {
-    const user = await prisma.user.findUnique({ where: { clerkId: userId } }).catch(() => null);
+    const user = await getDbUser().catch(() => null);
     if (user?.role === "ADMIN") redirect("/admin");
     if (user?.role === "PROFESOR") redirect("/profesor");
     if (user?.role === "PADRE") redirect("/padre");
+    // Si está logueado pero sin user en DB, mandar a onboarding
+    redirect("/onboarding");
   }
 
   return (
