@@ -286,9 +286,9 @@ async function main() {
 
   console.log("\n✅ Seed completo");
   console.log("Usuarios demo (creálos en Clerk con estos emails):");
-  console.log("  · admin@barrancas.com / Valen050203");
-  console.log("  · profe@barrancas.com / Valen050203");
-  console.log("  · padre@barrancas.com / Valen050203");
+  console.log("  · admin@barrancas.com / Valen050203!");
+  console.log("  · profe@barrancas.com / Valen050203!");
+  console.log("  · padre@barrancas.com / Valen050203!");
 }
 
 main()
