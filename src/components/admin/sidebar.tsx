@@ -1,8 +1,8 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Users, Wallet, CalendarCheck, FileText, Bell } from "lucide-react";
-import { UserButton } from "@clerk/nextjs";
+import { LayoutDashboard, Users, Wallet, CalendarCheck, FileText, Bell, LogOut } from "lucide-react";
+import { UserButton, SignOutButton } from "@clerk/nextjs";
 import { cn } from "@/lib/utils";
 import { BrandLogo } from "@/components/brand-logo";
 
@@ -44,12 +44,20 @@ export function AdminSidebar({ userName }: { userName: string }) {
           );
         })}
       </nav>
-      <div className="border-t border-sidebar-border p-3 flex items-center gap-3">
-        <UserButton appearance={{ elements: { avatarBox: "h-8 w-8" } }} />
-        <div className="flex flex-col min-w-0">
-          <span className="text-sm font-medium truncate">{userName}</span>
-          <span className="text-xs text-zinc-500">Administrador</span>
+      <div className="border-t border-sidebar-border p-3 space-y-2">
+        <div className="flex items-center gap-3">
+          <UserButton appearance={{ elements: { avatarBox: "h-8 w-8" } }} />
+          <div className="flex flex-col min-w-0 flex-1">
+            <span className="text-sm font-medium truncate">{userName}</span>
+            <span className="text-xs text-zinc-500">Administrador</span>
+          </div>
         </div>
+        <SignOutButton>
+          <button className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm text-zinc-400 hover:bg-sidebar-accent hover:text-white transition-colors">
+            <LogOut className="h-4 w-4" />
+            Cerrar sesión
+          </button>
+        </SignOutButton>
       </div>
     </aside>
   );

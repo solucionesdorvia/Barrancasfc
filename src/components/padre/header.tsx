@@ -1,15 +1,22 @@
 "use client";
-import { UserButton } from "@clerk/nextjs";
+import { UserButton, SignOutButton } from "@clerk/nextjs";
+import { LogOut } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
+import { Button } from "@/components/ui/button";
 
 export function PadreHeader({ name }: { name: string }) {
   return (
     <header className="sticky top-0 z-30 bg-background border-b">
       <div className="flex items-center justify-between px-4 h-14 max-w-md mx-auto">
         <BrandLogo showText={false} />
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium hidden sm:inline">{name}</span>
+        <div className="flex items-center gap-1">
+          <span className="text-sm font-medium hidden sm:inline mr-1">{name}</span>
           <UserButton appearance={{ elements: { avatarBox: "h-8 w-8" } }} />
+          <SignOutButton>
+            <Button variant="ghost" size="icon" className="text-muted-foreground">
+              <LogOut className="h-4 w-4" />
+            </Button>
+          </SignOutButton>
         </div>
       </div>
     </header>

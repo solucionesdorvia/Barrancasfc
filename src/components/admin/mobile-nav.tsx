@@ -2,8 +2,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, LayoutDashboard, Users, Wallet, CalendarCheck, FileText, Bell } from "lucide-react";
-import { UserButton } from "@clerk/nextjs";
+import { Menu, LayoutDashboard, Users, Wallet, CalendarCheck, FileText, Bell, LogOut } from "lucide-react";
+import { UserButton, SignOutButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { BrandLogo } from "@/components/brand-logo";
@@ -59,6 +59,12 @@ export function AdminMobileNav() {
                 );
               })}
             </nav>
+            <SignOutButton>
+              <button className="mt-6 w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm text-zinc-400 hover:bg-sidebar-accent hover:text-white border-t border-sidebar-border pt-4">
+                <LogOut className="h-4 w-4" />
+                Cerrar sesión
+              </button>
+            </SignOutButton>
           </aside>
         </div>
       )}
