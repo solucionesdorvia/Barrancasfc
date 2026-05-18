@@ -44,7 +44,7 @@ export default async function Home() {
         </div>
         <p className="mt-10 text-xs text-zinc-500">
           Usuarios demo: admin@barrancas.com · profe@barrancas.com · padre@barrancas.com<br />
-          Password: demo1234
+          Password: Valen050203
         </p>
       </div>
     </main>

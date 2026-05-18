@@ -166,7 +166,7 @@ async function main() {
   await prisma.user.create({
     data: {
       email: "admin@barrancas.com",
-      name: "Manuela Robles",
+      name: "Manuela",
       role: "ADMIN",
       clubId: club.id,
     },
@@ -175,7 +175,7 @@ async function main() {
   await prisma.user.create({
     data: {
       email: "profe@barrancas.com",
-      name: "Diego Fernández",
+      name: "Diego",
       role: "PROFESOR",
       clubId: club.id,
     },
@@ -184,7 +184,7 @@ async function main() {
   await prisma.user.create({
     data: {
       email: "padre@barrancas.com",
-      name: "Martín Rodríguez",
+      name: "Martín",
       role: "PADRE",
       clubId: club.id,
       children: {
@@ -286,9 +286,9 @@ async function main() {
 
   console.log("\n✅ Seed completo");
   console.log("Usuarios demo (creálos en Clerk con estos emails):");
-  console.log("  · admin@barrancas.com / demo1234");
-  console.log("  · profe@barrancas.com / demo1234");
-  console.log("  · padre@barrancas.com / demo1234");
+  console.log("  · admin@barrancas.com / Valen050203");
+  console.log("  · profe@barrancas.com / Valen050203");
+  console.log("  · padre@barrancas.com / Valen050203");
 }
 
 main()

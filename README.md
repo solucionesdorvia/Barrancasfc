@@ -37,9 +37,9 @@ npm run dev
 
 | Rol      | Email                  | Password   |
 |----------|------------------------|------------|
-| Admin    | admin@barrancas.com    | demo1234   |
-| Profesor | profe@barrancas.com    | demo1234   |
-| Padre    | padre@barrancas.com    | demo1234   |
+| Admin    | admin@barrancas.com    | Valen050203   |
+| Profesor | profe@barrancas.com    | Valen050203   |
+| Padre    | padre@barrancas.com    | Valen050203   |
 
 > Hay que crear esos 3 usuarios en Clerk con esos emails. El seed los linkea por email al `User` correspondiente.
 
