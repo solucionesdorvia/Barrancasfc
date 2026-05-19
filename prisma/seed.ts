@@ -163,7 +163,7 @@ async function main() {
   const juvenilCategory = categories.find((c) => c.name === "Juvenil 2008")!;
   const padreChild2 = allPlayers.find((p) => p.categoryId === juvenilCategory.id)!;
 
-  await prisma.user.create({
+  const adminUser = await prisma.user.create({
     data: {
       email: "admin@barrancas.com",
       name: "Manuela",
@@ -172,7 +172,7 @@ async function main() {
     },
   });
 
-  await prisma.user.create({
+  const profeUser = await prisma.user.create({
     data: {
       email: "profe@barrancas.com",
       name: "Diego",
@@ -198,6 +198,7 @@ async function main() {
   const now = new Date();
   let paymentsCount = 0;
   let overdueTotal = 0;
+  const paidPayments: { id: string; playerId: string; amount: number; month: number; year: number; method: string; paidAt: Date }[] = [];
 
   for (const player of allPlayers) {
     if (Number(player.monthlyFee) === 0) continue; // becados full no tienen cuotas
@@ -225,7 +226,7 @@ async function main() {
         else { status = "IN_PLAN"; }
       }
 
-      await prisma.payment.create({
+      const payment = await prisma.payment.create({
         data: {
           playerId: player.id,
           amount: player.monthlyFee,
@@ -237,52 +238,191 @@ async function main() {
           paymentMethod,
         },
       });
+      if (status === "PAID" && paidAt) {
+        paidPayments.push({ id: payment.id, playerId: player.id, amount: Number(player.monthlyFee), month, year, method: paymentMethod!, paidAt });
+      }
       paymentsCount++;
     }
   }
   console.log(`✓ ${paymentsCount} pagos generados (${overdueTotal} morosos)`);
 
-  // Asistencia: últimos 30 días para Infantil 2012 y Juvenil 2008 (las del profe y del padre demo)
+  // Asistencia: últimos 30 días para Infantil 2012 y Juvenil 2008
   const trackedCategories = [profeCategory.id, juvenilCategory.id];
   let attendanceCount = 0;
+  // Agrupado por (categoryId + fecha) para luego generar 1 log de "ATTENDANCE_RECORDED" por sesión
+  const attendanceSessions = new Map<string, { categoryId: string; date: Date; total: number; present: number }>();
+
   for (const player of allPlayers.filter((p) => trackedCategories.includes(p.categoryId))) {
     for (let daysAgo = 0; daysAgo < 30; daysAgo++) {
       const date = new Date();
       date.setDate(date.getDate() - daysAgo);
+      date.setHours(0, 0, 0, 0);
       const dow = date.getDay();
-      // entrenamientos lunes (1), miércoles (3), viernes (5)
       if (![1, 3, 5].includes(dow)) continue;
       const present = Math.random() < 0.85;
       await prisma.attendance.create({
         data: { playerId: player.id, date, present },
       });
       attendanceCount++;
+      const key = `${player.categoryId}_${date.toISOString()}`;
+      const s = attendanceSessions.get(key) ?? { categoryId: player.categoryId, date, total: 0, present: 0 };
+      s.total++;
+      if (present) s.present++;
+      attendanceSessions.set(key, s);
     }
   }
   console.log(`✓ ${attendanceCount} registros de asistencia`);
 
   // Documentos: 5 jugadores con docs
+  const createdDocs: { id: string; playerId: string; type: string; name: string }[] = [];
   for (const player of allPlayers.slice(0, 5)) {
-    await prisma.document.createMany({
-      data: [
-        {
-          playerId: player.id,
-          type: "DNI" as DocumentType,
-          name: `DNI - ${player.firstName} ${player.lastName}`,
-          url: "https://placehold.co/600x400/png?text=DNI",
-          uploadedBy: "admin@barrancas.com",
-        },
-        {
-          playerId: player.id,
-          type: "MEDICAL" as DocumentType,
-          name: `Apto físico - ${player.firstName} ${player.lastName}`,
-          url: "https://placehold.co/600x400/png?text=Apto+Fisico",
-          uploadedBy: "admin@barrancas.com",
-        },
-      ],
+    const d1 = await prisma.document.create({
+      data: {
+        playerId: player.id,
+        type: "DNI" as DocumentType,
+        name: `DNI - ${player.firstName} ${player.lastName}`,
+        url: "https://placehold.co/600x400/png?text=DNI",
+        uploadedBy: "admin@barrancas.com",
+      },
     });
+    const d2 = await prisma.document.create({
+      data: {
+        playerId: player.id,
+        type: "MEDICAL" as DocumentType,
+        name: `Apto físico - ${player.firstName} ${player.lastName}`,
+        url: "https://placehold.co/600x400/png?text=Apto+Fisico",
+        uploadedBy: "admin@barrancas.com",
+      },
+    });
+    createdDocs.push({ id: d1.id, playerId: player.id, type: "DNI", name: d1.name });
+    createdDocs.push({ id: d2.id, playerId: player.id, type: "MEDICAL", name: d2.name });
   }
   console.log(`✓ 10 documentos`);
+
+  // === Actividad: registramos los movimientos que normalmente generarían los usuarios ===
+  let auditCount = 0;
+
+  // 1. Importación inicial de jugadores (hace ~60 días, Manuela)
+  await prisma.auditLog.create({
+    data: {
+      userId: adminUser.id,
+      entityType: "System",
+      entityId: "import",
+      action: "PLAYERS_IMPORTED",
+      changes: { inserted: allPlayers.length, errorCount: 0, note: "Carga inicial del plantel" },
+      createdAt: faker.date.recent({ days: 60, refDate: new Date(now.getTime() - 50 * 24 * 3600 * 1000) }),
+    },
+  });
+  auditCount++;
+
+  // 2. Generación mensual de cuotas (1 por mes, los días 1 de cada uno, por Manuela)
+  for (let monthsAgo = 5; monthsAgo >= 0; monthsAgo--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - monthsAgo, 1, 9, 30, 0);
+    const count = allPlayers.filter((p) => Number(p.monthlyFee) > 0).length;
+    await prisma.auditLog.create({
+      data: {
+        userId: adminUser.id,
+        entityType: "System",
+        entityId: "payments",
+        action: "PAYMENTS_GENERATED",
+        changes: { month: d.getMonth() + 1, year: d.getFullYear(), count },
+        createdAt: d,
+      },
+    });
+    auditCount++;
+  }
+
+  // 3. Pagos cobrados (muestra de hasta 40 logs, Manuela los marcó manualmente)
+  const sampledPaid = paidPayments.sort(() => 0.5 - Math.random()).slice(0, 40);
+  for (const p of sampledPaid) {
+    await prisma.auditLog.create({
+      data: {
+        userId: adminUser.id,
+        entityType: "Payment",
+        entityId: p.id,
+        action: "PAYMENT_MARKED_PAID",
+        changes: { playerId: p.playerId, amount: p.amount, month: p.month, year: p.year, method: p.method, previousStatus: "PENDING" },
+        createdAt: p.paidAt,
+      },
+    });
+    auditCount++;
+  }
+
+  // 4. Cambios de categoría (5 jugadores que ascendieron, Manuela los movió)
+  const categoryChanges = allPlayers.slice(0, 5);
+  for (let i = 0; i < categoryChanges.length; i++) {
+    const player = categoryChanges[i];
+    const otherCat = categories.find((c) => c.id !== player.categoryId && c.type === "INFANTIL")!;
+    await prisma.auditLog.create({
+      data: {
+        userId: adminUser.id,
+        entityType: "Player",
+        entityId: player.id,
+        action: "PLAYER_CATEGORY_CHANGED",
+        changes: {
+          from: { id: otherCat.id, name: otherCat.name },
+          to: { id: player.categoryId, name: categories.find((c) => c.id === player.categoryId)!.name },
+          note: "Ascenso de categoría",
+        },
+        createdAt: faker.date.recent({ days: 30 - i * 4 }),
+      },
+    });
+    auditCount++;
+  }
+
+  // 5. Asistencias registradas (1 log por sesión, Diego el profesor)
+  for (const session of attendanceSessions.values()) {
+    // Solo Infantil 2012 (la del profe Diego)
+    if (session.categoryId !== profeCategory.id) continue;
+    await prisma.auditLog.create({
+      data: {
+        userId: profeUser.id,
+        entityType: "Attendance",
+        entityId: session.categoryId,
+        action: "ATTENDANCE_RECORDED",
+        changes: {
+          date: session.date.toISOString(),
+          total: session.total,
+          present: session.present,
+          absent: session.total - session.present,
+        },
+        createdAt: new Date(session.date.getTime() + 19 * 3600 * 1000), // ~19hs del día
+      },
+    });
+    auditCount++;
+  }
+
+  // 6. Documentos subidos (Manuela cargó los iniciales)
+  for (const d of createdDocs) {
+    await prisma.auditLog.create({
+      data: {
+        userId: adminUser.id,
+        entityType: "Document",
+        entityId: d.id,
+        action: "DOCUMENT_UPLOADED",
+        changes: { playerId: d.playerId, type: d.type, name: d.name },
+        createdAt: faker.date.recent({ days: 45 }),
+      },
+    });
+    auditCount++;
+  }
+
+  // 7. Aprobaciones de apto físico (3 recientes, Manuela)
+  for (let i = 0; i < 3; i++) {
+    const player = allPlayers[i + 5];
+    await prisma.auditLog.create({
+      data: {
+        userId: adminUser.id,
+        entityType: "Player",
+        entityId: player.id,
+        action: "FITNESS_APPROVED",
+        changes: { playerId: player.id, expiry: player.fitnessExpiry?.toISOString() ?? null, note: "Apto físico cargado y aprobado" },
+        createdAt: faker.date.recent({ days: 15 - i * 3 }),
+      },
+    });
+    auditCount++;
+  }
+  console.log(`✓ ${auditCount} movimientos en actividad`);
 
   console.log("\n✅ Seed completo");
   console.log("Usuarios demo (creálos en Clerk con estos emails):");
