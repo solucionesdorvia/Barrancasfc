@@ -55,7 +55,7 @@ export function ChangeCategoryButton({
         <DialogHeader>
           <DialogTitle>Cambiar de categoría</DialogTitle>
           <DialogDescription>
-            El cambio queda registrado en la auditoría con tu usuario y la fecha.
+            El cambio queda asentado en el historial con tu usuario y la fecha.
           </DialogDescription>
         </DialogHeader>
         <Select value={selected} onValueChange={setSelected}>

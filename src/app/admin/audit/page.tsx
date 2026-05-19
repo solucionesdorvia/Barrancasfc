@@ -19,17 +19,17 @@ export default async function AuditPage() {
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Auditoría</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Registro de actividad</h1>
         <p className="text-sm text-muted-foreground">
-          Registro de todas las acciones del sistema · {logs.length} últimos eventos
+          Movimientos del sistema · {logs.length} acciones registradas
         </p>
       </div>
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Bitácora global</CardTitle>
+          <CardTitle className="text-base">Últimas acciones</CardTitle>
           <CardDescription>
-            Cada acción queda registrada con usuario, fecha y detalle.
-            Para ver el historial de un usuario en particular, andá a <Link href="/admin/users" className="underline">Usuarios</Link>.
+            Cada movimiento queda registrado con el usuario, la fecha y el detalle de lo modificado.
+            Para ver la actividad de un usuario específico, ingresá a <Link href="/admin/users" className="underline">Staff</Link>.
           </CardDescription>
         </CardHeader>
         <CardContent>

@@ -257,9 +257,9 @@ export default async function PlayerDetailPage({ params }: { params: { id: strin
         <TabsContent value="historial">
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Historial de cambios</CardTitle>
+              <CardTitle className="text-base">Historial del jugador</CardTitle>
               <CardDescription>
-                Todo lo que se modificó en la ficha del jugador queda registrado con usuario y fecha.
+                Cada modificación en la ficha queda asentada con el usuario que la realizó y la fecha.
               </CardDescription>
             </CardHeader>
             <CardContent>

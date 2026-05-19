@@ -15,7 +15,7 @@ const nav = [
   { href: "/admin/documents", label: "Documentación", icon: FileText },
   { href: "/admin/notices", label: "Avisos", icon: Bell },
   { href: "/admin/users", label: "Staff", icon: UserCog },
-  { href: "/admin/audit", label: "Auditoría", icon: Activity },
+  { href: "/admin/audit", label: "Actividad", icon: Activity },
 ];
 
 export function AdminSidebar({ userName }: { userName: string }) {

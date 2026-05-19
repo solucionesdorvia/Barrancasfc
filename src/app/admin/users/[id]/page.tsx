@@ -81,10 +81,10 @@ export default async function UserProfilePage({ params }: { params: { id: string
       <Card>
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
-            <Activity className="h-4 w-4" /> Historial de actividad
+            <Activity className="h-4 w-4" /> Actividad del usuario
           </CardTitle>
           <CardDescription>
-            Todas las acciones que {user.name} realizó en el sistema, ordenadas de más reciente a más antigua.
+            Acciones realizadas por {user.name} dentro del sistema, ordenadas de la más reciente a la más antigua.
           </CardDescription>
         </CardHeader>
         <CardContent>
