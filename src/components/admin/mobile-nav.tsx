@@ -2,7 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, LayoutDashboard, Users, Wallet, CalendarCheck, FileText, Bell, LogOut } from "lucide-react";
+import { Menu, LayoutDashboard, Users, Wallet, CalendarCheck, FileText, Bell, LogOut, Shield, UserCog, Activity } from "lucide-react";
 import { UserButton, SignOutButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -10,11 +10,14 @@ import { BrandLogo } from "@/components/brand-logo";
 
 const nav = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/admin/categories", label: "Plantel", icon: Shield },
   { href: "/admin/players", label: "Jugadores", icon: Users },
   { href: "/admin/payments", label: "Cobranza", icon: Wallet },
   { href: "/admin/attendance", label: "Asistencia", icon: CalendarCheck },
   { href: "/admin/documents", label: "Documentación", icon: FileText },
   { href: "/admin/notices", label: "Avisos", icon: Bell },
+  { href: "/admin/users", label: "Staff", icon: UserCog },
+  { href: "/admin/audit", label: "Auditoría", icon: Activity },
 ];
 
 export function AdminMobileNav() {

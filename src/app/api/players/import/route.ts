@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
+import { logAudit } from "@/lib/audit";
 
 function parseDate(input: unknown): Date | null {
   if (!input) return null;
@@ -80,6 +81,16 @@ export async function POST(req: Request) {
     } catch (e) {
       errors.push({ row: rowNum, error: e instanceof Error ? e.message : "Error desconocido" });
     }
+  }
+
+  if (inserted > 0) {
+    await logAudit({
+      userId: user.id,
+      entityType: "System",
+      entityId: "import",
+      action: "PLAYERS_IMPORTED",
+      changes: { inserted, errorCount: errors.length },
+    });
   }
 
   return NextResponse.json({ inserted, errors });

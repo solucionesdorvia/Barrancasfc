@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
+import { logAudit } from "@/lib/audit";
 
 export async function POST() {
-  await requireRole("ADMIN");
+  const user = await requireRole("ADMIN");
 
   const now = new Date();
   const month = now.getMonth() + 1;
@@ -40,5 +41,14 @@ export async function POST() {
   }
 
   await prisma.payment.createMany({ data: toCreate });
+
+  await logAudit({
+    userId: user.id,
+    entityType: "System",
+    entityId: "payments",
+    action: "PAYMENTS_GENERATED",
+    changes: { month, year, count: toCreate.length },
+  });
+
   return NextResponse.json({ created: toCreate.length });
 }

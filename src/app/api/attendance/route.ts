@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
+import { logAudit } from "@/lib/audit";
 
 export async function POST(req: Request) {
-  await requireRole(["PROFESOR", "ADMIN"]);
+  const user = await requireRole(["PROFESOR", "ADMIN"]);
   const body = await req.json().catch(() => null);
   if (!body?.date || !Array.isArray(body?.marks)) {
     return NextResponse.json({ error: "Body inválido" }, { status: 400 });
@@ -12,7 +13,6 @@ export async function POST(req: Request) {
   const date = new Date(body.date);
   date.setHours(0, 0, 0, 0);
 
-  // upsert por (playerId, date)
   await Promise.all(
     body.marks.map((m: { playerId: string; present: boolean }) =>
       prisma.attendance.upsert({
@@ -22,6 +22,20 @@ export async function POST(req: Request) {
       })
     )
   );
+
+  const presentCount = body.marks.filter((m: { present: boolean }) => m.present).length;
+  await logAudit({
+    userId: user.id,
+    entityType: "Attendance",
+    entityId: body.categoryId ?? "global",
+    action: "ATTENDANCE_RECORDED",
+    changes: {
+      date: date.toISOString(),
+      total: body.marks.length,
+      present: presentCount,
+      absent: body.marks.length - presentCount,
+    },
+  });
 
   return NextResponse.json({ ok: true, count: body.marks.length });
 }

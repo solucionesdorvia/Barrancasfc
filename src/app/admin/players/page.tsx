@@ -40,8 +40,9 @@ export default async function PlayersListPage({
         category: true,
         payments: { orderBy: { createdAt: "desc" }, take: 1 },
       },
-      orderBy: { lastName: "asc" },
-      take: 200,
+      // ACTIVE primero (orden alfabético del enum los pone primero ya), después por apellido
+      orderBy: [{ status: "asc" }, { lastName: "asc" }],
+      take: 300,
     }),
     prisma.category.findMany({ orderBy: { name: "asc" } }),
   ]);

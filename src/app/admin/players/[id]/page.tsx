@@ -9,23 +9,38 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { PlayerStatusBadge } from "@/components/player-status-badge";
 import { PaymentStatusBadge } from "@/components/payment-status-badge";
+import { ChangeCategoryButton } from "@/components/admin/change-category-button";
+import { AuditTimeline } from "@/components/admin/audit-timeline";
 import { formatARS, formatDate, monthName, initials } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
 export default async function PlayerDetailPage({ params }: { params: { id: string } }) {
-  const player = await prisma.player.findUnique({
-    where: { id: params.id },
-    include: {
-      category: true,
-      payments: { orderBy: [{ year: "desc" }, { month: "desc" }] },
-      attendances: { orderBy: { date: "desc" }, take: 60 },
-      documents: { orderBy: { uploadedAt: "desc" } },
-      parents: true,
-    },
-  });
+  const [player, categories, auditLogs] = await Promise.all([
+    prisma.player.findUnique({
+      where: { id: params.id },
+      include: {
+        category: true,
+        payments: { orderBy: [{ year: "desc" }, { month: "desc" }] },
+        attendances: { orderBy: { date: "desc" }, take: 60 },
+        documents: { orderBy: { uploadedAt: "desc" } },
+        parents: true,
+      },
+    }),
+    prisma.category.findMany({ orderBy: { name: "asc" } }),
+    prisma.auditLog.findMany({
+      where: { entityType: "Player", entityId: params.id },
+      orderBy: { createdAt: "desc" },
+      take: 50,
+    }),
+  ]);
 
   if (!player) notFound();
+
+  const userIds = Array.from(new Set(auditLogs.map((l) => l.userId)));
+  const auditUsers = await prisma.user.findMany({ where: { id: { in: userIds } } });
+  const userMap = new Map(auditUsers.map((u) => [u.id, u]));
+  const logsWithUser = auditLogs.map((l) => ({ ...l, user: userMap.get(l.userId) ?? null }));
 
   const presentCount = player.attendances.filter((a) => a.present).length;
   const attendancePct = player.attendances.length > 0
@@ -56,6 +71,13 @@ export default async function PlayerDetailPage({ params }: { params: { id: strin
           <p className="text-sm text-muted-foreground mt-1">
             {player.category.name} · DNI {player.dni} · {player.nationality}
           </p>
+          <div className="mt-2">
+            <ChangeCategoryButton
+              playerId={player.id}
+              currentCategoryId={player.categoryId}
+              categories={categories.map((c) => ({ id: c.id, name: c.name }))}
+            />
+          </div>
           <div className="flex gap-6 mt-3 text-sm">
             <div>
               <span className="text-muted-foreground">Cuota: </span>
@@ -82,6 +104,7 @@ export default async function PlayerDetailPage({ params }: { params: { id: strin
           <TabsTrigger value="asistencia">Asistencia</TabsTrigger>
           <TabsTrigger value="medico">Médico</TabsTrigger>
           <TabsTrigger value="documentos">Documentación</TabsTrigger>
+          <TabsTrigger value="historial">Historial</TabsTrigger>
         </TabsList>
 
         <TabsContent value="datos" className="space-y-4">
@@ -227,6 +250,20 @@ export default async function PlayerDetailPage({ params }: { params: { id: strin
                   </Button>
                 </div>
               ))}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="historial">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Historial de cambios</CardTitle>
+              <CardDescription>
+                Todo lo que se modificó en la ficha del jugador queda registrado con usuario y fecha.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <AuditTimeline logs={logsWithUser} showUser />
             </CardContent>
           </Card>
         </TabsContent>
