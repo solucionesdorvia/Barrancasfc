@@ -5,30 +5,37 @@ import { Home, Wallet, FileText, Bell } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const items = [
-  { href: "/padre", label: "Inicio", icon: Home },
+  { href: "/padre", label: "Inicio", icon: Home, exact: true },
   { href: "/padre/pagos", label: "Pagos", icon: Wallet },
-  { href: "/padre/documentos", label: "Documentos", icon: FileText },
+  { href: "/padre/documentos", label: "Docs", icon: FileText },
   { href: "/padre/avisos", label: "Avisos", icon: Bell },
 ];
 
 export function PadreBottomNav() {
   const pathname = usePathname();
   return (
-    <nav className="fixed bottom-0 inset-x-0 border-t bg-background z-30">
+    <nav
+      className="fixed bottom-0 inset-x-0 border-t bg-background/95 backdrop-blur z-30 safe-area-inset-bottom"
+      aria-label="Navegación principal"
+    >
       <div className="grid grid-cols-4 max-w-md mx-auto">
         {items.map((it) => {
           const Icon = it.icon;
-          const active = pathname === it.href;
+          const active = it.exact ? pathname === it.href : pathname === it.href || pathname.startsWith(it.href + "/");
           return (
             <Link
               key={it.href}
               href={it.href}
+              aria-current={active ? "page" : undefined}
               className={cn(
-                "flex flex-col items-center gap-0.5 py-2.5 text-xs",
-                active ? "text-barrancas-red" : "text-muted-foreground"
+                "relative flex flex-col items-center gap-0.5 py-2.5 text-[11px] font-medium transition-colors focus-visible:outline-none focus-visible:bg-muted",
+                active ? "text-barrancas-red" : "text-muted-foreground hover:text-foreground"
               )}
             >
-              <Icon className="h-5 w-5" />
+              {active && (
+                <span className="absolute top-0 inset-x-6 h-0.5 bg-barrancas-red rounded-full" />
+              )}
+              <Icon className={cn("h-5 w-5 transition-transform", active && "scale-110")} />
               {it.label}
             </Link>
           );

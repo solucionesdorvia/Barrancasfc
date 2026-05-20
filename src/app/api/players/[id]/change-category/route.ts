@@ -1,21 +1,25 @@
-import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
 import { logAudit } from "@/lib/audit";
+import { changeCategorySchema, safeParse } from "@/lib/validators";
+import { apiBadRequest, apiForbidden, apiNotFound, apiOk, withErrorHandler } from "@/lib/api";
 
-export async function POST(req: Request, { params }: { params: { id: string } }) {
+export const POST = withErrorHandler(async (req: Request, { params }: { params: { id: string } }) => {
   const user = await requireRole("ADMIN");
-  const body = await req.json().catch(() => ({}));
-  const categoryId = body.categoryId;
-  if (!categoryId) return NextResponse.json({ error: "categoryId requerido" }, { status: 400 });
+  const json = await req.json().catch(() => ({}));
+  const parsed = safeParse(changeCategorySchema, json);
+  if (!parsed.ok) return apiBadRequest(parsed.error);
 
   const [player, newCat] = await Promise.all([
     prisma.player.findUnique({ where: { id: params.id }, include: { category: true } }),
-    prisma.category.findUnique({ where: { id: categoryId } }),
+    prisma.category.findUnique({ where: { id: parsed.data.categoryId } }),
   ]);
-  if (!player) return NextResponse.json({ error: "Jugador no encontrado" }, { status: 404 });
-  if (!newCat) return NextResponse.json({ error: "Categoría no encontrada" }, { status: 404 });
-  if (player.categoryId === newCat.id) return NextResponse.json({ ok: true });
+  if (!player) return apiNotFound("Jugador no encontrado");
+  if (!newCat) return apiNotFound("Categoría no encontrada");
+  if (player.clubId !== user.clubId || newCat.clubId !== user.clubId) return apiForbidden();
+  if (player.categoryId === newCat.id) return apiOk({ ok: true, unchanged: true });
+
+  const previousCategory = { id: player.categoryId, name: player.category.name };
 
   await prisma.player.update({
     where: { id: player.id },
@@ -28,10 +32,10 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     entityId: player.id,
     action: "PLAYER_CATEGORY_CHANGED",
     changes: {
-      from: { id: player.categoryId, name: player.category.name },
+      from: previousCategory,
       to: { id: newCat.id, name: newCat.name },
     },
   });
 
-  return NextResponse.json({ ok: true });
-}
+  return apiOk({ ok: true });
+});

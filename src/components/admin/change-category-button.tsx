@@ -4,8 +4,17 @@ import { useRouter } from "next/navigation";
 import { ArrowRightLeft } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 type Category = { id: string; name: string };
 
@@ -23,6 +32,11 @@ export function ChangeCategoryButton({
   const [selected, setSelected] = useState(currentCategoryId);
   const [loading, setLoading] = useState(false);
 
+  function handleOpenChange(o: boolean) {
+    setOpen(o);
+    if (o) setSelected(currentCategoryId);
+  }
+
   async function submit() {
     if (selected === currentCategoryId) {
       setOpen(false);
@@ -36,7 +50,8 @@ export function ChangeCategoryButton({
     });
     setLoading(false);
     if (!res.ok) {
-      toast.error("Error al cambiar de categoría");
+      const err = await res.json().catch(() => ({}));
+      toast.error(err.error || "No se pudo cambiar la categoría");
       return;
     }
     toast.success("Categoría actualizada");
@@ -45,7 +60,7 @@ export function ChangeCategoryButton({
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="gap-1.5">
           <ArrowRightLeft className="h-3.5 w-3.5" /> Cambiar categoría
@@ -58,14 +73,17 @@ export function ChangeCategoryButton({
             El cambio queda asentado en el historial con tu usuario y la fecha.
           </DialogDescription>
         </DialogHeader>
-        <Select value={selected} onValueChange={setSelected}>
-          <SelectTrigger><SelectValue /></SelectTrigger>
-          <SelectContent>
-            {categories.map((c) => (
-              <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="space-y-2">
+          <Label>Nueva categoría</Label>
+          <Select value={selected} onValueChange={setSelected}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {categories.map((c) => (
+                <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
         <DialogFooter>
           <Button variant="ghost" onClick={() => setOpen(false)}>Cancelar</Button>
           <Button onClick={submit} disabled={loading || selected === currentCategoryId}>

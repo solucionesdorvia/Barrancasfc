@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 
 export function ProfesorHeader({ userName }: { userName: string }) {
   return (
-    <header className="sticky top-0 z-30 border-b bg-background">
+    <header className="sticky top-0 z-30 border-b bg-background/95 backdrop-blur">
       <div className="flex items-center justify-between h-14 px-4 md:px-8 max-w-5xl mx-auto">
         <BrandLogo />
         <div className="flex items-center gap-2">

@@ -1,9 +1,9 @@
-import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
 import { logAudit } from "@/lib/audit";
+import { apiOk, withErrorHandler } from "@/lib/api";
 
-export async function POST() {
+export const POST = withErrorHandler(async () => {
   const user = await requireRole("ADMIN");
 
   const now = new Date();
@@ -18,6 +18,8 @@ export async function POST() {
     },
     select: { id: true, monthlyFee: true },
   });
+
+  if (players.length === 0) return apiOk({ created: 0 });
 
   const existing = await prisma.payment.findMany({
     where: { month, year, playerId: { in: players.map((p) => p.id) } },
@@ -36,9 +38,7 @@ export async function POST() {
       status: "PENDING" as const,
     }));
 
-  if (toCreate.length === 0) {
-    return NextResponse.json({ created: 0 });
-  }
+  if (toCreate.length === 0) return apiOk({ created: 0 });
 
   await prisma.payment.createMany({ data: toCreate });
 
@@ -50,5 +50,5 @@ export async function POST() {
     changes: { month, year, count: toCreate.length },
   });
 
-  return NextResponse.json({ created: toCreate.length });
-}
+  return apiOk({ created: toCreate.length });
+});

@@ -1,20 +1,21 @@
-import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
 import { logAudit } from "@/lib/audit";
+import { attendanceMarkSchema, safeParse } from "@/lib/validators";
+import { apiBadRequest, apiOk, withErrorHandler } from "@/lib/api";
 
-export async function POST(req: Request) {
+export const POST = withErrorHandler(async (req: Request) => {
   const user = await requireRole(["PROFESOR", "ADMIN"]);
-  const body = await req.json().catch(() => null);
-  if (!body?.date || !Array.isArray(body?.marks)) {
-    return NextResponse.json({ error: "Body inválido" }, { status: 400 });
-  }
+  const json = await req.json().catch(() => ({}));
+  const parsed = safeParse(attendanceMarkSchema, json);
+  if (!parsed.ok) return apiBadRequest(parsed.error);
 
-  const date = new Date(body.date);
+  const date = new Date(parsed.data.date);
   date.setHours(0, 0, 0, 0);
 
-  await Promise.all(
-    body.marks.map((m: { playerId: string; present: boolean }) =>
+  // Upsert en una sola transacción
+  await prisma.$transaction(
+    parsed.data.marks.map((m) =>
       prisma.attendance.upsert({
         where: { playerId_date: { playerId: m.playerId, date } },
         create: { playerId: m.playerId, date, present: m.present },
@@ -23,19 +24,19 @@ export async function POST(req: Request) {
     )
   );
 
-  const presentCount = body.marks.filter((m: { present: boolean }) => m.present).length;
+  const presentCount = parsed.data.marks.filter((m) => m.present).length;
   await logAudit({
     userId: user.id,
     entityType: "Attendance",
-    entityId: body.categoryId ?? "global",
+    entityId: parsed.data.categoryId ?? "global",
     action: "ATTENDANCE_RECORDED",
     changes: {
       date: date.toISOString(),
-      total: body.marks.length,
+      total: parsed.data.marks.length,
       present: presentCount,
-      absent: body.marks.length - presentCount,
+      absent: parsed.data.marks.length - presentCount,
     },
   });
 
-  return NextResponse.json({ ok: true, count: body.marks.length });
-}
+  return apiOk({ ok: true, count: parsed.data.marks.length });
+});

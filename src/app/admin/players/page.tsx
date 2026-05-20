@@ -1,15 +1,18 @@
 import Link from "next/link";
+import { Plus, Users } from "lucide-react";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { PageHeader } from "@/components/ui/page-header";
+import { EmptyState } from "@/components/ui/empty-state";
 import { PlayerStatusBadge } from "@/components/player-status-badge";
 import { PlayersToolbar } from "@/components/admin/players-toolbar";
 import { ExcelImporter } from "@/components/admin/excel-importer";
-import { formatDate, initials } from "@/lib/utils";
-import { Plus } from "lucide-react";
-import { Prisma } from "@prisma/client";
+import { ageFromBirth, fullName, initials, pluralize } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
@@ -20,10 +23,11 @@ export default async function PlayersListPage({
 }) {
   const where: Prisma.PlayerWhereInput = {};
   if (searchParams.q) {
+    const q = searchParams.q.trim();
     where.OR = [
-      { firstName: { contains: searchParams.q, mode: "insensitive" } },
-      { lastName: { contains: searchParams.q, mode: "insensitive" } },
-      { dni: { contains: searchParams.q } },
+      { firstName: { contains: q, mode: "insensitive" } },
+      { lastName: { contains: q, mode: "insensitive" } },
+      { dni: { contains: q } },
     ];
   }
   if (searchParams.categoryId && searchParams.categoryId !== "all") where.categoryId = searchParams.categoryId;
@@ -36,90 +40,108 @@ export default async function PlayersListPage({
   const [players, categories] = await Promise.all([
     prisma.player.findMany({
       where,
-      include: {
-        category: true,
-        payments: { orderBy: { createdAt: "desc" }, take: 1 },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        dni: true,
+        birthDate: true,
+        photo: true,
+        status: true,
+        scholarshipType: true,
+        scholarshipPercent: true,
+        category: { select: { id: true, name: true } },
       },
-      // ACTIVE primero (orden alfabético del enum los pone primero ya), después por apellido
       orderBy: [{ status: "asc" }, { lastName: "asc" }],
       take: 300,
     }),
-    prisma.category.findMany({ orderBy: { name: "asc" } }),
+    prisma.category.findMany({
+      orderBy: [{ type: "asc" }, { year: "desc" }],
+      select: { id: true, name: true },
+    }),
   ]);
+
+  const hasFilters = !!(searchParams.q || searchParams.categoryId || searchParams.status || searchParams.overdue || searchParams.scholarship);
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Jugadores</h1>
-          <p className="text-sm text-muted-foreground">{players.length} resultados</p>
-        </div>
-        <div className="flex gap-2">
-          <ExcelImporter />
-          <Button className="gap-2" asChild>
-            <Link href="/admin/players/new"><Plus className="h-4 w-4" /> Nuevo jugador</Link>
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        title="Jugadores"
+        description={`${players.length} ${pluralize(players.length, "resultado")}${hasFilters ? " con los filtros aplicados" : ""}`}
+        action={
+          <>
+            <ExcelImporter />
+            <Button className="gap-2" asChild>
+              <Link href="/admin/players/new"><Plus className="h-4 w-4" /> Nuevo jugador</Link>
+            </Button>
+          </>
+        }
+      />
 
       <Card className="p-4">
         <PlayersToolbar categories={categories} />
       </Card>
 
-      <Card className="p-0 overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Jugador</TableHead>
-              <TableHead>DNI</TableHead>
-              <TableHead>Categoría</TableHead>
-              <TableHead>Estado</TableHead>
-              <TableHead>Beca</TableHead>
-              <TableHead className="text-right">Acción</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {players.length === 0 && (
+      {players.length === 0 ? (
+        <Card>
+          <EmptyState
+            icon={Users}
+            title={hasFilters ? "No hay jugadores con esos filtros" : "Sin jugadores cargados"}
+            description={hasFilters ? "Probá quitar algún filtro o usar el buscador." : "Importá un Excel o creá uno desde \"Nuevo jugador\"."}
+            bare
+            className="py-12"
+          />
+        </Card>
+      ) : (
+        <Card className="p-0 overflow-hidden">
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={6} className="text-center text-muted-foreground py-12">
-                  No hay jugadores que coincidan con los filtros.
-                </TableCell>
+                <TableHead>Jugador</TableHead>
+                <TableHead>DNI</TableHead>
+                <TableHead>Categoría</TableHead>
+                <TableHead className="text-center">Edad</TableHead>
+                <TableHead>Estado</TableHead>
+                <TableHead>Beca</TableHead>
+                <TableHead className="text-right"></TableHead>
               </TableRow>
-            )}
-            {players.map((p) => (
-              <TableRow key={p.id}>
-                <TableCell>
-                  <Link href={`/admin/players/${p.id}`} className="flex items-center gap-3">
-                    <Avatar className="h-9 w-9">
-                      <AvatarImage src={p.photo ?? undefined} />
-                      <AvatarFallback>{initials(`${p.firstName} ${p.lastName}`)}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="text-sm font-medium hover:underline">{p.lastName}, {p.firstName}</p>
-                      <p className="text-xs text-muted-foreground">Nac. {formatDate(p.birthDate)}</p>
-                    </div>
-                  </Link>
-                </TableCell>
-                <TableCell className="text-sm font-mono">{p.dni}</TableCell>
-                <TableCell className="text-sm">{p.category.name}</TableCell>
-                <TableCell><PlayerStatusBadge status={p.status} /></TableCell>
-                <TableCell className="text-sm">
-                  {p.scholarshipType === "NONE" || !p.scholarshipType ? (
-                    <span className="text-muted-foreground">—</span>
-                  ) : (
-                    <span className="font-medium">{p.scholarshipPercent}%</span>
-                  )}
-                </TableCell>
-                <TableCell className="text-right">
-                  <Button asChild size="sm" variant="ghost">
-                    <Link href={`/admin/players/${p.id}`}>Ver ficha</Link>
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </Card>
+            </TableHeader>
+            <TableBody>
+              {players.map((p) => (
+                <TableRow key={p.id} className="group">
+                  <TableCell>
+                    <Link href={`/admin/players/${p.id}`} className="flex items-center gap-3">
+                      <Avatar className="h-9 w-9">
+                        <AvatarImage src={p.photo ?? undefined} />
+                        <AvatarFallback>{initials(fullName(p.firstName, p.lastName))}</AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium group-hover:underline truncate">{p.lastName}, {p.firstName}</p>
+                      </div>
+                    </Link>
+                  </TableCell>
+                  <TableCell className="text-sm font-mono text-muted-foreground">{p.dni}</TableCell>
+                  <TableCell className="text-sm">{p.category.name}</TableCell>
+                  <TableCell className="text-center text-sm tabular-nums">{ageFromBirth(p.birthDate)}</TableCell>
+                  <TableCell><PlayerStatusBadge status={p.status} /></TableCell>
+                  <TableCell className="text-sm">
+                    {p.scholarshipType === "NONE" || !p.scholarshipType ? (
+                      <span className="text-muted-foreground">—</span>
+                    ) : (
+                      <Badge variant="secondary">{p.scholarshipPercent}%</Badge>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button asChild size="sm" variant="ghost" className="opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Link href={`/admin/players/${p.id}`}>Abrir →</Link>
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Card>
+      )}
     </div>
   );
 }

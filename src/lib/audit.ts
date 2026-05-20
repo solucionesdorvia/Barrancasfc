@@ -9,9 +9,11 @@ export type AuditAction =
   | "PLAYER_UPDATED"
   | "PLAYER_CATEGORY_CHANGED"
   | "PLAYER_STATUS_CHANGED"
+  | "PLAYER_FEE_UPDATED"
   | "ATTENDANCE_RECORDED"
   | "DOCUMENT_UPLOADED"
-  | "FITNESS_APPROVED";
+  | "FITNESS_APPROVED"
+  | "NOTICE_CREATED";
 
 export const AUDIT_ACTION_LABEL: Record<AuditAction, string> = {
   PAYMENT_MARKED_PAID: "Pago marcado como cobrado",
@@ -19,12 +21,14 @@ export const AUDIT_ACTION_LABEL: Record<AuditAction, string> = {
   PAYMENTS_GENERATED: "Cuotas mensuales generadas",
   PLAYERS_IMPORTED: "Jugadores importados desde Excel",
   PLAYER_CREATED: "Jugador creado",
-  PLAYER_UPDATED: "Datos de jugador modificados",
+  PLAYER_UPDATED: "Datos del jugador modificados",
   PLAYER_CATEGORY_CHANGED: "Categoría cambiada",
   PLAYER_STATUS_CHANGED: "Estado cambiado",
+  PLAYER_FEE_UPDATED: "Cuota mensual actualizada",
   ATTENDANCE_RECORDED: "Asistencia registrada",
   DOCUMENT_UPLOADED: "Documento subido",
-  FITNESS_APPROVED: "Apto físico aprobado",
+  FITNESS_APPROVED: "Apto físico cargado",
+  NOTICE_CREATED: "Aviso publicado",
 };
 
 export async function logAudit(input: {

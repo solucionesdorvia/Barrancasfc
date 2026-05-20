@@ -1,9 +1,23 @@
-import { Activity, Wallet, FileText, ArrowRightLeft, ClipboardCheck, Upload, UserPlus, Pencil, ShieldCheck } from "lucide-react";
+import Link from "next/link";
+import {
+  Activity,
+  Wallet,
+  FileText,
+  ArrowRightLeft,
+  ClipboardCheck,
+  Upload,
+  UserPlus,
+  Pencil,
+  ShieldCheck,
+  Bell,
+  type LucideIcon,
+} from "lucide-react";
 import type { AuditLog } from "@prisma/client";
-import { formatDate } from "@/lib/utils";
+import { formatDateTime, formatRelative, formatARS, monthName, initials } from "@/lib/format";
 import { AUDIT_ACTION_LABEL, type AuditAction } from "@/lib/audit";
+import { EmptyState } from "@/components/ui/empty-state";
 
-const ICONS: Record<AuditAction, typeof Activity> = {
+const ICONS: Record<AuditAction, LucideIcon> = {
   PAYMENT_MARKED_PAID: Wallet,
   PAYMENT_REGISTERED: Wallet,
   PAYMENTS_GENERATED: Wallet,
@@ -12,51 +26,86 @@ const ICONS: Record<AuditAction, typeof Activity> = {
   PLAYER_UPDATED: Pencil,
   PLAYER_CATEGORY_CHANGED: ArrowRightLeft,
   PLAYER_STATUS_CHANGED: Pencil,
+  PLAYER_FEE_UPDATED: Wallet,
   ATTENDANCE_RECORDED: ClipboardCheck,
   DOCUMENT_UPLOADED: FileText,
   FITNESS_APPROVED: ShieldCheck,
+  NOTICE_CREATED: Bell,
+};
+
+const TONES: Record<AuditAction, string> = {
+  PAYMENT_MARKED_PAID: "bg-emerald-100 text-emerald-700",
+  PAYMENT_REGISTERED: "bg-emerald-100 text-emerald-700",
+  PAYMENTS_GENERATED: "bg-blue-100 text-blue-700",
+  PLAYERS_IMPORTED: "bg-violet-100 text-violet-700",
+  PLAYER_CREATED: "bg-blue-100 text-blue-700",
+  PLAYER_UPDATED: "bg-zinc-100 text-zinc-700",
+  PLAYER_CATEGORY_CHANGED: "bg-amber-100 text-amber-700",
+  PLAYER_STATUS_CHANGED: "bg-amber-100 text-amber-700",
+  PLAYER_FEE_UPDATED: "bg-amber-100 text-amber-700",
+  ATTENDANCE_RECORDED: "bg-cyan-100 text-cyan-700",
+  DOCUMENT_UPLOADED: "bg-violet-100 text-violet-700",
+  FITNESS_APPROVED: "bg-emerald-100 text-emerald-700",
+  NOTICE_CREATED: "bg-rose-100 text-rose-700",
 };
 
 type LogEntry = AuditLog & {
   user?: { id: string; name: string; role: string } | null;
 };
 
-export function AuditTimeline({ logs, showUser = false }: { logs: LogEntry[]; showUser?: boolean }) {
+export function AuditTimeline({
+  logs,
+  showUser = false,
+  showRelative = true,
+}: {
+  logs: LogEntry[];
+  showUser?: boolean;
+  showRelative?: boolean;
+}) {
   if (logs.length === 0) {
-    return (
-      <div className="text-center py-12 text-sm text-muted-foreground">
-        <Activity className="h-10 w-10 mx-auto mb-2 opacity-30" />
-        Sin movimientos registrados.
-      </div>
-    );
+    return <EmptyState icon={Activity} title="Sin movimientos registrados" description="Las acciones que se hagan en el sistema aparecerán acá." bare />;
   }
 
   return (
-    <ol className="space-y-3">
-      {logs.map((log) => {
-        const Icon = ICONS[log.action as AuditAction] ?? Activity;
-        const label = AUDIT_ACTION_LABEL[log.action as AuditAction] ?? log.action;
-        const detail = formatChanges(log.action as AuditAction, log.changes);
+    <ol className="space-y-0">
+      {logs.map((log, idx) => {
+        const action = log.action as AuditAction;
+        const Icon = ICONS[action] ?? Activity;
+        const label = AUDIT_ACTION_LABEL[action] ?? log.action;
+        const detail = formatChanges(action, log.changes);
+        const tone = TONES[action] ?? "bg-zinc-100 text-zinc-700";
+        const isLast = idx === logs.length - 1;
         return (
           <li key={log.id} className="flex gap-3 group">
             <div className="flex flex-col items-center">
-              <div className="h-8 w-8 rounded-full bg-zinc-100 grid place-items-center text-zinc-600 group-hover:bg-barrancas-red group-hover:text-white transition-colors">
+              <div className={`h-8 w-8 rounded-full grid place-items-center shrink-0 ring-2 ring-background ${tone}`}>
                 <Icon className="h-4 w-4" />
               </div>
-              <div className="flex-1 w-px bg-border my-1" />
+              {!isLast && <div className="flex-1 w-px bg-border my-1 min-h-[16px]" />}
             </div>
-            <div className="flex-1 pb-3">
+            <div className="flex-1 pb-6 -mt-0.5">
               <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="text-sm font-medium">{label}</p>
-                  {detail && <p className="text-xs text-muted-foreground mt-0.5">{detail}</p>}
+                <div className="min-w-0">
+                  <p className="text-sm font-medium leading-tight">{label}</p>
+                  {detail && <p className="text-xs text-muted-foreground mt-1 break-words">{detail}</p>}
                 </div>
-                <span className="text-xs text-muted-foreground whitespace-nowrap">{formatDate(log.createdAt)}</span>
+                <span
+                  title={formatDateTime(log.createdAt)}
+                  className="text-xs text-muted-foreground whitespace-nowrap tabular-nums"
+                >
+                  {showRelative ? formatRelative(log.createdAt) : formatDateTime(log.createdAt)}
+                </span>
               </div>
               {showUser && log.user && (
-                <p className="text-xs mt-1">
-                  por <span className="font-medium">{log.user.name}</span>
-                  <span className="text-muted-foreground"> · {log.user.role.toLowerCase()}</span>
+                <p className="text-xs mt-1.5 flex items-center gap-1.5 text-muted-foreground">
+                  <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-zinc-200 text-[9px] font-medium text-zinc-700">
+                    {initials(log.user.name)}
+                  </span>
+                  por{" "}
+                  <Link href={`/admin/users/${log.user.id}`} className="font-medium text-foreground hover:underline">
+                    {log.user.name}
+                  </Link>
+                  <span className="opacity-70">· {log.user.role.toLowerCase()}</span>
                 </p>
               )}
             </div>
@@ -72,17 +121,28 @@ function formatChanges(action: AuditAction, changes: unknown): string | null {
   const c = changes as Record<string, unknown>;
   switch (action) {
     case "PAYMENT_MARKED_PAID":
-      return `${monthYear(c)} · ${money(c.amount)} · ${c.method ?? ""}`;
+      return `${monthYear(c)} · ${formatARS(c.amount as number)}${c.method ? ` · ${c.method}` : ""}`;
     case "PAYMENTS_GENERATED":
       return `${c.count} cuotas para ${monthYearFromNumbers(c.month, c.year)}`;
     case "PLAYERS_IMPORTED":
       return `${c.inserted} jugadores agregados${c.errorCount ? ` · ${c.errorCount} errores` : ""}`;
     case "PLAYER_CATEGORY_CHANGED":
-      return `de ${getName(c.from)} → a ${getName(c.to)}`;
-    case "ATTENDANCE_RECORDED":
-      return `${c.present}/${c.total} presentes${c.absent ? ` · ${c.absent} ausentes` : ""}`;
+      return `de ${getName(c.from)} → ${getName(c.to)}`;
+    case "PLAYER_STATUS_CHANGED":
+      return `${translateStatus(c.from)} → ${translateStatus(c.to)}`;
+    case "PLAYER_FEE_UPDATED":
+      return `${formatARS(c.from as number)} → ${formatARS(c.to as number)}`;
+    case "ATTENDANCE_RECORDED": {
+      const date = c.date ? new Date(c.date as string) : null;
+      const day = date ? `${date.getDate()}/${date.getMonth() + 1}` : "";
+      return `${c.present}/${c.total} presentes${day ? ` · ${day}` : ""}`;
+    }
     case "DOCUMENT_UPLOADED":
       return String(c.name ?? c.type ?? "");
+    case "FITNESS_APPROVED":
+      return c.newExpiry ? `Vence ${new Date(c.newExpiry as string).toLocaleDateString("es-AR")}` : null;
+    case "NOTICE_CREATED":
+      return String(c.title ?? "");
     default:
       return null;
   }
@@ -95,13 +155,18 @@ function monthYearFromNumbers(m: unknown, y: unknown) {
   const month = Number(m);
   const year = Number(y);
   if (!month || !year) return "";
-  const names = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
-  return `${names[month - 1]} ${year}`;
-}
-function money(v: unknown) {
-  return new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(Number(v ?? 0));
+  return `${monthName(month, true)} ${year}`;
 }
 function getName(v: unknown) {
   if (v && typeof v === "object" && "name" in v) return String((v as { name: unknown }).name);
   return "—";
+}
+function translateStatus(v: unknown) {
+  const map: Record<string, string> = {
+    ACTIVE: "Activo",
+    INJURED: "Lesionado",
+    INACTIVE: "Inactivo",
+    SUSPENDED: "Suspendido",
+  };
+  return map[String(v ?? "")] ?? String(v ?? "—");
 }
