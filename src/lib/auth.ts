@@ -2,7 +2,12 @@ import { cache } from "react";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { withTimeout } from "@/lib/timeout";
 import type { Role } from "@prisma/client";
+
+// Si la DB tarda más que esto, devolvemos null en lugar de colgar 30s.
+// Evita pantallas blancas eternas cuando Postgres está dormido o caído.
+const DB_TIMEOUT_MS = 6_000;
 
 /**
  * Devuelve el User de la DB linkeado al Clerk user actual.
@@ -17,10 +22,14 @@ export const getDbUser = cache(async () => {
   if (!userId) return null;
 
   // Fast path: ya linkeado
-  const byClerkId = await prisma.user.findUnique({
-    where: { clerkId: userId },
-    include: { club: true, children: { include: { category: true } } },
-  });
+  const byClerkId = await withTimeout(
+    prisma.user.findUnique({
+      where: { clerkId: userId },
+      include: { club: true, children: { include: { category: true } } },
+    }).catch(() => null),
+    DB_TIMEOUT_MS,
+    null,
+  );
   if (byClerkId) return byClerkId;
 
   // Slow path: primer login → linkear por email
@@ -28,18 +37,26 @@ export const getDbUser = cache(async () => {
   const email = clerkUser?.emailAddresses[0]?.emailAddress;
   if (!email) return null;
 
-  const byEmail = await prisma.user.findUnique({
-    where: { email },
-    include: { club: true, children: { include: { category: true } } },
-  });
+  const byEmail = await withTimeout(
+    prisma.user.findUnique({
+      where: { email },
+      include: { club: true, children: { include: { category: true } } },
+    }).catch(() => null),
+    DB_TIMEOUT_MS,
+    null,
+  );
   if (!byEmail) return null;
 
   // Linkear y devolver actualizado
-  const linked = await prisma.user.update({
-    where: { id: byEmail.id },
-    data: { clerkId: userId },
-    include: { club: true, children: { include: { category: true } } },
-  });
+  const linked = await withTimeout(
+    prisma.user.update({
+      where: { id: byEmail.id },
+      data: { clerkId: userId },
+      include: { club: true, children: { include: { category: true } } },
+    }).catch(() => byEmail),
+    DB_TIMEOUT_MS,
+    byEmail,
+  );
   return linked;
 });
 
