@@ -121,7 +121,9 @@ export default async function CategoriesPage() {
                     <TableCell>
                       <Link href={`/admin/categories/${c.id}`} className="block">
                         <p className="font-medium group-hover:underline">{c.name}</p>
-                        <p className="text-xs text-muted-foreground">{c.type === "INFANTIL" ? "Infantil" : "Juvenil"}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {c.type === "INFANTIL" ? "Infantil" : c.type === "JUVENIL" ? "Juvenil" : "Profesional"}
+                        </p>
                       </Link>
                     </TableCell>
                     <TableCell className="text-center font-semibold tabular-nums">{stats.total}</TableCell>

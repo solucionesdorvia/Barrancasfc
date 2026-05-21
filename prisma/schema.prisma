@@ -16,6 +16,14 @@ enum Role {
 enum CategoryType {
   INFANTIL
   JUVENIL
+  PROFESIONAL
+}
+
+enum PlayerPosition {
+  GOALKEEPER
+  DEFENDER
+  MIDFIELDER
+  FORWARD
 }
 
 enum PlayerStatus {
@@ -102,6 +110,8 @@ model Player {
   emergencyContact      String?
   schoolName            String?
   schoolSchedule        Json?
+  position              PlayerPosition?
+  heightCm              Int?
   status                PlayerStatus     @default(ACTIVE)
   scholarshipType       ScholarshipType? @default(NONE)
   scholarshipPercent    Int?
