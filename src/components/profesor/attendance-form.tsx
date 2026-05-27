@@ -29,9 +29,12 @@ export function AttendanceForm({
 }) {
   const router = useRouter();
   const [, startTransition] = useTransition();
+  // Por default todos arrancan AUSENTES. El profe los va marcando como presentes
+  // a medida que llegan al entrenamiento. Si ya hay asistencia cargada para ese
+  // día, respetamos lo guardado.
   const [marks, setMarks] = useState<Record<string, boolean>>(() => {
     const m: Record<string, boolean> = {};
-    for (const p of players) m[p.id] = initial[p.id] ?? true;
+    for (const p of players) m[p.id] = initial[p.id] ?? false;
     return m;
   });
   const [saving, setSaving] = useState(false);
