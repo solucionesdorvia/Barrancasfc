@@ -24,7 +24,6 @@ export default async function PadrePagosPage({ searchParams }: { searchParams: {
   const pending = active.payments.filter((p) => p.status === "PENDING" || p.status === "OVERDUE");
   const paid = active.payments.filter((p) => p.status === "PAID");
   const totalDebt = active.payments.filter((p) => p.status === "OVERDUE").reduce((s, p) => s + Number(p.amount), 0);
-  const totalPaid = paid.reduce((s, p) => s + Number(p.amount), 0);
 
   return (
     <div className="space-y-4">
@@ -38,22 +37,14 @@ export default async function PadrePagosPage({ searchParams }: { searchParams: {
       />
 
       {/* Resumen */}
-      <div className="grid grid-cols-2 gap-2">
-        <Card>
-          <CardContent className="py-3">
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Total cobrado</p>
-            <p className="text-base font-bold tabular-nums text-emerald-600">{formatARS(totalPaid)}</p>
-          </CardContent>
-        </Card>
-        <Card className={totalDebt > 0 ? "bg-red-50 border-red-200" : ""}>
+      {totalDebt > 0 && (
+        <Card className="bg-red-50 border-red-200">
           <CardContent className="py-3">
             <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Deuda actual</p>
-            <p className={`text-base font-bold tabular-nums ${totalDebt > 0 ? "text-red-600" : "text-muted-foreground"}`}>
-              {formatARS(totalDebt)}
-            </p>
+            <p className="text-base font-bold tabular-nums text-red-600">{formatARS(totalDebt)}</p>
           </CardContent>
         </Card>
-      </div>
+      )}
 
       {/* Por pagar */}
       <div className="space-y-2">
