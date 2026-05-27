@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AlertTriangle, CheckCircle2, CircleDollarSign, Clock, Wallet } from "lucide-react";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -16,14 +17,44 @@ import { formatARS, formatDate, monthName, monthYear, initials, fullName, daysOv
 
 export const dynamic = "force-dynamic";
 
-export default async function PaymentsPage() {
+type FilterKey = "all" | "overdue" | "overdue_30" | "overdue_90" | "overdue_180" | "pending";
+
+const FILTER_LABELS: Record<FilterKey, string> = {
+  all: "Todas",
+  overdue: "Morosas",
+  overdue_30: "Morosas +30d",
+  overdue_90: "Morosas +90d",
+  overdue_180: "Morosas +180d",
+  pending: "Solo pendientes",
+};
+
+export default async function PaymentsPage({ searchParams }: { searchParams: { filter?: string } }) {
   const now = new Date();
   const month = now.getMonth() + 1;
   const year = now.getFullYear();
 
+  const filter: FilterKey = (Object.keys(FILTER_LABELS) as FilterKey[]).includes(searchParams.filter as FilterKey)
+    ? (searchParams.filter as FilterKey)
+    : "all";
+
+  function whereForFilter(): Prisma.PaymentWhereInput {
+    if (filter === "pending") return { status: "PENDING" };
+    if (filter === "overdue") return { status: "OVERDUE" };
+    if (filter === "overdue_30") {
+      return { status: "OVERDUE", dueDate: { lte: new Date(now.getTime() - 30 * 24 * 3600 * 1000) } };
+    }
+    if (filter === "overdue_90") {
+      return { status: "OVERDUE", dueDate: { lte: new Date(now.getTime() - 90 * 24 * 3600 * 1000) } };
+    }
+    if (filter === "overdue_180") {
+      return { status: "OVERDUE", dueDate: { lte: new Date(now.getTime() - 180 * 24 * 3600 * 1000) } };
+    }
+    return { status: { in: ["OVERDUE", "PENDING"] } };
+  }
+
   const [overdue, monthPayments] = await Promise.all([
     prisma.payment.findMany({
-      where: { status: { in: ["OVERDUE", "PENDING"] } },
+      where: whereForFilter(),
       include: {
         player: {
           select: {
@@ -37,7 +68,7 @@ export default async function PaymentsPage() {
         },
       },
       orderBy: [{ status: "asc" }, { dueDate: "asc" }],
-      take: 100,
+      take: 150,
     }),
     prisma.payment.findMany({
       where: { month, year },
@@ -83,13 +114,30 @@ export default async function PaymentsPage() {
       </div>
 
       <Card className="p-0 overflow-hidden">
-        <CardHeader className="px-6 py-4 border-b bg-muted/30">
-          <CardTitle className="text-base">Cuotas pendientes y morosas</CardTitle>
-          <CardDescription>
-            {overdue.length === 0
-              ? "Sin cuotas para reclamar"
-              : `${overdue.length} ${overdue.length === 1 ? "cuota requiere atención" : "cuotas requieren atención"}`}
-          </CardDescription>
+        <CardHeader className="px-6 py-4 border-b bg-muted/30 space-y-3">
+          <div>
+            <CardTitle className="text-base">Cuotas pendientes y morosas</CardTitle>
+            <CardDescription>
+              {overdue.length === 0
+                ? "Sin cuotas para reclamar con este filtro"
+                : `${overdue.length} ${overdue.length === 1 ? "cuota" : "cuotas"} · filtro: ${FILTER_LABELS[filter]}`}
+            </CardDescription>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {(Object.entries(FILTER_LABELS) as [FilterKey, string][]).map(([k, label]) => (
+              <Link
+                key={k}
+                href={k === "all" ? "/admin/payments" : `/admin/payments?filter=${k}`}
+                className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                  filter === k
+                    ? "bg-barrancas-red text-white"
+                    : "bg-background border text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {label}
+              </Link>
+            ))}
+          </div>
         </CardHeader>
         <CardContent className="p-0">
           {overdue.length === 0 ? (

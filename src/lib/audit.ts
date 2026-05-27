@@ -13,7 +13,15 @@ export type AuditAction =
   | "ATTENDANCE_RECORDED"
   | "DOCUMENT_UPLOADED"
   | "FITNESS_APPROVED"
-  | "NOTICE_CREATED";
+  | "NOTICE_CREATED"
+  | "NOTE_ADDED"
+  | "NOTE_UPDATED"
+  | "NOTE_DELETED"
+  | "INSTALLMENT_PLAN_CREATED"
+  | "INSTALLMENT_PLAN_CANCELLED"
+  | "EVENT_CREATED"
+  | "EVENT_UPDATED"
+  | "EVENT_DELETED";
 
 export const AUDIT_ACTION_LABEL: Record<AuditAction, string> = {
   PAYMENT_MARKED_PAID: "Pago marcado como cobrado",
@@ -29,11 +37,29 @@ export const AUDIT_ACTION_LABEL: Record<AuditAction, string> = {
   DOCUMENT_UPLOADED: "Documento subido",
   FITNESS_APPROVED: "Apto físico cargado",
   NOTICE_CREATED: "Aviso publicado",
+  NOTE_ADDED: "Nota agregada al jugador",
+  NOTE_UPDATED: "Nota actualizada",
+  NOTE_DELETED: "Nota eliminada",
+  INSTALLMENT_PLAN_CREATED: "Plan de pagos creado",
+  INSTALLMENT_PLAN_CANCELLED: "Plan de pagos cancelado",
+  EVENT_CREATED: "Evento creado en el calendario",
+  EVENT_UPDATED: "Evento actualizado",
+  EVENT_DELETED: "Evento eliminado",
 };
+
+export type AuditEntityType =
+  | "Player"
+  | "Payment"
+  | "Attendance"
+  | "Document"
+  | "Category"
+  | "System"
+  | "Event"
+  | "InstallmentPlan";
 
 export async function logAudit(input: {
   userId: string;
-  entityType: "Player" | "Payment" | "Attendance" | "Document" | "Category" | "System";
+  entityType: AuditEntityType;
   entityId: string;
   action: AuditAction;
   changes?: Record<string, unknown>;

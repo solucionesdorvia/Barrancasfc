@@ -1,13 +1,13 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Wallet, FileText, Bell } from "lucide-react";
+import { Home, Wallet, Calendar, Bell } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const items = [
   { href: "/padre", label: "Inicio", icon: Home, exact: true },
   { href: "/padre/pagos", label: "Pagos", icon: Wallet },
-  { href: "/padre/documentos", label: "Docs", icon: FileText },
+  { href: "/padre/calendario", label: "Agenda", icon: Calendar },
   { href: "/padre/avisos", label: "Avisos", icon: Bell },
 ];
 

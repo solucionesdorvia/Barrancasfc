@@ -10,6 +10,11 @@ import {
   Pencil,
   ShieldCheck,
   Bell,
+  StickyNote,
+  CalendarRange,
+  CalendarPlus,
+  CalendarX,
+  CalendarCheck,
   type LucideIcon,
 } from "lucide-react";
 import type { AuditLog } from "@prisma/client";
@@ -31,6 +36,14 @@ const ICONS: Record<AuditAction, LucideIcon> = {
   DOCUMENT_UPLOADED: FileText,
   FITNESS_APPROVED: ShieldCheck,
   NOTICE_CREATED: Bell,
+  NOTE_ADDED: StickyNote,
+  NOTE_UPDATED: StickyNote,
+  NOTE_DELETED: StickyNote,
+  INSTALLMENT_PLAN_CREATED: CalendarRange,
+  INSTALLMENT_PLAN_CANCELLED: CalendarRange,
+  EVENT_CREATED: CalendarPlus,
+  EVENT_UPDATED: CalendarCheck,
+  EVENT_DELETED: CalendarX,
 };
 
 const TONES: Record<AuditAction, string> = {
@@ -47,6 +60,14 @@ const TONES: Record<AuditAction, string> = {
   DOCUMENT_UPLOADED: "bg-violet-100 text-violet-700",
   FITNESS_APPROVED: "bg-emerald-100 text-emerald-700",
   NOTICE_CREATED: "bg-rose-100 text-rose-700",
+  NOTE_ADDED: "bg-amber-100 text-amber-700",
+  NOTE_UPDATED: "bg-zinc-100 text-zinc-700",
+  NOTE_DELETED: "bg-red-100 text-red-700",
+  INSTALLMENT_PLAN_CREATED: "bg-blue-100 text-blue-700",
+  INSTALLMENT_PLAN_CANCELLED: "bg-red-100 text-red-700",
+  EVENT_CREATED: "bg-emerald-100 text-emerald-700",
+  EVENT_UPDATED: "bg-zinc-100 text-zinc-700",
+  EVENT_DELETED: "bg-red-100 text-red-700",
 };
 
 type LogEntry = AuditLog & {

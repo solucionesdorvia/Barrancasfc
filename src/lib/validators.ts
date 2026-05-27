@@ -66,6 +66,39 @@ export const noticeCreateSchema = z.object({
   body: z.string().min(3).max(2000),
 });
 
+export const playerNoteCreateSchema = z.object({
+  playerId: cuidSchema,
+  body: z.string().min(1).max(2000),
+  category: z.enum(["medico", "academico", "disciplinario", "familiar", "general"]).default("general"),
+  pinned: z.boolean().optional().default(false),
+});
+
+export const playerNoteUpdateSchema = z.object({
+  body: z.string().min(1).max(2000).optional(),
+  pinned: z.boolean().optional(),
+  category: z.enum(["medico", "academico", "disciplinario", "familiar", "general"]).optional(),
+});
+
+export const installmentPlanCreateSchema = z.object({
+  playerId: cuidSchema,
+  paymentIds: z.array(cuidSchema).min(1).max(24),
+  installments: z.number().int().min(2).max(12),
+  notes: z.string().max(500).optional(),
+});
+
+export const eventCreateSchema = z.object({
+  title: z.string().min(2).max(120),
+  description: z.string().max(2000).optional(),
+  date: z.string().min(1),
+  endDate: z.string().optional().nullable(),
+  location: z.string().max(200).optional().nullable(),
+  type: z.enum(["TRAINING", "MATCH", "MEETING", "NOTICE", "OTHER"]).default("OTHER"),
+  audience: z.enum(["ALL", "ADMIN", "PROFESOR", "PADRE", "CATEGORY"]).default("ALL"),
+  categoryId: cuidSchema.optional().nullable(),
+});
+
+export const eventUpdateSchema = eventCreateSchema.partial();
+
 /**
  * Helper: aplica un schema y devuelve { ok, data, error } sin throw.
  * Útil para API routes que devuelven NextResponse.

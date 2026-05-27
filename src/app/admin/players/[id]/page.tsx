@@ -30,6 +30,10 @@ import { ChangeStatusButton } from "@/components/admin/change-status-button";
 import { ApproveFitnessButton } from "@/components/admin/approve-fitness-button";
 import { UpdateFeeButton } from "@/components/admin/update-fee-button";
 import { AuditTimeline } from "@/components/admin/audit-timeline";
+import { PlayerNotes } from "@/components/admin/player-notes";
+import { InstallmentPlanDialog } from "@/components/admin/installment-plan-dialog";
+import { requireRole } from "@/lib/auth";
+import { StickyNote, CalendarRange } from "lucide-react";
 import {
   formatARS,
   formatDate,
@@ -43,7 +47,9 @@ import {
 export const dynamic = "force-dynamic";
 
 export default async function PlayerDetailPage({ params }: { params: { id: string } }) {
-  const [player, categories, auditLogs] = await Promise.all([
+  const user = await requireRole(["ADMIN", "PROFESOR"]);
+
+  const [player, categories, auditLogs, notes, activePlans] = await Promise.all([
     prisma.player.findUnique({
       where: { id: params.id },
       include: {
@@ -60,16 +66,37 @@ export default async function PlayerDetailPage({ params }: { params: { id: strin
       orderBy: { createdAt: "desc" },
       take: 50,
     }),
+    prisma.playerNote
+      .findMany({
+        where: { playerId: params.id },
+        orderBy: [{ pinned: "desc" }, { createdAt: "desc" }],
+      })
+      .catch(() => [] as Awaited<ReturnType<typeof prisma.playerNote.findMany>>),
+    prisma.installmentPlan
+      .findMany({
+        where: { playerId: params.id, status: "ACTIVE" },
+        orderBy: { createdAt: "desc" },
+      })
+      .catch(() => [] as Awaited<ReturnType<typeof prisma.installmentPlan.findMany>>),
   ]);
 
   if (!player) notFound();
 
-  const userIds = Array.from(new Set(auditLogs.map((l) => l.userId)));
+  const userIds = Array.from(new Set([...auditLogs.map((l) => l.userId), ...notes.map((n) => n.authorId)]));
   const auditUsers = userIds.length
     ? await prisma.user.findMany({ where: { id: { in: userIds } } })
     : [];
   const userMap = new Map(auditUsers.map((u) => [u.id, u]));
   const logsWithUser = auditLogs.map((l) => ({ ...l, user: userMap.get(l.userId) ?? null }));
+  const notesWithAuthor = notes.map((n) => ({
+    id: n.id,
+    body: n.body,
+    category: n.category,
+    pinned: n.pinned,
+    authorId: n.authorId,
+    authorName: userMap.get(n.authorId)?.name,
+    createdAt: n.createdAt,
+  }));
 
   const presentCount = player.attendances.filter((a) => a.present).length;
   const attendancePct = player.attendances.length > 0
@@ -147,6 +174,10 @@ export default async function PlayerDetailPage({ params }: { params: { id: strin
           <TabsTrigger value="pagos">Pagos</TabsTrigger>
           <TabsTrigger value="asistencia">Asistencia</TabsTrigger>
           <TabsTrigger value="medico">Médico</TabsTrigger>
+          <TabsTrigger value="notas">
+            Notas
+            {notes.length > 0 && <span className="ml-1.5 text-[10px] px-1.5 rounded bg-amber-100 text-amber-800">{notes.length}</span>}
+          </TabsTrigger>
           <TabsTrigger value="documentos">Documentación</TabsTrigger>
           <TabsTrigger value="historial">Historial</TabsTrigger>
         </TabsList>
@@ -189,10 +220,38 @@ export default async function PlayerDetailPage({ params }: { params: { id: strin
         </TabsContent>
 
         <TabsContent value="pagos" className="space-y-4">
+          {activePlans.length > 0 && (
+            <Card className="border-blue-200 bg-blue-50/40">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <CalendarRange className="h-4 w-4 text-blue-700" /> Plan de pagos activo
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-1.5">
+                {activePlans.map((p) => (
+                  <div key={p.id} className="text-sm flex items-center justify-between">
+                    <span>{p.installments} cuotas de {formatARS(Number(p.totalAmount) / p.installments)}</span>
+                    <span className="text-muted-foreground text-xs">Total {formatARS(Number(p.totalAmount))}</span>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          )}
           <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Historial de pagos</CardTitle>
-              <CardDescription>{player.payments.length} cuotas · {formatARS(totalPaid)} cobrado{totalDebt > 0 ? ` · ${formatARS(totalDebt)} de deuda` : ""}</CardDescription>
+            <CardHeader className="flex flex-row items-start justify-between gap-3">
+              <div>
+                <CardTitle className="text-base">Historial de pagos</CardTitle>
+                <CardDescription>{player.payments.length} cuotas · {formatARS(totalPaid)} cobrado{totalDebt > 0 ? ` · ${formatARS(totalDebt)} de deuda` : ""}</CardDescription>
+              </div>
+              {user.role === "ADMIN" && totalDebt > 0 && (
+                <InstallmentPlanDialog
+                  playerId={player.id}
+                  playerName={`${player.firstName} ${player.lastName}`}
+                  payments={player.payments
+                    .filter((p) => p.status === "OVERDUE" || p.status === "PENDING")
+                    .map((p) => ({ id: p.id, amount: Number(p.amount), month: p.month, year: p.year }))}
+                />
+              )}
             </CardHeader>
             <CardContent className="p-0">
               {player.payments.length === 0 ? (
@@ -309,6 +368,27 @@ export default async function PlayerDetailPage({ params }: { params: { id: strin
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        <TabsContent value="notas">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                <StickyNote className="h-4 w-4" /> Notas del staff
+              </CardTitle>
+              <CardDescription>
+                Anotaciones internas sobre el jugador. Solo las ve el staff, no los padres.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <PlayerNotes
+                playerId={player.id}
+                notes={notesWithAuthor}
+                currentUserId={user.id}
+                isAdmin={user.role === "ADMIN"}
+              />
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="documentos">

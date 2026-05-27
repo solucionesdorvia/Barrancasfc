@@ -8,6 +8,8 @@ import {
   Shield,
   UserCog,
   Activity,
+  Calendar,
+  BarChart3,
   type LucideIcon,
 } from "lucide-react";
 
@@ -19,8 +21,10 @@ export const ADMIN_NAV: NavItem[] = [
   { href: "/admin/players", label: "Jugadores", icon: Users },
   { href: "/admin/payments", label: "Cobranza", icon: Wallet },
   { href: "/admin/attendance", label: "Asistencia", icon: CalendarCheck },
+  { href: "/admin/calendario", label: "Calendario", icon: Calendar },
   { href: "/admin/documents", label: "Documentación", icon: FileText },
   { href: "/admin/notices", label: "Avisos", icon: Bell },
+  { href: "/admin/reportes", label: "Reportes", icon: BarChart3 },
   { href: "/admin/users", label: "Staff", icon: UserCog },
   { href: "/admin/audit", label: "Actividad", icon: Activity },
 ];

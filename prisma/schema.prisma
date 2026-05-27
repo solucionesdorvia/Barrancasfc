@@ -61,6 +61,28 @@ enum DocumentType {
   OTHER
 }
 
+enum EventType {
+  TRAINING
+  MATCH
+  MEETING
+  NOTICE
+  OTHER
+}
+
+enum EventAudience {
+  ALL
+  ADMIN
+  PROFESOR
+  PADRE
+  CATEGORY
+}
+
+enum InstallmentPlanStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
 model Club {
   id         String     @id @default(cuid())
   name       String
@@ -127,6 +149,8 @@ model Player {
   payments              Payment[]
   attendances           Attendance[]
   documents             Document[]
+  notes                 PlayerNote[]
+  installmentPlans      InstallmentPlan[]
   clubId                String
   club                  Club             @relation(fields: [clubId], references: [id])
   createdAt             DateTime         @default(now())
@@ -188,6 +212,56 @@ model Notice {
   title     String
   body      String
   createdAt DateTime @default(now())
+}
+
+model PlayerNote {
+  id        String   @id @default(cuid())
+  playerId  String
+  player    Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  authorId  String
+  body      String
+  pinned    Boolean  @default(false)
+  category  String?  // ej: "medico", "academico", "disciplinario", "familiar"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([playerId])
+  @@index([authorId])
+}
+
+model InstallmentPlan {
+  id           String                @id @default(cuid())
+  playerId     String
+  player       Player                @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  totalAmount  Decimal
+  installments Int
+  notes        String?
+  status       InstallmentPlanStatus @default(ACTIVE)
+  createdById  String
+  createdAt    DateTime              @default(now())
+  paymentIds   String[]              @default([])
+
+  @@index([playerId])
+  @@index([status])
+}
+
+model Event {
+  id            String         @id @default(cuid())
+  title         String
+  description   String?
+  date          DateTime
+  endDate       DateTime?
+  location      String?
+  type          EventType      @default(OTHER)
+  audience      EventAudience  @default(ALL)
+  categoryId    String?
+  createdById   String
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@index([date])
+  @@index([categoryId])
+  @@index([audience])
 }
 
 model AuditLog {

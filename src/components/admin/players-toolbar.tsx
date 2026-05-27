@@ -17,6 +17,7 @@ export function PlayersToolbar({ categories }: { categories: Category[] }) {
   const status = searchParams.get("status") ?? "all";
   const overdue = searchParams.get("overdue") ?? "all";
   const scholarship = searchParams.get("scholarship") ?? "all";
+  const flags = searchParams.get("flags") ?? "all";
 
   // Debounce search
   useEffect(() => {
@@ -42,7 +43,7 @@ export function PlayersToolbar({ categories }: { categories: Category[] }) {
     startTransition(() => router.replace("/admin/players"));
   }
 
-  const hasFilters = q || categoryId !== "all" || status !== "all" || overdue !== "all" || scholarship !== "all";
+  const hasFilters = q || categoryId !== "all" || status !== "all" || overdue !== "all" || scholarship !== "all" || flags !== "all";
 
   return (
     <div className="flex flex-col md:flex-row gap-2 md:items-center">
@@ -89,6 +90,16 @@ export function PlayersToolbar({ categories }: { categories: Category[] }) {
             <SelectItem value="all">Todos</SelectItem>
             <SelectItem value="yes">Becados</SelectItem>
             <SelectItem value="no">No becados</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={flags} onValueChange={(v) => setParam("flags", v)}>
+          <SelectTrigger className="w-[170px]"><SelectValue placeholder="Alertas" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Sin filtro de alertas</SelectItem>
+            <SelectItem value="no_docs">Sin documentación</SelectItem>
+            <SelectItem value="fitness_expired">Apto vencido</SelectItem>
+            <SelectItem value="fitness_soon">Apto por vencer (30d)</SelectItem>
+            <SelectItem value="no_photo">Sin foto</SelectItem>
           </SelectContent>
         </Select>
         {hasFilters && (

@@ -19,7 +19,7 @@ export const dynamic = "force-dynamic";
 export default async function PlayersListPage({
   searchParams,
 }: {
-  searchParams: { q?: string; categoryId?: string; status?: string; overdue?: string; scholarship?: string };
+  searchParams: { q?: string; categoryId?: string; status?: string; overdue?: string; scholarship?: string; flags?: string };
 }) {
   const where: Prisma.PlayerWhereInput = {};
   if (searchParams.q) {
@@ -36,6 +36,15 @@ export default async function PlayersListPage({
   if (searchParams.scholarship === "no") where.scholarshipType = "NONE";
   if (searchParams.overdue === "yes") where.payments = { some: { status: "OVERDUE" } };
   if (searchParams.overdue === "no") where.payments = { none: { status: "OVERDUE" } };
+
+  // Filtros de alertas
+  const now = new Date();
+  if (searchParams.flags === "no_docs") where.documents = { none: {} };
+  if (searchParams.flags === "fitness_expired") where.fitnessExpiry = { lt: now };
+  if (searchParams.flags === "fitness_soon") {
+    where.fitnessExpiry = { gte: now, lte: new Date(now.getTime() + 30 * 24 * 3600 * 1000) };
+  }
+  if (searchParams.flags === "no_photo") where.photo = null;
 
   const [players, categories] = await Promise.all([
     prisma.player.findMany({
@@ -61,7 +70,7 @@ export default async function PlayersListPage({
     }),
   ]);
 
-  const hasFilters = !!(searchParams.q || searchParams.categoryId || searchParams.status || searchParams.overdue || searchParams.scholarship);
+  const hasFilters = !!(searchParams.q || searchParams.categoryId || searchParams.status || searchParams.overdue || searchParams.scholarship || searchParams.flags);
 
   return (
     <div className="space-y-5">
