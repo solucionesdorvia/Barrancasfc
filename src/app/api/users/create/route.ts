@@ -50,6 +50,23 @@ export const POST = withErrorHandler(async (req: Request) => {
       skipPasswordChecks: true,
     });
     clerkId = clerkUser.id;
+
+    // Marcar el email como verificado para que el usuario pueda entrar directo
+    // sin que Clerk le pida código por mail (porque la cuenta la creó un admin,
+    // se da por verificada).
+    const emailAddressId = clerkUser.emailAddresses?.[0]?.id;
+    if (emailAddressId) {
+      try {
+        await clerkClient().emailAddresses.updateEmailAddress(emailAddressId, {
+          verified: true,
+          primary: true,
+        });
+      } catch (verifyErr) {
+        console.error("[users/create] could not auto-verify email:", verifyErr);
+        // No fallamos por esto — el user igual está creado, solo va a tener que
+        // verificar al primer login. Pero loggeamos para visibilidad.
+      }
+    }
   } catch (e) {
     // Log completo para debugging desde Railway
     console.error("[users/create] Clerk error:", JSON.stringify(e, null, 2));
