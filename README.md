@@ -23,7 +23,9 @@ Completar `.env`:
 
 ### 3. Base de datos
 ```bash
-npm run db:push       # aplica schema sin migración formal
+npm run db:migrate    # aplica migrations versionadas (recomendado)
+# o si estás en local y querés iterar más rápido:
+npm run db:push       # sincroniza schema sin crear migration
 npm run db:seed       # carga datos demo (1 club, 8 categorías, 80 jugadores)
 ```
 
@@ -48,9 +50,19 @@ npm run dev
 1. Crear proyecto en Railway con Postgres
 2. Conectar repo de GitHub
 3. Setear variables de entorno
-4. Comando de build: `npm run build`
-5. Comando de start: `npm start`
-6. Después del primer deploy: correr `npm run db:push` y `npm run db:seed`
+4. Build y start los maneja `railway.json` automático
+5. **Las migraciones corren solas en cada deploy** (el `start` script ejecuta `prisma migrate deploy && next start`)
+6. Solo después del primer deploy: correr `npm run db:seed` una vez para cargar data demo
+
+### Workflow al cambiar el schema
+
+```bash
+# 1. Editás prisma/schema.prisma
+# 2. Generás la migration
+npx prisma migrate dev --name nombre_descriptivo
+# 3. Commit + push → Railway aplica la migration solo al deployar
+git add prisma/migrations && git commit -m "..." && git push
+```
 
 ## Estructura
 
