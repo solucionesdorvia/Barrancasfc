@@ -259,6 +259,9 @@ model Event {
   type          EventType      @default(OTHER)
   audience      EventAudience  @default(ALL)
   categoryId    String?
+  // Si pertenece a una serie recurrente, comparte seriesId con sus hermanos.
+  // Permite borrar/editar toda la serie en bulk.
+  seriesId      String?
   createdById   String
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
@@ -266,6 +269,7 @@ model Event {
   @@index([date])
   @@index([categoryId])
   @@index([audience])
+  @@index([seriesId])
 }
 
 model Invitation {

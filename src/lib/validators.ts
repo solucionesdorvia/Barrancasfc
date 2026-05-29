@@ -95,6 +95,12 @@ export const eventCreateSchema = z.object({
   type: z.enum(["TRAINING", "MATCH", "MEETING", "NOTICE", "OTHER"]).default("OTHER"),
   audience: z.enum(["ALL", "ADMIN", "PROFESOR", "PADRE", "CATEGORY"]).default("ALL"),
   categoryId: cuidSchema.optional().nullable(),
+  // Recurrencia opcional. Si repeatType es "NONE" o undefined → evento único.
+  // Si es "DAILY": se crea uno por día desde date hasta repeatUntil.
+  // Si es "WEEKLY": se crea uno por cada daysOfWeek desde date hasta repeatUntil.
+  repeatType: z.enum(["NONE", "DAILY", "WEEKLY"]).optional().default("NONE"),
+  daysOfWeek: z.array(z.number().int().min(0).max(6)).optional().default([]),
+  repeatUntil: z.string().optional().nullable(),
 });
 
 export const eventUpdateSchema = eventCreateSchema.partial();

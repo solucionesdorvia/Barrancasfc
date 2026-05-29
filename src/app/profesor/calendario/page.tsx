@@ -13,20 +13,27 @@ export default async function ProfesorCalendarPage({
 }: {
   searchParams: { view?: string; y?: string; m?: string };
 }) {
-  await requireRole(["PROFESOR", "ADMIN"]);
+  const user = await requireRole(["PROFESOR", "ADMIN"]);
   const view: "list" | "month" = searchParams.view === "month" ? "month" : "list";
   const now = new Date();
 
   const targetY = searchParams.y ? Number(searchParams.y) : now.getFullYear();
   const targetM = searchParams.m ? Number(searchParams.m) : now.getMonth() + 1;
 
+  const assignedCategoryIds = (user.assignedCategories ?? []).map((c) => c.id);
+
   const events = await (view === "month"
     ? getVisibleEvents({
         role: "PROFESOR",
+        assignedCategoryIds,
         from: new Date(targetY, targetM - 1, 1),
         to: new Date(targetY, targetM, 0, 23, 59, 59),
       })
-    : getVisibleEvents({ role: "PROFESOR", from: new Date(now.getTime() - 12 * 3600 * 1000) }));
+    : getVisibleEvents({
+        role: "PROFESOR",
+        assignedCategoryIds,
+        from: new Date(now.getTime() - 12 * 3600 * 1000),
+      }));
 
   return (
     <div className="space-y-5">

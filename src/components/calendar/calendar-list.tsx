@@ -17,6 +17,7 @@ type EventItem = {
   type: string;
   audience: string;
   categoryId: string | null;
+  seriesId?: string | null;
 };
 
 const DOW = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
@@ -37,7 +38,7 @@ export function CalendarList({
 }: {
   events: EventItem[];
   canManage?: boolean;
-  deleteSlot?: (eventId: string, title: string) => React.ReactNode;
+  deleteSlot?: (eventId: string, title: string, isSeries: boolean) => React.ReactNode;
   emptyHref?: string;
 }) {
   if (events.length === 0) {
@@ -99,7 +100,7 @@ export function CalendarList({
                           <p className="text-sm text-muted-foreground whitespace-pre-line">{e.description}</p>
                         )}
                         {canManage && deleteSlot && (
-                          <div className="flex justify-end pt-1">{deleteSlot(e.id, e.title)}</div>
+                          <div className="flex justify-end pt-1">{deleteSlot(e.id, e.title, !!e.seriesId)}</div>
                         )}
                       </div>
                     </div>

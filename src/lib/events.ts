@@ -3,27 +3,33 @@ import type { Role } from "@prisma/client";
 
 /**
  * Devuelve los eventos visibles para un usuario según su rol y categorías
- * relevantes (hijos en el caso del padre).
+ * relevantes (hijos para el padre, asignadas para el profesor).
+ *
+ * Reglas:
+ * - ADMIN: ve todo (cualquier audience)
+ * - PROFESOR: eventos ALL + PROFESOR + CATEGORY donde la categoría esté en sus
+ *   assignedCategoryIds. Si no tiene categorías asignadas, no ve eventos CATEGORY.
+ * - PADRE: eventos ALL + PADRE + CATEGORY donde la categoría sea de uno de sus
+ *   hijos. Si no tiene hijos, no ve CATEGORY.
  */
 export async function getVisibleEvents(opts: {
   role: Role;
   childrenCategoryIds?: string[];
+  assignedCategoryIds?: string[];
   from?: Date;
   to?: Date;
 }) {
-  const { role, childrenCategoryIds = [], from, to } = opts;
+  const { role, childrenCategoryIds = [], assignedCategoryIds = [], from, to } = opts;
 
-  const audienceOr: { audience: "ALL" | Role | "CATEGORY"; categoryId?: { in: string[] } }[] = [
+  const audienceOr: { audience: "ALL" | Role | "CATEGORY"; categoryId?: { in: string[] } | string }[] = [
     { audience: "ALL" },
     { audience: role },
   ];
   if (role === "PADRE" && childrenCategoryIds.length > 0) {
     audienceOr.push({ audience: "CATEGORY", categoryId: { in: childrenCategoryIds } });
   }
-  if (role === "PROFESOR") {
-    // Para el MVP el profesor también ve eventos de su categoría (Infantil 2012)
-    // y todos los que apunten a categoría.
-    audienceOr.push({ audience: "CATEGORY" });
+  if (role === "PROFESOR" && assignedCategoryIds.length > 0) {
+    audienceOr.push({ audience: "CATEGORY", categoryId: { in: assignedCategoryIds } });
   }
   if (role === "ADMIN") {
     audienceOr.push({ audience: "CATEGORY" });

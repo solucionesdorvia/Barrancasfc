@@ -76,7 +76,9 @@ export default async function AdminCalendarPage({
         <CalendarList
           events={events}
           canManage
-          deleteSlot={(id, title) => <DeleteEventButton eventId={id} title={title} />}
+          deleteSlot={(id, title, isSeries) => (
+            <DeleteEventButton eventId={id} title={title} isSeries={isSeries} />
+          )}
         />
       )}
     </div>
