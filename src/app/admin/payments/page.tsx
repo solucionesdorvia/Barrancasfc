@@ -150,7 +150,7 @@ export default async function PaymentsPage({ searchParams }: { searchParams: { f
               />
             </div>
           ) : (
-            <Table>
+            <Table className="min-w-[820px]">
               <TableHeader>
                 <TableRow>
                   <TableHead>Jugador</TableHead>

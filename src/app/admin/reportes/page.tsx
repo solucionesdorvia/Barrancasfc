@@ -199,7 +199,7 @@ export default async function ReportesPage() {
           <ExportButton rows={exportCategories} filename="resumen-por-categoria" />
         </CardHeader>
         <CardContent className="p-0">
-          <Table>
+          <Table className="min-w-[640px]">
             <TableHeader>
               <TableRow>
                 <TableHead>Categoría</TableHead>

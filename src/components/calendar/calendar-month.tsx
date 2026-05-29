@@ -128,7 +128,7 @@ export function CalendarMonth({
               <div
                 key={idx}
                 className={cn(
-                  "border-r border-b last:border-r-0 min-h-[64px] md:min-h-[88px] p-1 md:p-1.5 relative",
+                  "border-r border-b last:border-r-0 min-h-[72px] sm:min-h-[80px] md:min-h-[100px] p-0.5 sm:p-1 md:p-1.5 relative",
                   !isCurrent && "bg-muted/20",
                   isCurrent && isWeekend && "bg-rose-50/30"
                 )}
@@ -146,7 +146,25 @@ export function CalendarMonth({
                         {dayNum}
                       </span>
                     </div>
-                    <div className="space-y-0.5">
+                    {/* Mobile: solo dots de colores. Desktop: chips con texto. */}
+                    <div className="sm:hidden flex flex-wrap gap-0.5 mt-0.5">
+                      {dayEvents.slice(0, 5).map((e) => {
+                        const meta = eventTypeMeta(e.type);
+                        return (
+                          <a
+                            key={e.id}
+                            href={`#evt-${e.id}`}
+                            title={e.title}
+                            aria-label={e.title}
+                            className={cn("h-1.5 w-1.5 rounded-full", meta.dot)}
+                          />
+                        );
+                      })}
+                      {dayEvents.length > 5 && (
+                        <span className="text-[9px] text-muted-foreground leading-none">+{dayEvents.length - 5}</span>
+                      )}
+                    </div>
+                    <div className="hidden sm:block space-y-0.5">
                       {dayEvents.slice(0, 3).map((e) => {
                         const meta = eventTypeMeta(e.type);
                         return (
@@ -155,7 +173,7 @@ export function CalendarMonth({
                             href={`#evt-${e.id}`}
                             title={e.title}
                             className={cn(
-                              "block text-[10px] leading-tight truncate rounded px-1 py-0.5 cursor-pointer transition-opacity hover:opacity-80",
+                              "block text-[10px] leading-tight line-clamp-1 rounded px-1 py-0.5 cursor-pointer transition-opacity hover:opacity-80",
                               meta.tone
                             )}
                           >

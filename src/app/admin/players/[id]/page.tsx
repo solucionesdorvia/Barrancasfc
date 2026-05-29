@@ -146,7 +146,7 @@ export default async function PlayerDetailPage({ params }: { params: { id: strin
               <p className="text-sm text-muted-foreground">
                 {player.category.name} · DNI {player.dni} · {ageFromBirth(player.birthDate)} años
               </p>
-              <div className="flex flex-wrap gap-2 pt-2">
+              <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 pt-2 [&>*]:w-full sm:[&>*]:w-auto">
                 <ChangeStatusButton playerId={player.id} currentStatus={player.status} />
                 <ChangeCategoryButton
                   playerId={player.id}

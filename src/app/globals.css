@@ -105,4 +105,12 @@
   .scrollbar-thin::-webkit-scrollbar-track {
     background: transparent;
   }
+  /* Scrollbar oculta (para tabs, chips horizontales, etc.) */
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
 }

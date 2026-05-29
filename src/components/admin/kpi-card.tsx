@@ -26,9 +26,9 @@ export function KpiCard({ label, value, hint, icon: Icon, tone = "default", tren
       <CardContent className="pt-6">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
-            <p className="mt-2 text-3xl font-bold tracking-tight tabular-nums truncate">{value}</p>
-            {hint && <p className="mt-1 text-xs text-muted-foreground">{hint}</p>}
+            <p className="text-[10px] sm:text-[11px] font-medium uppercase tracking-wide text-muted-foreground truncate">{label}</p>
+            <p className="mt-2 text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight tabular-nums truncate">{value}</p>
+            {hint && <p className="mt-1 text-[10px] sm:text-xs text-muted-foreground truncate">{hint}</p>}
             {trend && (
               <p className={cn("mt-1 text-xs font-medium", trend.positive ? "text-emerald-600" : "text-red-600")}>
                 {trend.value}

@@ -105,7 +105,7 @@ export default async function UsersListPage() {
               className="py-10"
             />
           ) : (
-            <Table>
+            <Table className="min-w-[700px]">
               <TableHeader>
                 <TableRow>
                   <TableHead>Email / Referencia</TableHead>
@@ -168,7 +168,7 @@ export default async function UsersListPage() {
           {users.length === 0 ? (
             <EmptyState icon={UserCog} title="Sin staff cargado" bare className="py-12" />
           ) : (
-            <Table>
+            <Table className="min-w-[820px]">
               <TableHeader>
                 <TableRow>
                   <TableHead>Usuario</TableHead>

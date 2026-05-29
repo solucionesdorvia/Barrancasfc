@@ -103,7 +103,7 @@ export default async function PlayersListPage({
         </Card>
       ) : (
         <Card className="p-0 overflow-hidden">
-          <Table>
+          <Table className="min-w-[720px]">
             <TableHeader>
               <TableRow>
                 <TableHead>Jugador</TableHead>
