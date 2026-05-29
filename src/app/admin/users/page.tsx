@@ -10,6 +10,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { InvitationDialog } from "@/components/admin/invitation-dialog";
 import { InvitationActions } from "@/components/admin/invitation-actions";
+import { CreateUserDialog } from "@/components/admin/create-user-dialog";
 import { initials, formatRelative, formatDate, pluralize } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
@@ -77,7 +78,12 @@ export default async function UsersListPage() {
       <PageHeader
         title="Staff e invitaciones"
         description={`${users.length} ${pluralize(users.length, "usuario")} activos · ${pendingCount} ${pluralize(pendingCount, "invitación")} pendiente${pendingCount === 1 ? "" : "s"}`}
-        action={<InvitationDialog categories={categories} players={players} />}
+        action={
+          <>
+            <CreateUserDialog categories={categories} players={players} />
+            <InvitationDialog categories={categories} players={players} />
+          </>
+        }
       />
 
       {/* Invitaciones */}

@@ -25,7 +25,8 @@ export type AuditAction =
   | "INVITATION_CREATED"
   | "INVITATION_REVOKED"
   | "INVITATION_ACCEPTED"
-  | "USER_CATEGORIES_UPDATED";
+  | "USER_CATEGORIES_UPDATED"
+  | "USER_CREATED_DIRECT";
 
 export const AUDIT_ACTION_LABEL: Record<AuditAction, string> = {
   PAYMENT_MARKED_PAID: "Pago marcado como cobrado",
@@ -53,6 +54,7 @@ export const AUDIT_ACTION_LABEL: Record<AuditAction, string> = {
   INVITATION_REVOKED: "Invitación revocada",
   INVITATION_ACCEPTED: "Invitación aceptada — usuario creado",
   USER_CATEGORIES_UPDATED: "Categorías asignadas actualizadas",
+  USER_CREATED_DIRECT: "Cuenta creada directo desde admin",
 };
 
 export type AuditEntityType =

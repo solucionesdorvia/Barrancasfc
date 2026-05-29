@@ -108,6 +108,17 @@ export const invitationCreateSchema = z.object({
   expiresInDays: z.number().int().min(1).max(90).optional().default(7),
 });
 
+export const userCreateDirectSchema = z.object({
+  email: z.string().email("Email inválido"),
+  password: z.string().min(8, "Mínimo 8 caracteres").max(72),
+  firstName: z.string().min(1).max(60),
+  lastName: z.string().min(1).max(60),
+  role: z.enum(["ADMIN", "PROFESOR", "PADRE"]),
+  title: z.string().max(80).optional(),
+  categoryIds: z.array(cuidSchema).max(20).optional().default([]),
+  childrenIds: z.array(cuidSchema).max(20).optional().default([]),
+});
+
 /**
  * Helper: aplica un schema y devuelve { ok, data, error } sin throw.
  * Útil para API routes que devuelven NextResponse.

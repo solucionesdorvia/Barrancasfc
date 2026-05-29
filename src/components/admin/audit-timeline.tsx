@@ -51,6 +51,7 @@ const ICONS: Record<AuditAction, LucideIcon> = {
   INVITATION_REVOKED: MailX,
   INVITATION_ACCEPTED: MailCheck,
   USER_CATEGORIES_UPDATED: UserPlus,
+  USER_CREATED_DIRECT: UserPlus,
 };
 
 const TONES: Record<AuditAction, string> = {
@@ -79,6 +80,7 @@ const TONES: Record<AuditAction, string> = {
   INVITATION_REVOKED: "bg-red-100 text-red-700",
   INVITATION_ACCEPTED: "bg-emerald-100 text-emerald-700",
   USER_CATEGORIES_UPDATED: "bg-blue-100 text-blue-700",
+  USER_CREATED_DIRECT: "bg-emerald-100 text-emerald-700",
 };
 
 type LogEntry = AuditLog & {
