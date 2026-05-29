@@ -138,7 +138,7 @@ export function CreateUserDialog({ categories, players }: { categories: Category
             <DialogHeader>
               <DialogTitle>Crear cuenta directa</DialogTitle>
               <DialogDescription>
-                La persona puede entrar al instante con estas credenciales. Después puede cambiar el password desde su perfil.
+                La persona puede entrar al instante con estas credenciales. Después puede cambiar la contraseña desde su perfil.
               </DialogDescription>
             </DialogHeader>
 
@@ -250,7 +250,7 @@ export function CreateUserDialog({ categories, players }: { categories: Category
                 <CheckCircle2 className="h-5 w-5 text-emerald-600" /> Cuenta creada
               </DialogTitle>
               <DialogDescription>
-                Pasale estas credenciales a la persona. Puede cambiar el password cuando entre.
+                Pasale estas credenciales a la persona. Puede cambiar la contraseña cuando entre.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-2 bg-zinc-50 border rounded-lg p-4">

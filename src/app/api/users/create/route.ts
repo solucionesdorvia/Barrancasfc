@@ -44,13 +44,26 @@ export const POST = withErrorHandler(async (req: Request) => {
       password,
       firstName,
       lastName,
-      skipPasswordChecks: false,
-      skipPasswordRequirement: false,
+      // skipPasswordChecks=true para saltear el check de "password en breach databases"
+      // que rechaza muchos passwords razonables. La validación de longitud (8+) la hicimos
+      // nosotros con Zod.
+      skipPasswordChecks: true,
     });
     clerkId = clerkUser.id;
   } catch (e) {
-    const msg = (e as { errors?: { message?: string }[] })?.errors?.[0]?.message;
-    return apiBadRequest(msg ?? "No se pudo crear el usuario en Clerk. Revisá el email y password.");
+    // Log completo para debugging desde Railway
+    console.error("[users/create] Clerk error:", JSON.stringify(e, null, 2));
+    const err = e as {
+      errors?: { message?: string; longMessage?: string; code?: string }[];
+      status?: number;
+    };
+    const first = err?.errors?.[0];
+    const msg = first?.longMessage || first?.message;
+    return apiBadRequest(
+      msg
+        ? `Clerk rechazó la creación: ${msg}`
+        : "No se pudo crear el usuario en Clerk. Revisá email y contraseña."
+    );
   }
 
   // 2. Crear en DB
