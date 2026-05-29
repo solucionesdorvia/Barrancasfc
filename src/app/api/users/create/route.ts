@@ -67,6 +67,7 @@ export const POST = withErrorHandler(async (req: Request) => {
         // verificar al primer login. Pero loggeamos para visibilidad.
       }
     }
+
   } catch (e) {
     // Log completo para debugging desde Railway
     console.error("[users/create] Clerk error:", JSON.stringify(e, null, 2));
