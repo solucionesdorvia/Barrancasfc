@@ -1,7 +1,7 @@
 "use client";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { UserPlus, Loader2, Eye, EyeOff, Check, CheckCircle2, Sparkles } from "lucide-react";
+import { UserPlus, Loader2, Eye, EyeOff, Check, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,19 +21,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 type Category = { id: string; name: string };
 type Player = { id: string; firstName: string; lastName: string; category: { name: string } };
 type Role = "ADMIN" | "PROFESOR" | "PADRE";
-
-function generatePassword() {
-  // 12 chars, mezcla mayúsculas, minúsculas, números y un símbolo
-  const upper = "ABCDEFGHJKLMNPQRSTUVWXYZ";
-  const lower = "abcdefghijkmnpqrstuvwxyz";
-  const nums = "23456789";
-  const symbols = "!#$%&*";
-  const all = upper + lower + nums + symbols;
-  const pick = (s: string) => s[Math.floor(Math.random() * s.length)];
-  let pass = pick(upper) + pick(lower) + pick(nums) + pick(symbols);
-  for (let i = 0; i < 8; i++) pass += pick(all);
-  return pass.split("").sort(() => Math.random() - 0.5).join("");
-}
 
 export function CreateUserDialog({ categories, players }: { categories: Category[]; players: Player[] }) {
   const router = useRouter();
@@ -174,28 +161,23 @@ export function CreateUserDialog({ categories, players }: { categories: Category
 
               <div className="space-y-1.5">
                 <Label htmlFor="pw">Contraseña *</Label>
-                <div className="flex gap-2">
-                  <div className="relative flex-1">
-                    <Input
-                      id="pw"
-                      type={showPass ? "text" : "password"}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Mínimo 8 caracteres"
-                      className="pr-10 font-mono"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPass((s) => !s)}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground"
-                      aria-label="Mostrar/ocultar"
-                    >
-                      {showPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
-                  </div>
-                  <Button type="button" variant="outline" size="icon" onClick={() => { setPassword(generatePassword()); setShowPass(true); }} title="Generar password seguro">
-                    <Sparkles className="h-4 w-4" />
-                  </Button>
+                <div className="relative">
+                  <Input
+                    id="pw"
+                    type={showPass ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Mínimo 8 caracteres"
+                    className="pr-10 font-mono"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPass((s) => !s)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground"
+                    aria-label="Mostrar/ocultar"
+                  >
+                    {showPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
                 </div>
                 <p className="text-[10px] text-muted-foreground">El usuario puede cambiarla desde su perfil después.</p>
               </div>
