@@ -99,6 +99,15 @@ export const eventCreateSchema = z.object({
 
 export const eventUpdateSchema = eventCreateSchema.partial();
 
+export const invitationCreateSchema = z.object({
+  role: z.enum(["ADMIN", "PROFESOR", "PADRE"]),
+  email: z.string().email().optional().or(z.literal("")),
+  title: z.string().max(80).optional(),
+  categoryIds: z.array(cuidSchema).max(20).optional().default([]),
+  childrenIds: z.array(cuidSchema).max(20).optional().default([]),
+  expiresInDays: z.number().int().min(1).max(90).optional().default(7),
+});
+
 /**
  * Helper: aplica un schema y devuelve { ok, data, error } sin throw.
  * Útil para API routes que devuelven NextResponse.

@@ -12,9 +12,9 @@ import { initials, fullName, formatDate } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
-// Para el MVP el profesor está hardcodeado a "Infantil 2012". En el sistema final
-// viene de una relación profesor↔categorías.
-const PROFE_CATEGORY_NAME = "Infantil 2012";
+// Fallback para usuarios viejos que no tienen categorías asignadas (pre-feature
+// de invitaciones). El sistema final ya viene con categorías reales.
+const FALLBACK_CATEGORY_NAME = "Infantil 2012";
 
 function parseDate(input?: string): Date {
   if (!input) {
@@ -22,7 +22,6 @@ function parseDate(input?: string): Date {
     d.setHours(0, 0, 0, 0);
     return d;
   }
-  // Soporta YYYY-MM-DD
   const [y, m, d] = input.split("-").map(Number);
   if (y && m && d) return new Date(y, m - 1, d);
   const dt = new Date(input);
@@ -30,24 +29,40 @@ function parseDate(input?: string): Date {
   return dt;
 }
 
-export default async function ProfesorPage({ searchParams }: { searchParams: { fecha?: string } }) {
+export default async function ProfesorPage({
+  searchParams,
+}: {
+  searchParams: { fecha?: string; categoria?: string };
+}) {
   const user = await requireRole(["PROFESOR", "ADMIN"]);
 
-  const category = await prisma.category.findFirst({ where: { name: PROFE_CATEGORY_NAME } });
-  if (!category) {
+  // Categorías asignadas al profesor. Si no tiene ninguna, caemos al fallback.
+  let categories = (user.assignedCategories ?? []) as { id: string; name: string }[];
+  if (categories.length === 0) {
+    const fallback = await prisma.category.findFirst({ where: { name: FALLBACK_CATEGORY_NAME } });
+    if (fallback) categories = [fallback];
+  }
+
+  if (categories.length === 0) {
     return (
       <Card>
         <CardContent className="pt-6">
           <EmptyState
             icon={Users}
             title="No tenés categorías asignadas"
-            description="Pedile al admin que te asigne al menos una categoría para poder tomar asistencia."
+            description="Pedile al administrador que te asigne al menos una categoría desde Staff → Nueva invitación."
             bare
           />
         </CardContent>
       </Card>
     );
   }
+
+  // Elegir categoría activa (query string > primera de la lista)
+  const activeId = searchParams.categoria && categories.some((c) => c.id === searchParams.categoria)
+    ? searchParams.categoria
+    : categories[0].id;
+  const category = categories.find((c) => c.id === activeId)!;
 
   const selectedDate = parseDate(searchParams.fecha);
   const isToday = selectedDate.toDateString() === new Date().toDateString();
@@ -75,6 +90,26 @@ export default async function ProfesorPage({ searchParams }: { searchParams: { f
         description={`${players.length} jugadores · Hola, ${user.name}`}
       />
 
+      {/* Selector de categoría si tiene varias */}
+      {categories.length > 1 && (
+        <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1">
+          {categories.map((c) => {
+            const isActive = c.id === activeId;
+            return (
+              <Link
+                key={c.id}
+                href={`/profesor?categoria=${c.id}${searchParams.fecha ? `&fecha=${searchParams.fecha}` : ""}`}
+                className={`shrink-0 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                  isActive ? "bg-barrancas-red text-white" : "bg-background border text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {c.name}
+              </Link>
+            );
+          })}
+        </div>
+      )}
+
       <Tabs defaultValue="hoy">
         <TabsList>
           <TabsTrigger value="hoy">{isToday ? "Hoy" : "Asistencia"}</TabsTrigger>
@@ -87,6 +122,7 @@ export default async function ProfesorPage({ searchParams }: { searchParams: { f
               <Calendar className="h-4 w-4 text-muted-foreground" />
               <label htmlFor="fecha" className="text-sm font-medium">Día</label>
               <form action="" className="flex items-center gap-2 ml-auto" method="get">
+                {searchParams.categoria && <input type="hidden" name="categoria" value={searchParams.categoria} />}
                 <input
                   id="fecha"
                   name="fecha"

@@ -15,6 +15,9 @@ import {
   CalendarPlus,
   CalendarX,
   CalendarCheck,
+  Mail,
+  MailX,
+  MailCheck,
   type LucideIcon,
 } from "lucide-react";
 import type { AuditLog } from "@prisma/client";
@@ -44,6 +47,10 @@ const ICONS: Record<AuditAction, LucideIcon> = {
   EVENT_CREATED: CalendarPlus,
   EVENT_UPDATED: CalendarCheck,
   EVENT_DELETED: CalendarX,
+  INVITATION_CREATED: Mail,
+  INVITATION_REVOKED: MailX,
+  INVITATION_ACCEPTED: MailCheck,
+  USER_CATEGORIES_UPDATED: UserPlus,
 };
 
 const TONES: Record<AuditAction, string> = {
@@ -68,6 +75,10 @@ const TONES: Record<AuditAction, string> = {
   EVENT_CREATED: "bg-emerald-100 text-emerald-700",
   EVENT_UPDATED: "bg-zinc-100 text-zinc-700",
   EVENT_DELETED: "bg-red-100 text-red-700",
+  INVITATION_CREATED: "bg-violet-100 text-violet-700",
+  INVITATION_REVOKED: "bg-red-100 text-red-700",
+  INVITATION_ACCEPTED: "bg-emerald-100 text-emerald-700",
+  USER_CATEGORIES_UPDATED: "bg-blue-100 text-blue-700",
 };
 
 type LogEntry = AuditLog & {

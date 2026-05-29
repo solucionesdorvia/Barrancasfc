@@ -21,7 +21,11 @@ export type AuditAction =
   | "INSTALLMENT_PLAN_CANCELLED"
   | "EVENT_CREATED"
   | "EVENT_UPDATED"
-  | "EVENT_DELETED";
+  | "EVENT_DELETED"
+  | "INVITATION_CREATED"
+  | "INVITATION_REVOKED"
+  | "INVITATION_ACCEPTED"
+  | "USER_CATEGORIES_UPDATED";
 
 export const AUDIT_ACTION_LABEL: Record<AuditAction, string> = {
   PAYMENT_MARKED_PAID: "Pago marcado como cobrado",
@@ -45,6 +49,10 @@ export const AUDIT_ACTION_LABEL: Record<AuditAction, string> = {
   EVENT_CREATED: "Evento creado en el calendario",
   EVENT_UPDATED: "Evento actualizado",
   EVENT_DELETED: "Evento eliminado",
+  INVITATION_CREATED: "Invitación generada",
+  INVITATION_REVOKED: "Invitación revocada",
+  INVITATION_ACCEPTED: "Invitación aceptada — usuario creado",
+  USER_CATEGORIES_UPDATED: "Categorías asignadas actualizadas",
 };
 
 export type AuditEntityType =
@@ -55,7 +63,9 @@ export type AuditEntityType =
   | "Category"
   | "System"
   | "Event"
-  | "InstallmentPlan";
+  | "InstallmentPlan"
+  | "Invitation"
+  | "User";
 
 export async function logAudit(input: {
   userId: string;

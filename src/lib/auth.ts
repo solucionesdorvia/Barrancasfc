@@ -25,7 +25,7 @@ export const getDbUser = cache(async () => {
   const byClerkId = await withTimeout(
     prisma.user.findUnique({
       where: { clerkId: userId },
-      include: { club: true, children: { include: { category: true } } },
+      include: { club: true, children: { include: { category: true } }, assignedCategories: true },
     }).catch(() => null),
     DB_TIMEOUT_MS,
     null,
@@ -40,7 +40,7 @@ export const getDbUser = cache(async () => {
   const byEmail = await withTimeout(
     prisma.user.findUnique({
       where: { email },
-      include: { club: true, children: { include: { category: true } } },
+      include: { club: true, children: { include: { category: true } }, assignedCategories: true },
     }).catch(() => null),
     DB_TIMEOUT_MS,
     null,
@@ -52,7 +52,7 @@ export const getDbUser = cache(async () => {
     prisma.user.update({
       where: { id: byEmail.id },
       data: { clerkId: userId },
-      include: { club: true, children: { include: { category: true } } },
+      include: { club: true, children: { include: { category: true } }, assignedCategories: true },
     }).catch(() => byEmail),
     DB_TIMEOUT_MS,
     byEmail,

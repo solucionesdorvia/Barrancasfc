@@ -84,38 +84,42 @@ enum InstallmentPlanStatus {
 }
 
 model Club {
-  id         String     @id @default(cuid())
-  name       String
-  logo       String?
-  createdAt  DateTime   @default(now())
-  players    Player[]
-  categories Category[]
-  users      User[]
+  id          String       @id @default(cuid())
+  name        String
+  logo        String?
+  createdAt   DateTime     @default(now())
+  players     Player[]
+  categories  Category[]
+  users       User[]
+  invitations Invitation[]
 }
 
 model User {
-  id        String   @id @default(cuid())
-  clerkId   String?  @unique
-  email     String   @unique
-  name      String
-  role      Role
-  clubId    String
-  club      Club     @relation(fields: [clubId], references: [id])
-  children  Player[] @relation("ParentChildren")
-  createdAt DateTime @default(now())
+  id                 String     @id @default(cuid())
+  clerkId            String?    @unique
+  email              String     @unique
+  name               String
+  role               Role
+  title              String?    // ej "DT", "Coordinador", "Preparador físico" — cosmético
+  clubId             String
+  club               Club       @relation(fields: [clubId], references: [id])
+  children           Player[]   @relation("ParentChildren")
+  assignedCategories Category[] @relation("AssignedCategories")
+  createdAt          DateTime   @default(now())
 
   @@index([clubId])
   @@index([role])
 }
 
 model Category {
-  id      String       @id @default(cuid())
-  name    String
-  type    CategoryType
-  year    Int
-  clubId  String
-  club    Club         @relation(fields: [clubId], references: [id])
-  players Player[]
+  id         String       @id @default(cuid())
+  name       String
+  type       CategoryType
+  year       Int
+  clubId     String
+  club       Club         @relation(fields: [clubId], references: [id])
+  players    Player[]
+  assignedTo User[]       @relation("AssignedCategories")
 
   @@index([clubId])
 }
@@ -262,6 +266,28 @@ model Event {
   @@index([date])
   @@index([categoryId])
   @@index([audience])
+}
+
+model Invitation {
+  id           String    @id @default(cuid())
+  token        String    @unique
+  email        String?
+  role         Role
+  title        String?
+  clubId       String
+  club         Club      @relation(fields: [clubId], references: [id])
+  categoryIds  String[]  @default([])
+  childrenIds  String[]  @default([])
+  createdById  String
+  createdAt    DateTime  @default(now())
+  expiresAt    DateTime
+  usedAt       DateTime?
+  usedByUserId String?
+  revoked      Boolean   @default(false)
+
+  @@index([token])
+  @@index([clubId])
+  @@index([usedAt])
 }
 
 model AuditLog {
