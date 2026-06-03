@@ -125,7 +125,12 @@ export default async function PlayersListPage({
                         <AvatarFallback>{initials(fullName(p.firstName, p.lastName))}</AvatarFallback>
                       </Avatar>
                       <div className="min-w-0">
-                        <p className="text-sm font-medium group-hover:underline truncate">{p.lastName}, {p.firstName}</p>
+                        <p
+                          className="text-sm font-medium group-hover:underline truncate"
+                          title={`${p.lastName}, ${p.firstName}`}
+                        >
+                          {p.lastName}, {p.firstName}
+                        </p>
                       </div>
                     </Link>
                   </TableCell>
@@ -141,7 +146,7 @@ export default async function PlayersListPage({
                     )}
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button asChild size="sm" variant="ghost" className="opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button asChild size="sm" variant="ghost" className="opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                       <Link href={`/admin/players/${p.id}`}>Abrir →</Link>
                     </Button>
                   </TableCell>

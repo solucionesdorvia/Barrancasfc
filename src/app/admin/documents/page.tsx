@@ -68,7 +68,16 @@ export default async function DocumentsPage() {
                   <div className="h-9 w-9 rounded-lg bg-violet-100 text-violet-700 grid place-items-center shrink-0">
                     <FileText className="h-4 w-4" />
                   </div>
-                  <p className="text-sm font-medium leading-snug line-clamp-2">{d.name}</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium leading-snug line-clamp-2" title={d.name}>
+                      {d.name || <span className="text-muted-foreground italic">Sin nombre</span>}
+                    </p>
+                    {d.uploadedBy && (
+                      <p className="text-[10px] text-muted-foreground mt-0.5 truncate" title={`Subido por ${d.uploadedBy}`}>
+                        por {d.uploadedBy}
+                      </p>
+                    )}
+                  </div>
                 </div>
                 <Link href={`/admin/players/${d.player.id}`} className="flex items-center gap-2 hover:underline w-fit">
                   <Avatar className="h-5 w-5">

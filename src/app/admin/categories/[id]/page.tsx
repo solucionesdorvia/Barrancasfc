@@ -171,7 +171,7 @@ export default async function CategoryDetailPage({ params }: { params: { id: str
           {debt > 0 ? <span className="text-red-600 font-semibold">{formatARS(debt)}</span> : <span className="text-muted-foreground">—</span>}
         </TableCell>
         <TableCell className="text-right">
-          <Button asChild size="sm" variant="ghost" className="opacity-0 group-hover:opacity-100 transition-opacity">
+          <Button asChild size="sm" variant="ghost" className="opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
             <Link href={`/admin/players/${p.id}`}>Abrir →</Link>
           </Button>
         </TableCell>

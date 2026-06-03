@@ -18,7 +18,7 @@ export default async function PadreCalendarPage({
   const targetY = searchParams.y ? Number(searchParams.y) : now.getFullYear();
   const targetM = searchParams.m ? Number(searchParams.m) : now.getMonth() + 1;
 
-  const childrenCategoryIds = user.children.map((c) => c.categoryId);
+  const childrenCategoryIds = (user.children ?? []).map((c) => c.categoryId);
   const events = await (view === "month"
     ? getVisibleEvents({
         role: "PADRE",

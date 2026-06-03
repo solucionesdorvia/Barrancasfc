@@ -166,7 +166,7 @@ export default async function PaymentsPage({ searchParams }: { searchParams: { f
               <TableBody>
                 {overdue.map((p) => {
                   const days = daysOverdue(p.dueDate, now);
-                  const parent = p.player.parents[0];
+                  const parent = p.player.parents?.[0] ?? null;
                   return (
                     <TableRow key={p.id}>
                       <TableCell>

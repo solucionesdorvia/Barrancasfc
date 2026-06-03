@@ -71,7 +71,7 @@ export default async function PadreHomePage({ searchParams }: { searchParams: { 
       />
 
       {/* Alerta crítica: apto vencido (pop-up sticky arriba) */}
-      {fitnessExpired && (
+      {fitnessExpired && active.fitnessExpiry && (
         <PadreLink href="/padre/documentos">
           <div className="rounded-xl border-2 border-red-300 bg-red-50 p-4 shadow-sm flex items-start gap-3 transition-colors hover:bg-red-100 active:scale-[0.99]">
             <div className="bg-red-600 text-white rounded-full p-2 shrink-0 animate-pulse">
@@ -82,7 +82,7 @@ export default async function PadreHomePage({ searchParams }: { searchParams: { 
                 {active.firstName} tiene el apto físico vencido
               </p>
               <p className="text-xs text-red-800 mt-1">
-                Venció el {formatDate(active.fitnessExpiry!)}. No puede entrenar hasta renovarlo.
+                Venció el {formatDate(active.fitnessExpiry)}. No puede entrenar hasta renovarlo.
                 Tocá acá para subir el nuevo apto.
               </p>
             </div>
@@ -242,13 +242,17 @@ export default async function PadreHomePage({ searchParams }: { searchParams: { 
             </Card>
           ) : (
             notices.map((n) => (
-              <Card key={n.id} className="transition-shadow hover:shadow-md">
-                <CardContent className="py-3">
-                  <p className="text-sm font-medium">{n.title}</p>
-                  <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">{n.body}</p>
-                  <p className="text-[10px] text-muted-foreground mt-1.5">{formatDate(n.createdAt)}</p>
-                </CardContent>
-              </Card>
+              <PadreLink key={n.id} href="/padre/avisos">
+                <Card className="transition-shadow hover:shadow-md">
+                  <CardContent className="py-3">
+                    <p className="text-sm font-medium">{n.title}</p>
+                    <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5" title={n.body}>
+                      {n.body}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground mt-1.5">{formatDate(n.createdAt)}</p>
+                  </CardContent>
+                </Card>
+              </PadreLink>
             ))
           )}
         </div>

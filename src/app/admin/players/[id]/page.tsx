@@ -336,6 +336,9 @@ export default async function PlayerDetailPage({ params }: { params: { id: strin
               <CardContent className="space-y-3 text-sm">
                 <Field icon={Heart} label="Obra social" value={player.healthInsurance ?? "—"} />
                 <Field icon={Heart} label="Nº de afiliado" value={player.healthInsuranceNumber ?? "—"} />
+                {player.heightCm && (
+                  <Field icon={Heart} label="Altura" value={`${player.heightCm} cm`} />
+                )}
               </CardContent>
             </Card>
             <Card>

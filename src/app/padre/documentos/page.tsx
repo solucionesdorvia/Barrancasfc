@@ -70,7 +70,7 @@ export default async function PadreDocumentosPage({ searchParams }: { searchPara
                   {d.type === "MEDICAL" ? <ShieldCheck className="h-4 w-4" /> : <FileText className="h-4 w-4" />}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{d.name}</p>
+                  <p className="text-sm font-medium truncate" title={d.name}>{d.name}</p>
                   <p className="text-xs text-muted-foreground">
                     {DOC_TYPE_LABEL[d.type] ?? d.type} · <span title={formatDate(d.uploadedAt)}>{formatRelative(d.uploadedAt)}</span>
                   </p>
