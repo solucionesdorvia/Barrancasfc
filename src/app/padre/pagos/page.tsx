@@ -24,6 +24,7 @@ export default async function PadrePagosPage({ searchParams }: { searchParams: {
   const pending = active.payments.filter((p) => p.status === "PENDING" || p.status === "OVERDUE");
   const paid = active.payments.filter((p) => p.status === "PAID");
   const totalDebt = active.payments.filter((p) => p.status === "OVERDUE").reduce((s, p) => s + Number(p.amount), 0);
+  const now = new Date();
 
   return (
     <div className="space-y-4">
@@ -60,13 +61,17 @@ export default async function PadrePagosPage({ searchParams }: { searchParams: {
             </CardContent>
           </Card>
         ) : (
-          pending.map((p) => (
+          pending.map((p) => {
+            const isOverdue = p.dueDate < now;
+            return (
             <Card key={p.id}>
               <CardContent className="py-3 space-y-3">
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="text-sm font-medium">{monthName(p.month)} {p.year}</p>
-                    <p className="text-xs text-muted-foreground">Vence {formatDate(p.dueDate)}</p>
+                    <p className={`text-xs ${isOverdue ? "text-red-600 font-medium" : "text-muted-foreground"}`}>
+                      {isOverdue ? "Venció" : "Vence"} {formatDate(p.dueDate)}
+                    </p>
                   </div>
                   <PaymentStatusBadge status={p.status} />
                 </div>
@@ -80,7 +85,8 @@ export default async function PadrePagosPage({ searchParams }: { searchParams: {
                 />
               </CardContent>
             </Card>
-          ))
+            );
+          })
         )}
       </div>
 

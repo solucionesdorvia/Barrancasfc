@@ -1,8 +1,8 @@
 "use client";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, Wallet, Calendar, Bell } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { PadreLink } from "@/components/padre/padre-link";
 
 const items = [
   { href: "/padre", label: "Inicio", icon: Home, exact: true },
@@ -23,7 +23,7 @@ export function PadreBottomNav() {
           const Icon = it.icon;
           const active = it.exact ? pathname === it.href : pathname === it.href || pathname.startsWith(it.href + "/");
           return (
-            <Link
+            <PadreLink
               key={it.href}
               href={it.href}
               aria-current={active ? "page" : undefined}
@@ -37,7 +37,7 @@ export function PadreBottomNav() {
               )}
               <Icon className={cn("h-5 w-5 transition-transform", active && "scale-110")} />
               {it.label}
-            </Link>
+            </PadreLink>
           );
         })}
       </div>

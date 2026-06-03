@@ -1,11 +1,11 @@
-import Link from "next/link";
-import { CalendarDays, Bell, ChevronRight, Trophy, Activity, ShieldAlert, FileText } from "lucide-react";
+import { CalendarDays, Bell, ChevronRight, Trophy, Activity, ShieldAlert, FileText, AlertTriangle } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { ChildSwitcher } from "@/components/padre/child-switcher";
 import { PayButton } from "@/components/padre/pay-button";
+import { PadreLink } from "@/components/padre/padre-link";
 import { getPadreContext } from "@/lib/padre";
 import { formatARS, formatDate, monthName, initials, fullName } from "@/lib/format";
 
@@ -70,6 +70,27 @@ export default async function PadreHomePage({ searchParams }: { searchParams: { 
         activeId={active.id}
       />
 
+      {/* Alerta crítica: apto vencido (pop-up sticky arriba) */}
+      {fitnessExpired && (
+        <PadreLink href="/padre/documentos">
+          <div className="rounded-xl border-2 border-red-300 bg-red-50 p-4 shadow-sm flex items-start gap-3 transition-colors hover:bg-red-100 active:scale-[0.99]">
+            <div className="bg-red-600 text-white rounded-full p-2 shrink-0 animate-pulse">
+              <AlertTriangle className="h-5 w-5" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold text-red-900 leading-tight">
+                {active.firstName} tiene el apto físico vencido
+              </p>
+              <p className="text-xs text-red-800 mt-1">
+                Venció el {formatDate(active.fitnessExpiry!)}. No puede entrenar hasta renovarlo.
+                Tocá acá para subir el nuevo apto.
+              </p>
+            </div>
+            <ChevronRight className="h-4 w-4 text-red-700 shrink-0 self-center" />
+          </div>
+        </PadreLink>
+      )}
+
       {/* Hero del hijo */}
       <Card className="overflow-hidden border-0 shadow-lg">
         <div className="bg-gradient-to-br from-barrancas-red via-red-600 to-red-800 text-white p-5 relative">
@@ -101,7 +122,9 @@ export default async function PadreHomePage({ searchParams }: { searchParams: { 
                 <Trophy className="h-3 w-3" /> Apto físico
               </div>
               <p className="text-xs font-semibold mt-0.5">
-                {active.fitnessExpiry ? `Vence ${formatDate(active.fitnessExpiry)}` : "Sin cargar"}
+                {active.fitnessExpiry
+                  ? `${fitnessExpired ? "Venció" : "Vence"} ${formatDate(active.fitnessExpiry)}`
+                  : "Sin cargar"}
               </p>
             </div>
           </div>
@@ -121,7 +144,9 @@ export default async function PadreHomePage({ searchParams }: { searchParams: { 
             <div>
               <p className="text-xs text-muted-foreground">{monthName(nextDue.month)} {nextDue.year}</p>
               <p className="text-3xl font-bold tabular-nums">{formatARS(Number(nextDue.amount))}</p>
-              <p className="text-xs text-muted-foreground">Vence {formatDate(nextDue.dueDate)}</p>
+              <p className={`text-xs ${nextDue.dueDate < now ? "text-red-600 font-medium" : "text-muted-foreground"}`}>
+                {nextDue.dueDate < now ? "Venció" : "Vence"} {formatDate(nextDue.dueDate)}
+              </p>
             </div>
             <PayButton
               paymentId={nextDue.id}
@@ -160,9 +185,10 @@ export default async function PadreHomePage({ searchParams }: { searchParams: { 
         </CardContent>
       </Card>
 
-      {/* Alertas de apto físico */}
-      {(fitnessExpired || fitnessSoon || fitnessMissing) && (
-        <Link href="/padre/documentos">
+      {/* Alertas de apto físico — solo "por vencer" o "falta cargar".
+          La de "vencido" ya se muestra arriba como banner crítico. */}
+      {(fitnessSoon || fitnessMissing) && !fitnessExpired && (
+        <PadreLink href="/padre/documentos">
           <Card className="border-amber-200 bg-amber-50 transition-colors hover:bg-amber-100">
             <CardContent className="py-4 flex items-center gap-3">
               <div className="bg-amber-100 text-amber-700 rounded-md p-2">
@@ -170,11 +196,7 @@ export default async function PadreHomePage({ searchParams }: { searchParams: { 
               </div>
               <div className="flex-1">
                 <p className="text-sm font-medium text-amber-900">
-                  {fitnessExpired
-                    ? "Apto físico vencido"
-                    : fitnessSoon
-                      ? "Apto físico por vencer"
-                      : "Falta cargar el apto físico"}
+                  {fitnessSoon ? "Apto físico por vencer" : "Falta cargar el apto físico"}
                 </p>
                 <p className="text-xs text-amber-700">
                   Necesario para que {active.firstName} pueda seguir entrenando.
@@ -183,12 +205,12 @@ export default async function PadreHomePage({ searchParams }: { searchParams: { 
               <ChevronRight className="h-4 w-4 text-amber-700 shrink-0" />
             </CardContent>
           </Card>
-        </Link>
+        </PadreLink>
       )}
 
       {/* Documentación pendiente */}
       {active.documents.length === 0 && (
-        <Link href="/padre/documentos">
+        <PadreLink href="/padre/documentos">
           <Card className="border-zinc-200 transition-colors hover:bg-muted/50">
             <CardContent className="py-4 flex items-center gap-3">
               <div className="bg-zinc-100 text-zinc-700 rounded-md p-2">
@@ -201,14 +223,14 @@ export default async function PadreHomePage({ searchParams }: { searchParams: { 
               <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
             </CardContent>
           </Card>
-        </Link>
+        </PadreLink>
       )}
 
       {/* Avisos */}
       <div>
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-sm font-semibold">Avisos del club</h2>
-          <Link href="/padre/avisos" className="text-xs text-barrancas-red font-medium">Ver todos</Link>
+          <PadreLink href="/padre/avisos" className="text-xs text-barrancas-red font-medium">Ver todos</PadreLink>
         </div>
         <div className="space-y-2">
           {notices.length === 0 ? (
