@@ -58,7 +58,7 @@ export function PlayersToolbar({ categories }: { categories: Category[] }) {
       </div>
       <div className="flex flex-wrap gap-2">
         <Select value={categoryId} onValueChange={(v) => setParam("categoryId", v)}>
-          <SelectTrigger className="w-[170px]"><SelectValue placeholder="Categoría" /></SelectTrigger>
+          <SelectTrigger className="w-full sm:w-[170px]"><SelectValue placeholder="Categoría" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todas las categorías</SelectItem>
             {categories.map((c) => (
@@ -67,7 +67,7 @@ export function PlayersToolbar({ categories }: { categories: Category[] }) {
           </SelectContent>
         </Select>
         <Select value={status} onValueChange={(v) => setParam("status", v)}>
-          <SelectTrigger className="w-[140px]"><SelectValue placeholder="Estado" /></SelectTrigger>
+          <SelectTrigger className="w-full sm:w-[140px]"><SelectValue placeholder="Estado" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos</SelectItem>
             <SelectItem value="ACTIVE">Activos</SelectItem>
@@ -77,7 +77,7 @@ export function PlayersToolbar({ categories }: { categories: Category[] }) {
           </SelectContent>
         </Select>
         <Select value={overdue} onValueChange={(v) => setParam("overdue", v)}>
-          <SelectTrigger className="w-[130px]"><SelectValue placeholder="Morosidad" /></SelectTrigger>
+          <SelectTrigger className="w-full sm:w-[130px]"><SelectValue placeholder="Morosidad" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos</SelectItem>
             <SelectItem value="yes">Solo morosos</SelectItem>
@@ -85,7 +85,7 @@ export function PlayersToolbar({ categories }: { categories: Category[] }) {
           </SelectContent>
         </Select>
         <Select value={scholarship} onValueChange={(v) => setParam("scholarship", v)}>
-          <SelectTrigger className="w-[130px]"><SelectValue placeholder="Becados" /></SelectTrigger>
+          <SelectTrigger className="w-full sm:w-[130px]"><SelectValue placeholder="Becados" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos</SelectItem>
             <SelectItem value="yes">Becados</SelectItem>
@@ -93,7 +93,7 @@ export function PlayersToolbar({ categories }: { categories: Category[] }) {
           </SelectContent>
         </Select>
         <Select value={flags} onValueChange={(v) => setParam("flags", v)}>
-          <SelectTrigger className="w-[170px]"><SelectValue placeholder="Alertas" /></SelectTrigger>
+          <SelectTrigger className="w-full sm:w-[170px]"><SelectValue placeholder="Alertas" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Sin filtro de alertas</SelectItem>
             <SelectItem value="no_docs">Sin documentación</SelectItem>

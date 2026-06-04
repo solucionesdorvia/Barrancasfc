@@ -173,7 +173,7 @@ export function InvitationDialog({ categories, players }: { categories: Category
 
               <div className="space-y-1.5">
                 <Label htmlFor="email">Email (opcional)</Label>
-                <Input id="email" type="email" placeholder="se@usa.como.referencia" value={email} onChange={(e) => setEmail(e.target.value)} />
+                <Input id="email" type="email" inputMode="email" autoComplete="off" placeholder="se@usa.como.referencia" value={email} onChange={(e) => setEmail(e.target.value)} />
                 <p className="text-xs text-muted-foreground">Es solo para identificar la invitación. La persona usa su propio email al registrarse.</p>
               </div>
 

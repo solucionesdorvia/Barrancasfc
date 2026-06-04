@@ -28,7 +28,7 @@ export function PadreBottomNav() {
               href={it.href}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "relative flex flex-col items-center gap-0.5 py-2.5 text-[11px] font-medium transition-colors focus-visible:outline-none focus-visible:bg-muted",
+                "relative flex flex-col items-center gap-0.5 py-2.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:bg-muted min-h-[56px] justify-center",
                 active ? "text-barrancas-red" : "text-muted-foreground hover:text-foreground"
               )}
             >

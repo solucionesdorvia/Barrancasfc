@@ -29,7 +29,9 @@ function invitationStatus(inv: { revoked: boolean; usedAt: Date | null; expiresA
 }
 
 export default async function UsersListPage() {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") || "";
+  // Si la var no está seteada (caso local sin .env), usamos un placeholder
+  // para que el link copiado al menos sea identificable.
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") || "http://localhost:3000";
 
   const [users, counts, invitations, categories, players] = await Promise.all([
     prisma.user.findMany({

@@ -156,7 +156,15 @@ export function CreateUserDialog({ categories, players }: { categories: Category
 
               <div className="space-y-1.5">
                 <Label htmlFor="em">Email *</Label>
-                <Input id="em" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="usuario@ejemplo.com" />
+                <Input
+                  id="em"
+                  type="email"
+                  inputMode="email"
+                  autoComplete="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="usuario@ejemplo.com"
+                />
               </div>
 
               <div className="space-y-1.5">

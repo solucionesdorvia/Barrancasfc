@@ -185,11 +185,11 @@ function NoteCard({
           </div>
           {canModify && (
             <div className="flex flex-col gap-1">
-              <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => onTogglePin(note)} title={note.pinned ? "Desfijar" : "Fijar"}>
-                {note.pinned ? <PinOff className="h-3.5 w-3.5" /> : <Pin className="h-3.5 w-3.5" />}
+              <Button size="icon" variant="ghost" className="h-9 w-9" onClick={() => onTogglePin(note)} aria-label={note.pinned ? "Desfijar nota" : "Fijar nota"}>
+                {note.pinned ? <PinOff className="h-4 w-4" /> : <Pin className="h-4 w-4" />}
               </Button>
-              <Button size="icon" variant="ghost" className="h-7 w-7 text-red-600 hover:text-red-700" onClick={() => onDelete(note)} title="Eliminar">
-                <Trash2 className="h-3.5 w-3.5" />
+              <Button size="icon" variant="ghost" className="h-9 w-9 text-red-600 hover:text-red-700" onClick={() => onDelete(note)} aria-label="Eliminar nota">
+                <Trash2 className="h-4 w-4" />
               </Button>
             </div>
           )}
