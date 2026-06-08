@@ -62,7 +62,7 @@ export default async function PlayersListPage({
         category: { select: { id: true, name: true } },
       },
       orderBy: [{ status: "asc" }, { lastName: "asc" }],
-      take: 300,
+      take: 1000,
     }),
     prisma.category.findMany({
       orderBy: [{ type: "asc" }, { year: "desc" }],

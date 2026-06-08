@@ -236,6 +236,7 @@ async function main() {
     monthlyFee: number;
     paymentPlan: "MONTHLY" | "ANNUAL";
     categoryId: string;
+    photo: string;
     clubId: string;
   };
   type MultiCatLink = { afaId: string; additionalCatIds: string[] };
@@ -267,6 +268,7 @@ async function main() {
       monthlyFee: primaryCat.monthlyFee,
       paymentPlan: primaryCat.type === "PROFESIONAL" ? "ANNUAL" : "MONTHLY",
       categoryId: primaryCat.id,
+      photo: `https://api.dicebear.com/9.x/avataaars/svg?seed=${encodeURIComponent(pd.fullName + pd.afaId)}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf`,
       clubId: club.id,
     });
 

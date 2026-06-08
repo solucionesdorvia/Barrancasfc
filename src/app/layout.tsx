@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
+import { esES } from "@clerk/localizations";
 import { Toaster } from "sonner";
 import "./globals.css";
 
@@ -54,11 +55,15 @@ export const viewport: Viewport = {
   themeColor: "#C8102E",
 };
 
+// Cast por mismatch de types entre @clerk/localizations v4 y @clerk/nextjs v5; en runtime funciona.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const clerkLocalization = esES as any;
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <ClerkProvider>
+    <ClerkProvider localization={clerkLocalization}>
       <html lang="es" suppressHydrationWarning>
         <body className={`${inter.variable} font-sans antialiased`}>
           {children}

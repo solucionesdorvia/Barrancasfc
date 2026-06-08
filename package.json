@@ -15,6 +15,7 @@
     "db:import-comet": "tsx prisma/import-comet.ts",
     "db:generate-invitations": "tsx prisma/generate-invitations.ts",
     "db:seed-notices": "tsx prisma/seed-notices.ts",
+    "db:backfill-photos": "tsx prisma/backfill-photos.ts",
     "db:studio": "prisma studio",
     "postinstall": "prisma generate"
   },
@@ -22,6 +23,7 @@
     "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
+    "@clerk/localizations": "^4.7.1",
     "@clerk/nextjs": "^5.7.6",
     "@hookform/resolvers": "^5.2.2",
     "@prisma/client": "^5.22.0",
