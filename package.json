@@ -13,6 +13,8 @@
     "db:reset": "prisma migrate reset --force",
     "db:seed": "tsx prisma/seed.ts",
     "db:import-comet": "tsx prisma/import-comet.ts",
+    "db:generate-invitations": "tsx prisma/generate-invitations.ts",
+    "db:seed-notices": "tsx prisma/seed-notices.ts",
     "db:studio": "prisma studio",
     "postinstall": "prisma generate"
   },
