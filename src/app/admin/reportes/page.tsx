@@ -92,7 +92,7 @@ export default async function ReportesPage() {
     ...players.map((p) => [
       p.lastName,
       p.firstName,
-      p.dni,
+      p.dni ?? "",
       p.category.name,
       p.status,
       Number(p.monthlyFee),

@@ -56,9 +56,34 @@ enum PaymentStatus {
 enum DocumentType {
   BIRTH_CERT
   DNI
+  DNI_FRONT
+  DNI_BACK
+  PARENT_DOC
   MEDICAL
   REPORT_CARD
   OTHER
+}
+
+enum EducationStatus {
+  PRIMARIA
+  SECUNDARIA
+  TERCIARIO
+  UNIVERSITARIO
+  FINALIZADO
+  OTRO
+}
+
+enum SchoolShift {
+  MANANA
+  TARDE
+  NOCHE
+  DOBLE
+}
+
+enum TransferStatus {
+  SIN_PASE
+  EN_TRAMITE
+  CONFIRMADO
 }
 
 enum EventType {
@@ -112,14 +137,19 @@ model User {
 }
 
 model Category {
-  id         String       @id @default(cuid())
-  name       String
-  type       CategoryType
-  year       Int
-  clubId     String
-  club       Club         @relation(fields: [clubId], references: [id])
-  players    Player[]
-  assignedTo User[]       @relation("AssignedCategories")
+  id                String   @id @default(cuid())
+  name              String
+  type              CategoryType
+  year              Int
+  clubId            String
+  club              Club     @relation(fields: [clubId], references: [id])
+  // Categoría principal de los jugadores (1:N). Es la que usa cobranza y la
+  // que se muestra como "su categoría" en la mayoría de las pantallas.
+  players           Player[]
+  // Jugadores que ALSO están en esta categoría (no es la principal pero
+  // entrenan/juegan acá también). Sin cuota duplicada.
+  additionalPlayers Player[] @relation("AdditionalCategories")
+  assignedTo        User[]   @relation("AssignedCategories")
 
   @@index([clubId])
 }
@@ -128,14 +158,52 @@ model Player {
   id                    String           @id @default(cuid())
   firstName             String
   lastName              String
-  dni                   String           @unique
+  dni                   String?          @unique
+  // Número de registro AFA / COMET (las planillas oficiales lo usan como ID único)
+  afaId                 String?          @unique
   birthDate             DateTime
   photo                 String?
   nationality           String           @default("Argentina")
+  citizenship           String?
+  observations          String?
+
+  // Domicilio
   address               String?
+  locality              String?
+  province              String?
+
+  // Contacto personal
+  personalPhone         String?
+  personalEmail         String?
+  notificationEmail     String?
+
+  // Contacto de emergencia
+  emergencyContactName  String?
+  emergencyContactRelation String?
+  emergencyContactPhone String?
+  emergencyContactEmail String?
+  // (legacy combinado, se mantiene por retro-compatibilidad)
   emergencyContact      String?
+
+  // Escolaridad
   schoolName            String?
+  schoolStatus          EducationStatus?
+  schoolShift           SchoolShift?
+  schoolStartTime       String?  // "08:00"
+  schoolEndTimeTuesday  String?
+  schoolEndTimeWednesday String?
+  schoolEndTimeThursday String?
+  schoolEndTimeFriday   String?
+  // (legacy JSON, se mantiene)
   schoolSchedule        Json?
+
+  // Obra social
+  hasHealthInsurance    Boolean          @default(false)
+  healthInsurance       String?
+  healthInsurancePlan   String?
+  healthInsuranceNumber String?
+
+  // Estado administrativo / club
   position              PlayerPosition?
   heightCm              Int?
   status                PlayerStatus     @default(ACTIVE)
@@ -143,12 +211,22 @@ model Player {
   scholarshipPercent    Int?
   paymentPlan           PaymentPlan      @default(MONTHLY)
   monthlyFee            Decimal          @default(0)
-  healthInsurance       String?
-  healthInsuranceNumber String?
   fitnessExpiry         DateTime?
   afaRegistration       String?
+  clothingPaid          Boolean          @default(false)
+  transferStatus        TransferStatus?
+  registeredIn2025      Boolean          @default(false)
+  lastInstallmentNote   String?
+
+  // Categorización
+  // categoryId / category = PRINCIPAL del jugador (usada para cobranza).
+  // Si la categoría es PROFESIONAL, no se le generan cuotas.
   categoryId            String
   category              Category         @relation(fields: [categoryId], references: [id])
+  // Categorías adicionales en las que también juega (no genera doble cuota)
+  additionalCategories  Category[]       @relation("AdditionalCategories")
+
+  // Relaciones
   parents               User[]           @relation("ParentChildren")
   payments              Payment[]
   attendances           Attendance[]
@@ -163,6 +241,7 @@ model Player {
   @@index([clubId])
   @@index([categoryId])
   @@index([status])
+  @@index([afaId])
 }
 
 model Payment {

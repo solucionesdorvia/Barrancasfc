@@ -114,6 +114,55 @@ export const invitationCreateSchema = z.object({
   expiresInDays: z.number().int().min(1).max(90).optional().default(7),
 });
 
+export const playerProfileUpdateSchema = z.object({
+  // Identificación
+  firstName: z.string().min(1).max(80).optional(),
+  lastName: z.string().min(1).max(80).optional(),
+  dni: z.string().regex(/^\d{7,9}$/, "DNI inválido").optional().nullable().or(z.literal("")),
+  birthDate: z.string().optional().nullable(),
+  nationality: z.string().max(40).optional().nullable(),
+  citizenship: z.string().max(60).optional().nullable(),
+  observations: z.string().max(2000).optional().nullable(),
+
+  // Domicilio
+  address: z.string().max(200).optional().nullable(),
+  locality: z.string().max(100).optional().nullable(),
+  province: z.string().max(60).optional().nullable(),
+
+  // Contacto personal
+  personalPhone: z.string().max(30).optional().nullable(),
+  personalEmail: z.string().email().optional().nullable().or(z.literal("")),
+  notificationEmail: z.string().email().optional().nullable().or(z.literal("")),
+
+  // Contacto de emergencia
+  emergencyContactName: z.string().max(120).optional().nullable(),
+  emergencyContactRelation: z.string().max(40).optional().nullable(),
+  emergencyContactPhone: z.string().max(30).optional().nullable(),
+  emergencyContactEmail: z.string().email().optional().nullable().or(z.literal("")),
+
+  // Obra social
+  hasHealthInsurance: z.boolean().optional(),
+  healthInsurance: z.string().max(80).optional().nullable(),
+  healthInsurancePlan: z.string().max(80).optional().nullable(),
+  healthInsuranceNumber: z.string().max(40).optional().nullable(),
+
+  // Educación
+  schoolName: z.string().max(120).optional().nullable(),
+  schoolStatus: z.enum(["PRIMARIA", "SECUNDARIA", "TERCIARIO", "UNIVERSITARIO", "FINALIZADO", "OTRO"]).optional().nullable(),
+  schoolShift: z.enum(["MANANA", "TARDE", "NOCHE", "DOBLE"]).optional().nullable(),
+  schoolStartTime: z.string().max(10).optional().nullable(),
+  schoolEndTimeTuesday: z.string().max(10).optional().nullable(),
+  schoolEndTimeWednesday: z.string().max(10).optional().nullable(),
+  schoolEndTimeThursday: z.string().max(10).optional().nullable(),
+  schoolEndTimeFriday: z.string().max(10).optional().nullable(),
+
+  // Admin fields (solo admin)
+  clothingPaid: z.boolean().optional(),
+  transferStatus: z.enum(["SIN_PASE", "EN_TRAMITE", "CONFIRMADO"]).optional().nullable(),
+  registeredIn2025: z.boolean().optional(),
+  lastInstallmentNote: z.string().max(200).optional().nullable(),
+});
+
 export const userCreateDirectSchema = z.object({
   email: z.string().email("Email inválido"),
   password: z.string().min(8, "Mínimo 8 caracteres").max(72),

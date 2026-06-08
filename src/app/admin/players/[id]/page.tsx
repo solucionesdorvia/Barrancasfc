@@ -54,6 +54,7 @@ export default async function PlayerDetailPage({ params }: { params: { id: strin
       where: { id: params.id },
       include: {
         category: true,
+        additionalCategories: { orderBy: { year: "desc" }, select: { id: true, name: true } },
         payments: { orderBy: [{ year: "desc" }, { month: "desc" }] },
         attendances: { orderBy: { date: "desc" }, take: 60 },
         documents: { orderBy: { uploadedAt: "desc" } },
@@ -119,9 +120,14 @@ export default async function PlayerDetailPage({ params }: { params: { id: strin
 
   return (
     <div className="space-y-6">
-      <Button asChild variant="ghost" size="sm" className="-ml-2 gap-1.5">
-        <Link href="/admin/players"><ArrowLeft className="h-4 w-4" /> Volver al listado</Link>
-      </Button>
+      <div className="flex items-center justify-between">
+        <Button asChild variant="ghost" size="sm" className="-ml-2 gap-1.5">
+          <Link href="/admin/players"><ArrowLeft className="h-4 w-4" /> Volver al listado</Link>
+        </Button>
+        <Button asChild size="sm" variant="outline" className="gap-1.5">
+          <Link href={`/admin/players/${player.id}/editar`}>Editar perfil completo</Link>
+        </Button>
+      </div>
 
       {/* Hero */}
       <Card className="overflow-hidden">
@@ -144,7 +150,14 @@ export default async function PlayerDetailPage({ params }: { params: { id: strin
                 )}
               </div>
               <p className="text-sm text-muted-foreground">
-                {player.category.name} · DNI {player.dni} · {ageFromBirth(player.birthDate)} años
+                {player.category.name}
+                {player.additionalCategories.length > 0 && (
+                  <> · <span className="text-amber-700 font-medium">también en {player.additionalCategories.map((c) => c.name).join(", ")}</span></>
+                )}
+                {player.dni ? ` · DNI ${player.dni}` : player.afaId ? ` · AFA ${player.afaId}` : ""} · {ageFromBirth(player.birthDate)} años
+                {player.category.type === "PROFESIONAL" && (
+                  <> · <span className="text-emerald-700 font-medium">sin cuota (Primera)</span></>
+                )}
               </p>
               <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 pt-2 [&>*]:w-full sm:[&>*]:w-auto">
                 <ChangeStatusButton playerId={player.id} currentStatus={player.status} />

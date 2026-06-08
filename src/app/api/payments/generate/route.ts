@@ -11,10 +11,13 @@ export const POST = withErrorHandler(async () => {
   const year = now.getFullYear();
   const dueDate = new Date(year, month - 1, 10);
 
+  // Skip jugadores de categoría PROFESIONAL (Primera no paga cuota) y los
+  // que ya tengan monthlyFee = 0 (becados full).
   const players = await prisma.player.findMany({
     where: {
       status: "ACTIVE",
       monthlyFee: { gt: 0 },
+      category: { type: { not: "PROFESIONAL" } },
     },
     select: { id: true, monthlyFee: true },
   });

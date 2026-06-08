@@ -1,6 +1,6 @@
 "use client";
 import { usePathname } from "next/navigation";
-import { Home, Wallet, Calendar, Bell } from "lucide-react";
+import { Home, Wallet, Calendar, Bell, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PadreLink } from "@/components/padre/padre-link";
 
@@ -9,6 +9,7 @@ const items = [
   { href: "/padre/pagos", label: "Pagos", icon: Wallet },
   { href: "/padre/calendario", label: "Agenda", icon: Calendar },
   { href: "/padre/avisos", label: "Avisos", icon: Bell },
+  { href: "/padre/perfil", label: "Perfil", icon: User },
 ];
 
 export function PadreBottomNav() {
@@ -18,7 +19,7 @@ export function PadreBottomNav() {
       className="fixed bottom-0 inset-x-0 border-t bg-background/95 backdrop-blur z-30 safe-area-inset-bottom"
       aria-label="Navegación principal"
     >
-      <div className="grid grid-cols-4 max-w-md mx-auto">
+      <div className="grid grid-cols-5 max-w-md mx-auto">
         {items.map((it) => {
           const Icon = it.icon;
           const active = it.exact ? pathname === it.href : pathname === it.href || pathname.startsWith(it.href + "/");
