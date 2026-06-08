@@ -222,49 +222,81 @@ async function main() {
   }
   console.log(`  ↳ ${multiCount} jugadores en más de una categoría`);
 
-  // 6. Crear jugadores
-  console.log("\n🏗️ Creando jugadores en la base...");
-  let created = 0;
+  // 6. Crear jugadores — BATCH para minimizar round-trips
+  console.log("\n🏗️ Creando jugadores en la base (batch)...");
   let withoutBirth = 0;
+  type PlayerInsert = {
+    firstName: string;
+    lastName: string;
+    afaId: string;
+    afaRegistration: string;
+    birthDate: Date;
+    nationality: string;
+    status: "ACTIVE" | "INACTIVE";
+    monthlyFee: number;
+    paymentPlan: "MONTHLY" | "ANNUAL";
+    categoryId: string;
+    clubId: string;
+  };
+  type MultiCatLink = { afaId: string; additionalCatIds: string[] };
+
+  const inserts: PlayerInsert[] = [];
+  const multiCatLinks: MultiCatLink[] = [];
 
   for (const pd of players.values()) {
     if (!pd.birthDate) {
       withoutBirth++;
-      // Fallback: usar 1 ene del año mayor de las categorías (mejor que nada)
       const fallbackYear = pd.categories[0]?.name.includes("Infantil")
         ? Number(pd.categories[0].name.split(" ")[1])
         : 2005;
       pd.birthDate = new Date(Date.UTC(fallbackYear, 0, 1));
     }
 
-    // Categoría principal: la de mayor priority
     const sortedCats = [...pd.categories].sort((a, b) => b.priority - a.priority);
-    const primaryCatName = sortedCats[0].name;
-    const primaryCat = catByName.get(primaryCatName)!;
+    const primaryCat = catByName.get(sortedCats[0].name)!;
     const additionalCatIds = sortedCats.slice(1).map((c) => catByName.get(c.name)!.id);
 
-    await prisma.player.create({
-      data: {
-        firstName: pd.firstName,
-        lastName: pd.lastName,
-        afaId: pd.afaId,
-        afaRegistration: pd.afaId, // legacy
-        birthDate: pd.birthDate,
-        nationality: pd.nationality,
-        status: pd.verified ? "ACTIVE" : "INACTIVE",
-        monthlyFee: primaryCat.monthlyFee,
-        paymentPlan: primaryCat.type === "PROFESIONAL" ? "ANNUAL" : "MONTHLY",
-        categoryId: primaryCat.id,
-        additionalCategories: additionalCatIds.length
-          ? { connect: additionalCatIds.map((id) => ({ id })) }
-          : undefined,
-        clubId: club.id,
-      },
+    inserts.push({
+      firstName: pd.firstName,
+      lastName: pd.lastName,
+      afaId: pd.afaId,
+      afaRegistration: pd.afaId,
+      birthDate: pd.birthDate,
+      nationality: pd.nationality,
+      status: pd.verified ? "ACTIVE" : "INACTIVE",
+      monthlyFee: primaryCat.monthlyFee,
+      paymentPlan: primaryCat.type === "PROFESIONAL" ? "ANNUAL" : "MONTHLY",
+      categoryId: primaryCat.id,
+      clubId: club.id,
     });
-    created++;
+
+    if (additionalCatIds.length > 0) {
+      multiCatLinks.push({ afaId: pd.afaId, additionalCatIds });
+    }
   }
 
-  console.log(`✓ ${created} jugadores creados`);
+  // Insert en chunks de 100 para no saturar
+  const CHUNK = 100;
+  let created = 0;
+  for (let i = 0; i < inserts.length; i += CHUNK) {
+    const chunk = inserts.slice(i, i + CHUNK);
+    const res = await prisma.player.createMany({ data: chunk, skipDuplicates: true });
+    created += res.count;
+    console.log(`  ⏳ ${created}/${inserts.length}`);
+  }
+
+  // Conectar additionalCategories (solo para los multi-cat, 15 en total)
+  if (multiCatLinks.length > 0) {
+    console.log(`\n🔗 Vinculando ${multiCatLinks.length} jugadores multi-categoría...`);
+    for (const link of multiCatLinks) {
+      await prisma.player.update({
+        where: { afaId: link.afaId },
+        data: { additionalCategories: { connect: link.additionalCatIds.map((id) => ({ id })) } },
+      });
+    }
+  }
+
+  console.log(`\n✓ ${created} jugadores creados`);
   if (withoutBirth > 0) {
     console.log(`  ⚠️  ${withoutBirth} jugadores sin fecha de nacimiento parseable (usado fallback)`);
   }
