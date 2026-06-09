@@ -26,7 +26,12 @@ export type AuditAction =
   | "INVITATION_REVOKED"
   | "INVITATION_ACCEPTED"
   | "USER_CATEGORIES_UPDATED"
-  | "USER_CREATED_DIRECT";
+  | "USER_CREATED_DIRECT"
+  | "POLL_VOTED"
+  | "STAFF_TASK_CREATED"
+  | "STAFF_TASK_UPDATED"
+  | "STAFF_TASK_COMPLETED"
+  | "FAMILY_GROUP_UPDATED";
 
 export const AUDIT_ACTION_LABEL: Record<AuditAction, string> = {
   PAYMENT_MARKED_PAID: "Pago marcado como cobrado",
@@ -55,6 +60,11 @@ export const AUDIT_ACTION_LABEL: Record<AuditAction, string> = {
   INVITATION_ACCEPTED: "Invitación aceptada — usuario creado",
   USER_CATEGORIES_UPDATED: "Categorías asignadas actualizadas",
   USER_CREATED_DIRECT: "Cuenta creada directo desde admin",
+  POLL_VOTED: "Voto registrado en encuesta",
+  STAFF_TASK_CREATED: "Tarea creada",
+  STAFF_TASK_UPDATED: "Tarea modificada",
+  STAFF_TASK_COMPLETED: "Tarea completada",
+  FAMILY_GROUP_UPDATED: "Grupo familiar actualizado",
 };
 
 export type AuditEntityType =
@@ -67,7 +77,9 @@ export type AuditEntityType =
   | "Event"
   | "InstallmentPlan"
   | "Invitation"
-  | "User";
+  | "User"
+  | "Notice"
+  | "StaffTask";
 
 export async function logAudit(input: {
   userId: string;

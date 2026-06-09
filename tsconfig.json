@@ -22,5 +22,5 @@
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules", "prisma/seed.ts", "prisma/load-primera.ts", "prisma/import-comet.ts", "prisma/generate-invitations.ts", "prisma/seed-notices.ts", "prisma/backfill-photos.ts"]
+  "exclude": ["node_modules", "prisma/seed.ts", "prisma/load-primera.ts", "prisma/import-comet.ts", "prisma/generate-invitations.ts", "prisma/seed-notices.ts", "prisma/backfill-photos.ts", "prisma/import-extended-data.ts", "prisma/import-parents.ts"]
 }

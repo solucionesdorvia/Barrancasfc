@@ -64,6 +64,37 @@ export const playerImportSchema = z.object({
 export const noticeCreateSchema = z.object({
   title: z.string().min(3).max(120),
   body: z.string().min(3).max(2000),
+  pollOptions: z.array(z.string().min(1).max(80)).max(6).optional().default([]),
+  pollClosesAt: z.string().optional().nullable(),
+});
+
+export const noticeVoteSchema = z.object({
+  noticeId: cuidSchema,
+  optionIdx: z.number().int().min(0).max(5),
+});
+
+export const staffTaskCreateSchema = z.object({
+  title: z.string().min(2).max(140),
+  description: z.string().max(2000).optional(),
+  priority: z.enum(["LOW", "NORMAL", "HIGH", "URGENT"]).default("NORMAL"),
+  assignedToId: cuidSchema.optional().nullable(),
+  assignedToRole: z.enum(["ADMIN", "PROFESOR", "PADRE"]).optional().nullable(),
+  relatedPlayerId: cuidSchema.optional().nullable(),
+  dueDate: z.string().optional().nullable(),
+});
+
+export const staffTaskUpdateSchema = z.object({
+  status: z.enum(["PENDING", "IN_PROGRESS", "DONE", "CANCELLED"]).optional(),
+  title: z.string().min(2).max(140).optional(),
+  description: z.string().max(2000).optional().nullable(),
+  priority: z.enum(["LOW", "NORMAL", "HIGH", "URGENT"]).optional(),
+  assignedToId: cuidSchema.optional().nullable(),
+  dueDate: z.string().optional().nullable(),
+});
+
+export const familyGroupSchema = z.object({
+  familyGroupId: z.string().min(3).max(60).optional().nullable(),
+  familyDiscountPercent: z.number().int().min(0).max(100).optional().nullable(),
 });
 
 export const playerNoteCreateSchema = z.object({

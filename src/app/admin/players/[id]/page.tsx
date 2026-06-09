@@ -32,6 +32,8 @@ import { UpdateFeeButton } from "@/components/admin/update-fee-button";
 import { AuditTimeline } from "@/components/admin/audit-timeline";
 import { PlayerNotes } from "@/components/admin/player-notes";
 import { InstallmentPlanDialog } from "@/components/admin/installment-plan-dialog";
+import { FamilyGroupForm } from "@/components/admin/family-group-form";
+import { Users } from "lucide-react";
 import { requireRole } from "@/lib/auth";
 import { StickyNote, CalendarRange } from "lucide-react";
 import {
@@ -82,6 +84,36 @@ export default async function PlayerDetailPage({ params }: { params: { id: strin
   ]);
 
   if (!player) notFound();
+
+  // Hermanos del mismo grupo familiar (solo si está asignado a uno)
+  type FamilyMember = {
+    id: string;
+    firstName: string;
+    lastName: string;
+    category: { name: string } | null;
+  };
+  const familyMembers: FamilyMember[] = player.familyGroupId
+    ? await prisma.player
+        .findMany({
+          where: {
+            familyGroupId: player.familyGroupId,
+            id: { not: player.id },
+          },
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            category: { select: { name: true } },
+          },
+        })
+        .catch(() => [] as FamilyMember[])
+    : [];
+  const groupSiblings = familyMembers.map((m) => ({
+    id: m.id,
+    firstName: m.firstName,
+    lastName: m.lastName,
+    categoryName: m.category?.name ?? null,
+  }));
 
   const userIds = Array.from(new Set([...auditLogs.map((l) => l.userId), ...notes.map((n) => n.authorId)]));
   const auditUsers = userIds.length
@@ -230,6 +262,31 @@ export default async function PlayerDetailPage({ params }: { params: { id: strin
               </CardContent>
             </Card>
           </div>
+
+          {user.role === "ADMIN" && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Users className="h-4 w-4 text-violet-600" /> Grupo familiar
+                </CardTitle>
+                <CardDescription>
+                  {player.familyGroupId
+                    ? `Pertenece al grupo "${player.familyGroupId}"${
+                        player.familyDiscountPercent ? ` con ${player.familyDiscountPercent}% de descuento` : ""
+                      }`
+                    : "Sin grupo asignado"}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <FamilyGroupForm
+                  playerId={player.id}
+                  initialGroupId={player.familyGroupId ?? null}
+                  initialPercent={player.familyDiscountPercent ?? null}
+                  groupSiblings={groupSiblings}
+                />
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         <TabsContent value="pagos" className="space-y-4">

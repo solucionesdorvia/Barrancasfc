@@ -18,6 +18,10 @@ import {
   Mail,
   MailX,
   MailCheck,
+  BarChart3,
+  ListTodo,
+  CheckCircle2,
+  Users,
   type LucideIcon,
 } from "lucide-react";
 import type { AuditLog } from "@prisma/client";
@@ -52,6 +56,11 @@ const ICONS: Record<AuditAction, LucideIcon> = {
   INVITATION_ACCEPTED: MailCheck,
   USER_CATEGORIES_UPDATED: UserPlus,
   USER_CREATED_DIRECT: UserPlus,
+  POLL_VOTED: BarChart3,
+  STAFF_TASK_CREATED: ListTodo,
+  STAFF_TASK_UPDATED: Pencil,
+  STAFF_TASK_COMPLETED: CheckCircle2,
+  FAMILY_GROUP_UPDATED: Users,
 };
 
 const TONES: Record<AuditAction, string> = {
@@ -81,6 +90,11 @@ const TONES: Record<AuditAction, string> = {
   INVITATION_ACCEPTED: "bg-emerald-100 text-emerald-700",
   USER_CATEGORIES_UPDATED: "bg-blue-100 text-blue-700",
   USER_CREATED_DIRECT: "bg-emerald-100 text-emerald-700",
+  POLL_VOTED: "bg-violet-100 text-violet-700",
+  STAFF_TASK_CREATED: "bg-blue-100 text-blue-700",
+  STAFF_TASK_UPDATED: "bg-zinc-100 text-zinc-700",
+  STAFF_TASK_COMPLETED: "bg-emerald-100 text-emerald-700",
+  FAMILY_GROUP_UPDATED: "bg-violet-100 text-violet-700",
 };
 
 type LogEntry = AuditLog & {

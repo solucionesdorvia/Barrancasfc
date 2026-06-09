@@ -218,6 +218,11 @@ model Player {
   registeredIn2025      Boolean          @default(false)
   lastInstallmentNote   String?
 
+  // Grupo familiar: jugadores con el mismo familyGroupId son hermanos.
+  // El sistema aplica descuento progresivo a hermanos (ver lib/family.ts).
+  familyGroupId         String?
+  familyDiscountPercent Int?             // override manual del descuento; null = usa default
+
   // Categorización
   // categoryId / category = PRINCIPAL del jugador (usada para cobranza).
   // Si la categoría es PROFESIONAL, no se le generan cuotas.
@@ -291,10 +296,66 @@ model Document {
 }
 
 model Notice {
+  id          String       @id @default(cuid())
+  title       String
+  body        String
+  createdAt   DateTime     @default(now())
+  // Si es encuesta, `pollOptions` tiene las opciones de respuesta.
+  // Vacío = aviso normal sin votación.
+  pollOptions String[]     @default([])
+  pollClosesAt DateTime?
+  votes       NoticeVote[]
+}
+
+model NoticeVote {
   id        String   @id @default(cuid())
-  title     String
-  body      String
+  noticeId  String
+  notice    Notice   @relation(fields: [noticeId], references: [id], onDelete: Cascade)
+  userId    String   // quién votó (User.id)
+  optionIdx Int      // índice en pollOptions
   createdAt DateTime @default(now())
+
+  @@unique([noticeId, userId]) // un voto por user por aviso
+  @@index([noticeId])
+}
+
+enum StaffTaskStatus {
+  PENDING
+  IN_PROGRESS
+  DONE
+  CANCELLED
+}
+
+enum StaffTaskPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+/// Tareas pendientes del staff. Las puede crear el admin manualmente o se
+/// auto-generan por triggers (ej. apto vencido → tarea para coordinador).
+model StaffTask {
+  id              String            @id @default(cuid())
+  title           String
+  description     String?
+  status          StaffTaskStatus   @default(PENDING)
+  priority        StaffTaskPriority @default(NORMAL)
+  assignedToId    String?           // User.id del responsable; null = sin asignar
+  assignedToRole  Role?             // Si está dirigida a un rol entero (ej. todos los profes)
+  createdById     String            // User.id de quién la creó (o "system" para auto)
+  // Referencias opcionales a entidades relacionadas
+  relatedPlayerId String?
+  relatedPaymentId String?
+  dueDate         DateTime?
+  completedAt     DateTime?
+  completedById   String?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@index([assignedToId, status])
+  @@index([assignedToRole, status])
+  @@index([status])
 }
 
 model PlayerNote {

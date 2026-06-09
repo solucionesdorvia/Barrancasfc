@@ -16,6 +16,8 @@
     "db:generate-invitations": "tsx prisma/generate-invitations.ts",
     "db:seed-notices": "tsx prisma/seed-notices.ts",
     "db:backfill-photos": "tsx prisma/backfill-photos.ts",
+    "db:import-extended-data": "tsx prisma/import-extended-data.ts",
+    "db:import-parents": "tsx prisma/import-parents.ts",
     "db:studio": "prisma studio",
     "postinstall": "prisma generate"
   },
