@@ -259,14 +259,15 @@ export function InvitationDialog({ categories, players }: { categories: Category
 }
 
 function CreatedLinkBox({ url, waMessage }: { url: string; waMessage: string }) {
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = useState<"link" | "msg" | null>(null);
+  const fullMessage = decodeURIComponent(waMessage);
 
-  async function copy() {
+  async function copyText(text: string, kind: "link" | "msg") {
     try {
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
-      toast.success("Link copiado");
+      await navigator.clipboard.writeText(text);
+      setCopied(kind);
+      setTimeout(() => setCopied(null), 1500);
+      toast.success(kind === "link" ? "Link copiado" : "Mensaje completo copiado");
     } catch {
       toast.error("No se pudo copiar. Copialo manualmente.");
     }
@@ -280,20 +281,40 @@ function CreatedLinkBox({ url, waMessage }: { url: string; waMessage: string }) 
           value={url}
           className="flex-1 px-3 py-2 text-xs font-mono rounded-md border bg-muted/50 select-all"
         />
-        <Button size="icon" variant="outline" onClick={copy} title="Copiar">
-          {copied ? <Check className="h-4 w-4 text-emerald-600" /> : <Copy className="h-4 w-4" />}
+        <Button size="icon" variant="outline" onClick={() => copyText(url, "link")} title="Copiar solo el link">
+          {copied === "link" ? <Check className="h-4 w-4 text-emerald-600" /> : <Copy className="h-4 w-4" />}
         </Button>
       </div>
-      <div className="flex gap-2">
-        <a
-          href={`https://wa.me/?text=${waMessage}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex-1 inline-flex items-center justify-center gap-2 h-9 px-4 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium transition-colors"
-        >
-          <ExternalLink className="h-4 w-4" /> Compartir por WhatsApp
-        </a>
+
+      {/* Preview del mensaje completo + botón para copiarlo */}
+      <div className="rounded-md border bg-muted/30 p-3 space-y-2">
+        <div className="flex items-center justify-between">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Mensaje listo para pegar</p>
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-7 gap-1.5 text-xs"
+            onClick={() => copyText(fullMessage, "msg")}
+          >
+            {copied === "msg" ? (
+              <><Check className="h-3 w-3 text-emerald-600" /> Copiado</>
+            ) : (
+              <><Copy className="h-3 w-3" /> Copiar mensaje</>
+            )}
+          </Button>
+        </div>
+        <p className="text-xs whitespace-pre-line text-muted-foreground">{fullMessage}</p>
       </div>
+
+      <a
+        href={`https://wa.me/?text=${waMessage}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="w-full inline-flex items-center justify-center gap-2 h-9 px-4 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium transition-colors"
+      >
+        <ExternalLink className="h-4 w-4" /> Compartir por WhatsApp
+      </a>
+
       <Badge variant="outline" className="text-[10px]">El link funciona una sola vez</Badge>
     </div>
   );

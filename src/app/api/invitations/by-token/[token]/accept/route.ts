@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { logAudit } from "@/lib/audit";
 import { apiBadRequest, apiOk, apiUnauthorized, withErrorHandler } from "@/lib/api";
 import { lookupInvitation, INVITATION_FAILURE_LABEL } from "@/lib/invitations";
+import { autoAssignFamilyGroup } from "@/lib/family-group";
 
 /**
  * Aceptar una invitación. Se llama desde /invite/[token]/accept después del
@@ -86,6 +87,12 @@ export const POST = withErrorHandler(async (_req: Request, { params }: { params:
     where: { id: inv.id },
     data: { usedAt: new Date(), usedByUserId: user.id },
   });
+
+  // Si el padre quedó con 2+ hijos vinculados, auto-armamos grupo familiar
+  // (sin descuento — eso lo elige admin después).
+  if (user.role === "PADRE" && inv.childrenIds.length >= 2) {
+    await autoAssignFamilyGroup(user.id, inv.childrenIds);
+  }
 
   await logAudit({
     userId: user.id,

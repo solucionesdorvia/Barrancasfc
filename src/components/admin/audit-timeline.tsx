@@ -62,6 +62,8 @@ const ICONS: Record<AuditAction, LucideIcon> = {
   STAFF_TASK_COMPLETED: CheckCircle2,
   FAMILY_GROUP_UPDATED: Users,
   PROFILE_COMPLETED: UserPlus,
+  USER_UPDATED: Pencil,
+  USER_DELETED: MailX,
 };
 
 const TONES: Record<AuditAction, string> = {
@@ -97,6 +99,8 @@ const TONES: Record<AuditAction, string> = {
   STAFF_TASK_COMPLETED: "bg-emerald-100 text-emerald-700",
   FAMILY_GROUP_UPDATED: "bg-violet-100 text-violet-700",
   PROFILE_COMPLETED: "bg-emerald-100 text-emerald-700",
+  USER_UPDATED: "bg-zinc-100 text-zinc-700",
+  USER_DELETED: "bg-red-100 text-red-700",
 };
 
 type LogEntry = AuditLog & {

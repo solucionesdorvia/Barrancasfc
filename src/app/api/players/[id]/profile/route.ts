@@ -29,8 +29,20 @@ export const PATCH = withErrorHandler(async (req: Request, { params }: { params:
   const parsed = safeParse(playerProfileUpdateSchema, json);
   if (!parsed.ok) return apiBadRequest(parsed.error);
 
-  // Campos solo admin
-  const adminOnly = ["clothingPaid", "transferStatus", "registeredIn2025", "lastInstallmentNote"] as const;
+  // Campos solo admin (identificatorios + administrativos). El padre no puede
+  // cambiar nombre/DNI/fecha de nacimiento/nacionalidad de su hijo.
+  const adminOnly = [
+    "firstName",
+    "lastName",
+    "dni",
+    "birthDate",
+    "nationality",
+    "citizenship",
+    "clothingPaid",
+    "transferStatus",
+    "registeredIn2025",
+    "lastInstallmentNote",
+  ] as const;
   const data: Record<string, unknown> = { ...parsed.data };
   if (user.role !== "ADMIN") {
     for (const f of adminOnly) delete data[f];

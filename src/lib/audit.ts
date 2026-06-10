@@ -32,7 +32,9 @@ export type AuditAction =
   | "STAFF_TASK_UPDATED"
   | "STAFF_TASK_COMPLETED"
   | "FAMILY_GROUP_UPDATED"
-  | "PROFILE_COMPLETED";
+  | "PROFILE_COMPLETED"
+  | "USER_UPDATED"
+  | "USER_DELETED";
 
 export const AUDIT_ACTION_LABEL: Record<AuditAction, string> = {
   PAYMENT_MARKED_PAID: "Pago marcado como cobrado",
@@ -67,6 +69,8 @@ export const AUDIT_ACTION_LABEL: Record<AuditAction, string> = {
   STAFF_TASK_COMPLETED: "Tarea completada",
   FAMILY_GROUP_UPDATED: "Grupo familiar actualizado",
   PROFILE_COMPLETED: "Perfil completado por el usuario",
+  USER_UPDATED: "Usuario modificado",
+  USER_DELETED: "Usuario eliminado",
 };
 
 export type AuditEntityType =

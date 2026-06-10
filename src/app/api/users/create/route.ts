@@ -4,6 +4,7 @@ import { requireRole } from "@/lib/auth";
 import { logAudit } from "@/lib/audit";
 import { userCreateDirectSchema, safeParse } from "@/lib/validators";
 import { apiBadRequest, apiConflict, apiOk, apiServerError, withErrorHandler } from "@/lib/api";
+import { autoAssignFamilyGroup } from "@/lib/family-group";
 
 /**
  * Crea una cuenta directo desde el admin (sin link de invitación).
@@ -106,6 +107,11 @@ export const POST = withErrorHandler(async (req: Request) => {
       action: "USER_CREATED_DIRECT",
       changes: { email, role, title, categoryIds, childrenIds, createdByAdmin: admin.name },
     });
+
+    // Si el padre quedó con 2+ hijos, armar grupo familiar automático.
+    if (role === "PADRE" && childrenIds.length >= 2) {
+      await autoAssignFamilyGroup(user.id, childrenIds);
+    }
 
     return apiOk({ id: user.id, email: user.email, role: user.role });
   } catch (e) {

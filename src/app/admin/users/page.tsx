@@ -13,6 +13,7 @@ import { InvitationActions } from "@/components/admin/invitation-actions";
 import { CreateUserDialog } from "@/components/admin/create-user-dialog";
 import { initials, formatRelative, formatDate, pluralize } from "@/lib/format";
 import { getBaseUrl } from "@/lib/base-url";
+import { UserActions } from "@/components/admin/user-actions";
 
 export const dynamic = "force-dynamic";
 
@@ -216,8 +217,8 @@ export default async function UsersListPage() {
                 {users.map((u) => {
                   const stat = countMap.get(u.id);
                   return (
-                    <Link key={u.id} href={`/admin/users/${u.id}`} className="block p-3 hover:bg-muted/40 transition-colors">
-                      <div className="flex items-center gap-3">
+                    <div key={u.id} className="flex items-start gap-2 p-3 hover:bg-muted/40 transition-colors">
+                      <Link href={`/admin/users/${u.id}`} className="flex items-center gap-3 flex-1 min-w-0">
                         <Avatar className="h-10 w-10 shrink-0">
                           <AvatarFallback>{initials(u.name)}</AvatarFallback>
                         </Avatar>
@@ -245,8 +246,9 @@ export default async function UsersListPage() {
                             {stat?._count ?? 0} acciones · {stat?._max.createdAt ? formatRelative(stat._max.createdAt) : "sin actividad"}
                           </p>
                         </div>
-                      </div>
-                    </Link>
+                      </Link>
+                      <UserActions user={{ id: u.id, name: u.name, title: u.title, role: u.role }} />
+                    </div>
                   );
                 })}
               </div>
@@ -309,9 +311,12 @@ export default async function UsersListPage() {
                           )}
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button asChild size="sm" variant="ghost" className="opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Link href={`/admin/users/${u.id}`}>Ver perfil →</Link>
-                          </Button>
+                          <div className="flex items-center justify-end gap-1">
+                            <Button asChild size="sm" variant="ghost" className="opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Link href={`/admin/users/${u.id}`}>Ver perfil →</Link>
+                            </Button>
+                            <UserActions user={{ id: u.id, name: u.name, title: u.title, role: u.role }} />
+                          </div>
                         </TableCell>
                       </TableRow>
                     );

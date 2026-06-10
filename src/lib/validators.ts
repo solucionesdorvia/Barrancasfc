@@ -209,6 +209,13 @@ export const playerProfileUpdateSchema = z.object({
   lastInstallmentNote: z.string().max(200).optional().nullable(),
 });
 
+export const userUpdateSchema = z.object({
+  name: z.string().min(1).max(120).optional(),
+  title: z.string().max(80).optional().nullable(),
+  categoryIds: z.array(cuidSchema).max(20).optional(),
+  childrenIds: z.array(cuidSchema).max(20).optional(),
+});
+
 export const userCreateDirectSchema = z.object({
   email: z.string().email("Email inválido"),
   password: z.string().min(8, "Mínimo 8 caracteres").max(72),

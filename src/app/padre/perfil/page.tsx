@@ -36,7 +36,10 @@ export default async function PadrePerfilPage({ searchParams }: { searchParams: 
         activeId={active.id}
       />
 
-      <PlayerProfileForm player={player} isAdmin={false} />
+      {/* key={player.id} fuerza remount cuando el padre cambia de hijo en el
+          ChildSwitcher — si no, el useState interno mantiene los datos del
+          hijo anterior y al guardar los pisa en el hijo actual. */}
+      <PlayerProfileForm key={player.id} player={player} isAdmin={false} />
     </div>
   );
 }
