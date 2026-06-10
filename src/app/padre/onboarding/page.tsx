@@ -49,10 +49,12 @@ export default async function PadreOnboardingPage() {
     .catch(() => null);
   const children = data?.children ?? [];
 
-  // Pre-fill desde name si Clerk lo trajo
+  // Pre-fill desde name si Clerk lo trajo "Nombre Apellido".
+  // Si name parece email (fallback en accept cuando Clerk no manda firstName),
+  // no pre-cargamos para no meterle el email entero en el campo nombre.
   let firstFromName: string | undefined;
   let lastFromName: string | undefined;
-  if (user.name && !user.firstName) {
+  if (user.name && !user.firstName && !user.name.includes("@")) {
     const parts = user.name.trim().split(/\s+/);
     firstFromName = parts[0];
     if (parts.length > 1) lastFromName = parts.slice(1).join(" ");

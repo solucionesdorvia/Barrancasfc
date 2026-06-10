@@ -36,10 +36,12 @@ export default async function OnboardingPage() {
     .catch(() => null);
   const categoryNames = assigned?.assignedCategories.map((c) => c.name) ?? [];
 
-  // Pre-fill desde el name si Clerk lo trajo "Nombre Apellido"
+  // Pre-fill desde el name si Clerk lo trajo "Nombre Apellido".
+  // Si name es un email (Clerk no mandó firstName y el accept usó email como
+  // fallback) ignoramos — sino el form arranca con el email en el campo nombre.
   let firstFromName: string | undefined;
   let lastFromName: string | undefined;
-  if (user.name && !user.firstName) {
+  if (user.name && !user.firstName && !user.name.includes("@")) {
     const parts = user.name.trim().split(/\s+/);
     firstFromName = parts[0];
     if (parts.length > 1) lastFromName = parts.slice(1).join(" ");
