@@ -6,11 +6,34 @@ import Link from "next/link";
 import { CheckCircle2, Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+type AcceptResponse = {
+  ok: true;
+  role: "ADMIN" | "PROFESOR" | "PADRE";
+};
+
+/**
+ * Resuelve a dónde mandar al usuario después de aceptar la invitación.
+ *
+ * Profes y padres recién creados arrancan con profileCompleted=false en la
+ * DB, así que la ruta /onboarding del rol correspondiente es el destino
+ * directo. Admins van al dashboard.
+ *
+ * Antes redirigíamos a "/" (landing público) y dependíamos de una cadena de
+ * redirects server-side a través de layouts y guards — eso causaba flicker
+ * del landing público en mobile y a veces la cookie de Clerk no propagaba
+ * a tiempo y quedaba colgado en home.
+ */
+function destinationFor(role: "ADMIN" | "PROFESOR" | "PADRE"): string {
+  if (role === "PROFESOR") return "/profesor/onboarding";
+  if (role === "PADRE") return "/padre/onboarding";
+  return "/admin";
+}
+
 export default function AcceptInvitationPage({ params }: { params: { token: string } }) {
   const router = useRouter();
   const [status, setStatus] = useState<"loading" | "ok" | "error">("loading");
+  const [destination, setDestination] = useState<string>("/");
   const [error, setError] = useState<string>("");
-  const [redirectIn, setRedirectIn] = useState(3);
 
   useEffect(() => {
     let cancelled = false;
@@ -26,7 +49,12 @@ export default function AcceptInvitationPage({ params }: { params: { token: stri
           setStatus("error");
           return;
         }
+        const data = (await res.json().catch(() => null)) as AcceptResponse | null;
+        const dest = data?.role ? destinationFor(data.role) : "/";
+        setDestination(dest);
         setStatus("ok");
+        // Redirect inmediato — no hace falta countdown.
+        router.replace(dest);
       } catch {
         if (!cancelled) {
           setError("Error de conexión. Probá de nuevo en unos segundos.");
@@ -37,18 +65,7 @@ export default function AcceptInvitationPage({ params }: { params: { token: stri
     return () => {
       cancelled = true;
     };
-  }, [params.token]);
-
-  // Cuenta regresiva + redirect después de aceptar
-  useEffect(() => {
-    if (status !== "ok") return;
-    if (redirectIn <= 0) {
-      router.replace("/");
-      return;
-    }
-    const t = setTimeout(() => setRedirectIn((n) => n - 1), 1000);
-    return () => clearTimeout(t);
-  }, [status, redirectIn, router]);
+  }, [params.token, router]);
 
   return (
     <main className="min-h-dvh bg-gradient-to-br from-barrancas-dark via-zinc-950 to-zinc-900 text-white grid place-items-center p-6">
@@ -68,9 +85,10 @@ export default function AcceptInvitationPage({ params }: { params: { token: stri
               <CheckCircle2 className="h-8 w-8 text-emerald-400" />
             </div>
             <h1 className="text-xl font-bold">¡Listo!</h1>
-            <p className="text-sm text-zinc-400">Tu cuenta quedó vinculada al club. Te llevamos a tu panel…</p>
+            <p className="text-sm text-zinc-400">Tu cuenta quedó vinculada al club.</p>
+            {/* Fallback por si el router.replace no se ejecuta (raro pero posible) */}
             <Button asChild className="w-full bg-barrancas-red hover:bg-barrancas-red/90">
-              <Link href="/">Ir ahora ({redirectIn})</Link>
+              <Link href={destination}>Continuar</Link>
             </Button>
           </div>
         )}
