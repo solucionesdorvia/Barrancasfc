@@ -105,6 +105,13 @@ export const profesorOnboardingSchema = z.object({
   photo: z.string().url().optional().or(z.literal("")),
 });
 
+export const padreOnboardingSchema = z.object({
+  firstName: z.string().trim().min(1, "Ingresá tu nombre").max(60),
+  lastName: z.string().trim().min(1, "Ingresá tu apellido").max(60),
+  phone: z.string().trim().min(6, "Ingresá un teléfono válido").max(30),
+  relation: z.enum(["Padre", "Madre", "Tutor/a", "Abuelo/a", "Otro"]),
+});
+
 export const playerNoteCreateSchema = z.object({
   playerId: cuidSchema,
   body: z.string().min(1).max(2000),
