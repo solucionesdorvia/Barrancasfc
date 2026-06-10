@@ -4,6 +4,7 @@ import { requireRole } from "@/lib/auth";
 import { logAudit } from "@/lib/audit";
 import { invitationCreateSchema, safeParse } from "@/lib/validators";
 import { apiBadRequest, apiOk, withErrorHandler } from "@/lib/api";
+import { getBaseUrl } from "@/lib/base-url";
 
 /**
  * Crear una nueva invitación. Genera un token random URL-safe y devuelve la
@@ -43,8 +44,7 @@ export const POST = withErrorHandler(async (req: Request) => {
     },
   });
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") || "";
-  const url = `${baseUrl}/invite/${token}`;
+  const url = `${getBaseUrl()}/invite/${token}`;
 
   await logAudit({
     userId: user.id,

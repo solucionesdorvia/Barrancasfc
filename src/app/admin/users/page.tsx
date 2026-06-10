@@ -12,6 +12,7 @@ import { InvitationDialog } from "@/components/admin/invitation-dialog";
 import { InvitationActions } from "@/components/admin/invitation-actions";
 import { CreateUserDialog } from "@/components/admin/create-user-dialog";
 import { initials, formatRelative, formatDate, pluralize } from "@/lib/format";
+import { getBaseUrl } from "@/lib/base-url";
 
 export const dynamic = "force-dynamic";
 
@@ -29,9 +30,9 @@ function invitationStatus(inv: { revoked: boolean; usedAt: Date | null; expiresA
 }
 
 export default async function UsersListPage() {
-  // Si la var no está seteada (caso local sin .env), usamos un placeholder
-  // para que el link copiado al menos sea identificable.
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") || "http://localhost:3000";
+  // URL base inferida del request actual (proto + host). Si en algún
+  // momento se setea NEXT_PUBLIC_APP_URL en Railway, esa gana.
+  const baseUrl = getBaseUrl();
 
   const [users, counts, invitations, categories, players] = await Promise.all([
     prisma.user.findMany({

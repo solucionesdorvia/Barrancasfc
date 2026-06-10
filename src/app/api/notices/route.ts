@@ -4,6 +4,7 @@ import { logAudit } from "@/lib/audit";
 import { noticeCreateSchema, safeParse } from "@/lib/validators";
 import { apiBadRequest, apiOk, withErrorHandler } from "@/lib/api";
 import { sendNoticeNotification, isMailerEnabled } from "@/lib/mailer";
+import { getBaseUrl } from "@/lib/base-url";
 
 export const POST = withErrorHandler(async (req: Request) => {
   const user = await requireRole("ADMIN");
@@ -51,7 +52,7 @@ export const POST = withErrorHandler(async (req: Request) => {
           noticeTitle: notice.title,
           noticeBody: notice.body,
           isPoll: notice.pollOptions.length > 0,
-          appUrl: process.env.NEXT_PUBLIC_APP_URL,
+          appUrl: getBaseUrl(),
         });
       }
     } catch (e) {
