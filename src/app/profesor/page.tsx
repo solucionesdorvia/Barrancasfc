@@ -163,7 +163,7 @@ export default async function ProfesorPage({
                 })
                 .sort((a, b) => b.pct - a.pct)
                 .map((p) => (
-                  <Link key={p.id} href={`/admin/players/${p.id}`} className="flex items-center gap-3 p-2 rounded-md hover:bg-muted transition-colors">
+                  <div key={p.id} className="flex items-center gap-3 p-2 rounded-md">
                     <Avatar className="h-8 w-8">
                       <AvatarImage src={p.photo ?? undefined} />
                       <AvatarFallback className="text-xs">{initials(fullName(p.firstName, p.lastName))}</AvatarFallback>
@@ -183,7 +183,7 @@ export default async function ProfesorPage({
                       </span>
                       <p className="text-[10px] text-muted-foreground">{p.present}/{p.total}</p>
                     </div>
-                  </Link>
+                  </div>
                 ))}
               {players.length === 0 && (
                 <EmptyState icon={Users} title="Sin jugadores en la categoría" bare />
