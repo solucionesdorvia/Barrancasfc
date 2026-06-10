@@ -43,9 +43,10 @@ const CHECK_LABEL: Record<CheckKey, string> = {
 };
 
 export default async function DocumentsPage() {
-  // Plantel activo con todas las flags que vamos a contar
+  // Plantel completo (todos los jugadores cargados) con flags de completitud.
+  // No filtramos por status ni categoría — el conteo total tiene que coincidir
+  // con /admin/players para evitar confusión.
   const players = await prisma.player.findMany({
-    where: { status: "ACTIVE", category: { type: { not: "PROFESIONAL" } } },
     select: {
       id: true,
       firstName: true,
@@ -116,7 +117,7 @@ export default async function DocumentsPage() {
     <div className="space-y-5">
       <PageHeader
         title="Documentación"
-        description={`${total} jugadores activos · ${pluralize(total, "estado")} de completitud del plantel`}
+        description={`${total} jugadores cargados · ${pluralize(total, "estado")} de completitud del plantel`}
       />
 
       {/* KPIs de completitud */}
