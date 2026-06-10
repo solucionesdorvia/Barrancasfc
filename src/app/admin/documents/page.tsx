@@ -42,11 +42,45 @@ const CHECK_LABEL: Record<CheckKey, string> = {
   documents: "Documentación",
 };
 
-export default async function DocumentsPage() {
-  // Plantel completo (todos los jugadores cargados) con flags de completitud.
-  // No filtramos por status ni categoría — el conteo total tiene que coincidir
-  // con /admin/players para evitar confusión.
+type VistaKey = "todos" | "activos" | "cobrables";
+
+const VISTA_LABEL: Record<VistaKey, string> = {
+  todos: "Todos",
+  activos: "Solo activos",
+  cobrables: "Activos sin Primera",
+};
+
+export default async function DocumentsPage({
+  searchParams,
+}: {
+  searchParams: { vista?: string };
+}) {
+  const vista: VistaKey = (Object.keys(VISTA_LABEL) as VistaKey[]).includes(searchParams.vista as VistaKey)
+    ? (searchParams.vista as VistaKey)
+    : "todos";
+
+  // where según vista. Mantenemos los counts del resto para los chips.
+  const whereByVista = {
+    todos: {},
+    activos: { status: "ACTIVE" as const },
+    cobrables: { status: "ACTIVE" as const, category: { type: { not: "PROFESIONAL" as const } } },
+  };
+
+  // Counts en paralelo para los chips
+  const [cntTodos, cntActivos, cntCobrables] = await Promise.all([
+    prisma.player.count({ where: whereByVista.todos }),
+    prisma.player.count({ where: whereByVista.activos }),
+    prisma.player.count({ where: whereByVista.cobrables }),
+  ]);
+  const vistaCount: Record<VistaKey, number> = {
+    todos: cntTodos,
+    activos: cntActivos,
+    cobrables: cntCobrables,
+  };
+
+  // Plantel según la vista elegida
   const players = await prisma.player.findMany({
+    where: whereByVista[vista],
     select: {
       id: true,
       firstName: true,
@@ -113,12 +147,40 @@ export default async function DocumentsPage() {
     take: 20,
   });
 
+  function vistaHref(v: VistaKey) {
+    return v === "todos" ? "/admin/documents" : `/admin/documents?vista=${v}`;
+  }
+
   return (
     <div className="space-y-5">
       <PageHeader
         title="Documentación"
-        description={`${total} jugadores cargados · ${pluralize(total, "estado")} de completitud del plantel`}
+        description={`${total} jugadores · ${pluralize(total, "estado")} de completitud (${VISTA_LABEL[vista].toLowerCase()})`}
       />
+
+      {/* Filtro de vista (chips con contadores) */}
+      <div className="flex flex-wrap gap-1.5">
+        {(Object.entries(VISTA_LABEL) as [VistaKey, string][]).map(([k, label]) => (
+          <Link
+            key={k}
+            href={vistaHref(k)}
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+              vista === k
+                ? "bg-barrancas-red text-white"
+                : "bg-background border text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {label}
+            <span
+              className={`tabular-nums text-[10px] px-1.5 rounded ${
+                vista === k ? "bg-white/20" : "bg-muted text-muted-foreground"
+              }`}
+            >
+              {vistaCount[k]}
+            </span>
+          </Link>
+        ))}
+      </div>
 
       {/* KPIs de completitud */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
