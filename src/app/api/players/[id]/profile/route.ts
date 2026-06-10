@@ -42,6 +42,8 @@ export const PATCH = withErrorHandler(async (req: Request, { params }: { params:
     "transferStatus",
     "registeredIn2025",
     "lastInstallmentNote",
+    "scholarshipType",
+    "scholarshipPercent",
   ] as const;
   const data: Record<string, unknown> = { ...parsed.data };
   if (user.role !== "ADMIN") {

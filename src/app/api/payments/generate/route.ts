@@ -6,13 +6,14 @@ import { apiOk, withErrorHandler } from "@/lib/api";
 /**
  * Generación mensual de cuotas.
  *
- * Reglas:
- * - Skip categoría PROFESIONAL (Primera no paga).
- * - Skip jugadores con monthlyFee = 0 (becados full).
- * - Si el jugador tiene `familyGroupId` y `familyDiscountPercent`, aplicamos
- *   el descuento sobre el monto base. Ej: 20% → cobra 80%.
- *   La idea es que en familias con varios hermanos, el admin marca el grupo
- *   y el % de descuento (típicamente entre 10 y 25%).
+ * Reglas en orden:
+ * 1. Skip categoría PROFESIONAL (Primera no paga).
+ * 2. Skip jugadores con monthlyFee = 0 (becados full históricos).
+ * 3. Beca: si scholarshipType=FULL (o scholarshipPercent=100) → NO se
+ *    genera cuota para ese jugador. Si parcial, se aplica el descuento.
+ * 4. Grupo familiar: si tiene familyGroupId + familyDiscountPercent, se
+ *    aplica además del de beca (multiplicativo: cada uno reduce sobre el
+ *    monto resultante del paso anterior).
  */
 export const POST = withErrorHandler(async () => {
   const user = await requireRole("ADMIN");
@@ -33,6 +34,8 @@ export const POST = withErrorHandler(async () => {
       monthlyFee: true,
       familyGroupId: true,
       familyDiscountPercent: true,
+      scholarshipType: true,
+      scholarshipPercent: true,
     },
   });
 
@@ -44,18 +47,43 @@ export const POST = withErrorHandler(async () => {
   });
   const existingSet = new Set(existing.map((e) => e.playerId));
 
-  let discountedCount = 0;
+  let discountedByFamily = 0;
+  let discountedByScholarship = 0;
+  let skippedFullScholarship = 0;
+
   const toCreate = players
     .filter((p) => !existingSet.has(p.id))
     .map((p) => {
-      let amount: number | typeof p.monthlyFee = p.monthlyFee;
-      // Aplicar descuento por grupo familiar
-      if (p.familyGroupId && p.familyDiscountPercent && p.familyDiscountPercent > 0) {
-        const pct = Math.min(100, Math.max(0, p.familyDiscountPercent));
-        const base = Number(p.monthlyFee);
-        amount = Math.round((base * (100 - pct)) / 100);
-        discountedCount++;
+      const base = Number(p.monthlyFee);
+
+      // Beca: porcentaje efectivo (PERCENT primero, sino derivar de TYPE).
+      let schPct = 0;
+      if (typeof p.scholarshipPercent === "number" && p.scholarshipPercent > 0) {
+        schPct = p.scholarshipPercent;
+      } else if (p.scholarshipType === "FULL") schPct = 100;
+      else if (p.scholarshipType === "PARTIAL_50") schPct = 50;
+      else if (p.scholarshipType === "PARTIAL_25") schPct = 25;
+
+      // Si la beca es total, no se genera cuota.
+      if (schPct >= 100) {
+        skippedFullScholarship++;
+        return null;
       }
+
+      // Aplicamos descuento por beca.
+      let amount = base;
+      if (schPct > 0) {
+        amount = Math.round((amount * (100 - schPct)) / 100);
+        discountedByScholarship++;
+      }
+
+      // Y después el descuento por grupo familiar (sobre el monto ya descontado).
+      if (p.familyGroupId && p.familyDiscountPercent && p.familyDiscountPercent > 0) {
+        const fPct = Math.min(100, Math.max(0, p.familyDiscountPercent));
+        amount = Math.round((amount * (100 - fPct)) / 100);
+        discountedByFamily++;
+      }
+
       return {
         playerId: p.id,
         amount,
@@ -64,9 +92,12 @@ export const POST = withErrorHandler(async () => {
         dueDate,
         status: "PENDING" as const,
       };
-    });
+    })
+    .filter((x): x is Exclude<typeof x, null> => x !== null);
 
-  if (toCreate.length === 0) return apiOk({ created: 0 });
+  if (toCreate.length === 0) {
+    return apiOk({ created: 0, skippedFullScholarship });
+  }
 
   await prisma.payment.createMany({ data: toCreate });
 
@@ -75,8 +106,20 @@ export const POST = withErrorHandler(async () => {
     entityType: "System",
     entityId: "payments",
     action: "PAYMENTS_GENERATED",
-    changes: { month, year, count: toCreate.length, discountedByFamily: discountedCount },
+    changes: {
+      month,
+      year,
+      count: toCreate.length,
+      discountedByFamily,
+      discountedByScholarship,
+      skippedFullScholarship,
+    },
   });
 
-  return apiOk({ created: toCreate.length, discountedByFamily: discountedCount });
+  return apiOk({
+    created: toCreate.length,
+    discountedByFamily,
+    discountedByScholarship,
+    skippedFullScholarship,
+  });
 });

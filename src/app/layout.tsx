@@ -56,8 +56,32 @@ export const viewport: Viewport = {
 };
 
 // Cast por mismatch de types entre @clerk/localizations v4 y @clerk/nextjs v5; en runtime funciona.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const clerkLocalization = esES as any;
+// Extendemos con overrides custom para keys que esES no cubre (mensajes de password,
+// unstable_errors) y para personalizar el copy con el nombre del club.
+/* eslint-disable @typescript-eslint/no-explicit-any */
+const esBase = esES as any;
+const clerkLocalization: any = {
+  ...esBase,
+  signUp: {
+    ...esBase.signUp,
+    start: {
+      ...(esBase.signUp?.start ?? {}),
+      title: "Creá tu cuenta",
+      subtitle: "para entrar a Barrancas FC",
+    },
+  },
+  unstable__errors: {
+    ...esBase.unstable__errors,
+    passwords_helper_text: "La contraseña cumple con los requisitos.",
+    zxcvbn: {
+      ...(esBase.unstable__errors?.zxcvbn ?? {}),
+      goodPassword: "La contraseña cumple con todos los requisitos.",
+      notEnough: "La contraseña no es lo suficientemente fuerte.",
+    },
+  },
+  formFieldHintText__password: "Usá al menos 8 caracteres.",
+};
+/* eslint-enable @typescript-eslint/no-explicit-any */
 
 export default function RootLayout({
   children,

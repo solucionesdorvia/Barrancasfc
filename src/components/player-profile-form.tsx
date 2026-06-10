@@ -47,6 +47,8 @@ type Player = {
   transferStatus: string | null;
   registeredIn2025: boolean;
   lastInstallmentNote: string | null;
+  scholarshipType: string | null;
+  scholarshipPercent: number | null;
 };
 
 const PROVINCES = [
@@ -102,7 +104,11 @@ export function PlayerProfileForm({ player, isAdmin }: { player: Player; isAdmin
     transferStatus: player.transferStatus ?? "",
     registeredIn2025: player.registeredIn2025,
     lastInstallmentNote: player.lastInstallmentNote ?? "",
+    scholarshipType: player.scholarshipType ?? "NONE",
+    scholarshipPercent: player.scholarshipPercent ?? null,
   });
+
+  const hasScholarship = form.scholarshipType !== "NONE" && form.scholarshipType !== "";
 
   function set<K extends keyof typeof form>(k: K, v: (typeof form)[K]) {
     setForm((f) => ({ ...f, [k]: v }));
@@ -238,43 +244,65 @@ export function PlayerProfileForm({ player, isAdmin }: { player: Player; isAdmin
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Educación</CardTitle>
-          <CardDescription>Para coordinar entrenamientos con horarios escolares</CardDescription>
+          <CardDescription>
+            Para coordinar entrenamientos con horarios escolares.
+            Completá solo los días que cursa — los que dejes vacíos los entendemos como días libres.
+          </CardDescription>
         </CardHeader>
-        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div className="space-y-1.5">
-            <Label>Estado</Label>
-            <Select value={form.schoolStatus || "_none"} onValueChange={(v) => set("schoolStatus", v === "_none" ? "" : v)}>
-              <SelectTrigger><SelectValue placeholder="Elegir" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="_none">—</SelectItem>
-                <SelectItem value="PRIMARIA">Primaria</SelectItem>
-                <SelectItem value="SECUNDARIA">Secundaria</SelectItem>
-                <SelectItem value="TERCIARIO">Terciario</SelectItem>
-                <SelectItem value="UNIVERSITARIO">Universitario</SelectItem>
-                <SelectItem value="FINALIZADO">Finalizado</SelectItem>
-                <SelectItem value="OTRO">Otro</SelectItem>
-              </SelectContent>
-            </Select>
+        <CardContent className="space-y-4">
+          {/* Datos generales del colegio */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label>Nivel educativo</Label>
+              <Select value={form.schoolStatus || "_none"} onValueChange={(v) => set("schoolStatus", v === "_none" ? "" : v)}>
+                <SelectTrigger><SelectValue placeholder="Elegir" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="_none">—</SelectItem>
+                  <SelectItem value="PRIMARIA">Primaria</SelectItem>
+                  <SelectItem value="SECUNDARIA">Secundaria</SelectItem>
+                  <SelectItem value="TERCIARIO">Terciario</SelectItem>
+                  <SelectItem value="UNIVERSITARIO">Universitario</SelectItem>
+                  <SelectItem value="FINALIZADO">Finalizado</SelectItem>
+                  <SelectItem value="OTRO">Otro</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Field label="Nombre del colegio / institución" value={form.schoolName} onChange={(v) => set("schoolName", v)} />
           </div>
-          <Field label="Nombre del colegio / institución" value={form.schoolName} onChange={(v) => set("schoolName", v)} />
-          <div className="space-y-1.5">
-            <Label>Turno</Label>
-            <Select value={form.schoolShift || "_none"} onValueChange={(v) => set("schoolShift", v === "_none" ? "" : v)}>
-              <SelectTrigger><SelectValue placeholder="Elegir" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="_none">—</SelectItem>
-                <SelectItem value="MANANA">Mañana</SelectItem>
-                <SelectItem value="TARDE">Tarde</SelectItem>
-                <SelectItem value="NOCHE">Noche</SelectItem>
-                <SelectItem value="DOBLE">Doble jornada</SelectItem>
-              </SelectContent>
-            </Select>
+
+          {/* Turno y entrada — opcionales para casos de doble turno */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 border-t">
+            <div className="space-y-1.5">
+              <Label>Turno habitual <span className="text-xs text-muted-foreground font-normal">(opcional)</span></Label>
+              <Select value={form.schoolShift || "_none"} onValueChange={(v) => set("schoolShift", v === "_none" ? "" : v)}>
+                <SelectTrigger><SelectValue placeholder="Sin turno fijo" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="_none">— Sin turno fijo / varía</SelectItem>
+                  <SelectItem value="MANANA">Mañana</SelectItem>
+                  <SelectItem value="TARDE">Tarde</SelectItem>
+                  <SelectItem value="NOCHE">Noche</SelectItem>
+                  <SelectItem value="DOBLE">Doble jornada</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Field label="Hora de entrada (opcional)" type="time" value={form.schoolStartTime} onChange={(v) => set("schoolStartTime", v)} />
           </div>
-          <Field label="Hora de inicio" type="time" value={form.schoolStartTime} onChange={(v) => set("schoolStartTime", v)} />
-          <Field label="Salida martes" type="time" value={form.schoolEndTimeTuesday} onChange={(v) => set("schoolEndTimeTuesday", v)} />
-          <Field label="Salida miércoles" type="time" value={form.schoolEndTimeWednesday} onChange={(v) => set("schoolEndTimeWednesday", v)} />
-          <Field label="Salida jueves" type="time" value={form.schoolEndTimeThursday} onChange={(v) => set("schoolEndTimeThursday", v)} />
-          <Field label="Salida viernes" type="time" value={form.schoolEndTimeFriday} onChange={(v) => set("schoolEndTimeFriday", v)} />
+
+          {/* Salidas por día — vacío significa no cursa o no hay hora fija */}
+          <div className="space-y-2 pt-2 border-t">
+            <Label className="text-xs uppercase tracking-wide text-muted-foreground">
+              Hora de salida por día
+            </Label>
+            <p className="text-[11px] text-muted-foreground">
+              Dejá vacío el día que no cursa. Solo cargamos los días que coinciden con entrenamientos.
+            </p>
+            <div className="grid grid-cols-2 gap-3 pt-1">
+              <DayField label="Martes" value={form.schoolEndTimeTuesday} onChange={(v) => set("schoolEndTimeTuesday", v)} />
+              <DayField label="Miércoles" value={form.schoolEndTimeWednesday} onChange={(v) => set("schoolEndTimeWednesday", v)} />
+              <DayField label="Jueves" value={form.schoolEndTimeThursday} onChange={(v) => set("schoolEndTimeThursday", v)} />
+              <DayField label="Viernes" value={form.schoolEndTimeFriday} onChange={(v) => set("schoolEndTimeFriday", v)} />
+            </div>
+          </div>
         </CardContent>
       </Card>
 
@@ -309,6 +337,48 @@ export function PlayerProfileForm({ player, isAdmin }: { player: Player; isAdmin
               </Select>
             </div>
             <Field label="Última cuota (nota interna)" value={form.lastInstallmentNote} onChange={(v) => set("lastInstallmentNote", v)} placeholder="ej. Pagó hasta agosto" />
+
+            {/* Beca: toggle + % aplicable a la cuota mensual */}
+            <div className="space-y-2 rounded-md border bg-violet-50/40 p-3">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <Checkbox
+                  checked={hasScholarship}
+                  onCheckedChange={(v) => {
+                    if (v) {
+                      set("scholarshipType", "PARTIAL_50");
+                      set("scholarshipPercent", 50);
+                    } else {
+                      set("scholarshipType", "NONE");
+                      set("scholarshipPercent", null);
+                    }
+                  }}
+                />
+                <span className="text-sm font-medium">Tiene beca</span>
+              </label>
+              {hasScholarship && (
+                <div className="space-y-1.5 pt-1">
+                  <Label className="text-xs">Tipo de beca</Label>
+                  <Select
+                    value={form.scholarshipType || "PARTIAL_50"}
+                    onValueChange={(v) => {
+                      set("scholarshipType", v);
+                      const pct = v === "FULL" ? 100 : v === "PARTIAL_50" ? 50 : v === "PARTIAL_25" ? 25 : 0;
+                      set("scholarshipPercent", pct);
+                    }}
+                  >
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="PARTIAL_25">25% de descuento</SelectItem>
+                      <SelectItem value="PARTIAL_50">50% de descuento</SelectItem>
+                      <SelectItem value="FULL">100% — no paga cuota</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-[11px] text-muted-foreground">
+                    Se aplica al generar las cuotas mensuales. La cuota del jugador refleja el descuento.
+                  </p>
+                </div>
+              )}
+            </div>
           </CardContent>
         </Card>
       )}
@@ -363,6 +433,37 @@ function Field({
         inputMode={inputMode}
         disabled={disabled}
       />
+    </div>
+  );
+}
+
+/**
+ * Campo de hora de salida por día. Si tiene valor lo muestra normal;
+ * si está vacío lo marca como "no cursa" con UI más calmada para que
+ * el padre vea de un vistazo qué días dejó libres.
+ */
+function DayField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+  return (
+    <div className="space-y-1">
+      <div className="flex items-center justify-between gap-2">
+        <Label className="text-xs">{label}</Label>
+        {value && (
+          <button
+            type="button"
+            onClick={() => onChange("")}
+            className="text-[10px] text-muted-foreground hover:text-rose-600"
+          >
+            limpiar
+          </button>
+        )}
+      </div>
+      <Input
+        type="time"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className={value ? "" : "text-muted-foreground"}
+      />
+      {!value && <p className="text-[10px] text-muted-foreground">No cursa</p>}
     </div>
   );
 }

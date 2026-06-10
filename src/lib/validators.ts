@@ -207,6 +207,8 @@ export const playerProfileUpdateSchema = z.object({
   transferStatus: z.enum(["SIN_PASE", "EN_TRAMITE", "CONFIRMADO"]).optional().nullable(),
   registeredIn2025: z.boolean().optional(),
   lastInstallmentNote: z.string().max(200).optional().nullable(),
+  scholarshipType: z.enum(["NONE", "PARTIAL_25", "PARTIAL_50", "FULL"]).optional().nullable(),
+  scholarshipPercent: z.number().int().min(0).max(100).optional().nullable(),
 });
 
 export const userUpdateSchema = z.object({

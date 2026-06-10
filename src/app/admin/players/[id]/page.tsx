@@ -18,7 +18,7 @@ import {
 import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -33,6 +33,7 @@ import { AuditTimeline } from "@/components/admin/audit-timeline";
 import { PlayerNotes } from "@/components/admin/player-notes";
 import { InstallmentPlanDialog } from "@/components/admin/installment-plan-dialog";
 import { FamilyGroupForm } from "@/components/admin/family-group-form";
+import { PlayerPhotoEditor } from "@/components/admin/player-photo-editor";
 import { Users } from "lucide-react";
 import { requireRole } from "@/lib/auth";
 import { StickyNote, CalendarRange } from "lucide-react";
@@ -165,10 +166,12 @@ export default async function PlayerDetailPage({ params }: { params: { id: strin
       <Card className="overflow-hidden">
         <CardContent className="pt-6">
           <div className="flex flex-col md:flex-row md:items-start gap-5">
-            <Avatar className="h-20 w-20 md:h-24 md:w-24 border-2 border-background ring-2 ring-zinc-200">
-              <AvatarImage src={player.photo ?? undefined} />
-              <AvatarFallback className="text-2xl">{initials(fullName(player.firstName, player.lastName))}</AvatarFallback>
-            </Avatar>
+            <PlayerPhotoEditor
+              playerId={player.id}
+              initialPhoto={player.photo ?? null}
+              initialsLabel={initials(fullName(player.firstName, player.lastName))}
+              canEdit={user.role === "ADMIN"}
+            />
             <div className="flex-1 space-y-2">
               <div className="flex items-center gap-3 flex-wrap">
                 <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
