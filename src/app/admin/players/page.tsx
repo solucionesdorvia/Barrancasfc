@@ -102,59 +102,94 @@ export default async function PlayersListPage({
           />
         </Card>
       ) : (
-        <Card className="p-0 overflow-hidden">
-          <Table className="min-w-[720px]">
-            <TableHeader>
-              <TableRow>
-                <TableHead>Jugador</TableHead>
-                <TableHead>DNI</TableHead>
-                <TableHead>Categoría</TableHead>
-                <TableHead className="text-center">Edad</TableHead>
-                <TableHead>Estado</TableHead>
-                <TableHead>Beca</TableHead>
-                <TableHead className="text-right"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {players.map((p) => (
-                <TableRow key={p.id} className="group">
-                  <TableCell>
-                    <Link href={`/admin/players/${p.id}`} className="flex items-center gap-3">
-                      <Avatar className="h-9 w-9">
-                        <AvatarImage src={p.photo ?? undefined} />
-                        <AvatarFallback>{initials(fullName(p.firstName, p.lastName))}</AvatarFallback>
-                      </Avatar>
-                      <div className="min-w-0">
-                        <p
-                          className="text-sm font-medium group-hover:underline truncate"
-                          title={`${p.lastName}, ${p.firstName}`}
-                        >
-                          {p.lastName}, {p.firstName}
-                        </p>
-                      </div>
-                    </Link>
-                  </TableCell>
-                  <TableCell className="text-sm font-mono text-muted-foreground">{p.dni}</TableCell>
-                  <TableCell className="text-sm">{p.category.name}</TableCell>
-                  <TableCell className="text-center text-sm tabular-nums">{ageFromBirth(p.birthDate)}</TableCell>
-                  <TableCell><PlayerStatusBadge status={p.status} /></TableCell>
-                  <TableCell className="text-sm">
-                    {p.scholarshipType === "NONE" || !p.scholarshipType ? (
-                      <span className="text-muted-foreground">—</span>
-                    ) : (
-                      <Badge variant="secondary">{p.scholarshipPercent}%</Badge>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button asChild size="sm" variant="ghost" className="opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                      <Link href={`/admin/players/${p.id}`}>Abrir →</Link>
-                    </Button>
-                  </TableCell>
+        <>
+          {/* Mobile: tarjetas, una por jugador */}
+          <div className="md:hidden space-y-2">
+            {players.map((p) => (
+              <Link
+                key={p.id}
+                href={`/admin/players/${p.id}`}
+                className="block rounded-lg border bg-card p-3 hover:bg-muted/40 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-10 w-10 shrink-0">
+                    <AvatarImage src={p.photo ?? undefined} />
+                    <AvatarFallback>{initials(fullName(p.firstName, p.lastName))}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">
+                      {p.lastName}, {p.firstName}
+                    </p>
+                    <p className="text-xs text-muted-foreground truncate">
+                      {p.category.name} · {ageFromBirth(p.birthDate)} años
+                    </p>
+                    <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                      <PlayerStatusBadge status={p.status} />
+                      {p.scholarshipType && p.scholarshipType !== "NONE" && (
+                        <Badge variant="secondary" className="text-[10px]">Beca {p.scholarshipPercent}%</Badge>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          {/* Desktop: tabla completa */}
+          <Card className="hidden md:block p-0 overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Jugador</TableHead>
+                  <TableHead>DNI</TableHead>
+                  <TableHead>Categoría</TableHead>
+                  <TableHead className="text-center">Edad</TableHead>
+                  <TableHead>Estado</TableHead>
+                  <TableHead>Beca</TableHead>
+                  <TableHead className="text-right"></TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </Card>
+              </TableHeader>
+              <TableBody>
+                {players.map((p) => (
+                  <TableRow key={p.id} className="group">
+                    <TableCell>
+                      <Link href={`/admin/players/${p.id}`} className="flex items-center gap-3">
+                        <Avatar className="h-9 w-9">
+                          <AvatarImage src={p.photo ?? undefined} />
+                          <AvatarFallback>{initials(fullName(p.firstName, p.lastName))}</AvatarFallback>
+                        </Avatar>
+                        <div className="min-w-0">
+                          <p
+                            className="text-sm font-medium group-hover:underline truncate"
+                            title={`${p.lastName}, ${p.firstName}`}
+                          >
+                            {p.lastName}, {p.firstName}
+                          </p>
+                        </div>
+                      </Link>
+                    </TableCell>
+                    <TableCell className="text-sm font-mono text-muted-foreground">{p.dni}</TableCell>
+                    <TableCell className="text-sm">{p.category.name}</TableCell>
+                    <TableCell className="text-center text-sm tabular-nums">{ageFromBirth(p.birthDate)}</TableCell>
+                    <TableCell><PlayerStatusBadge status={p.status} /></TableCell>
+                    <TableCell className="text-sm">
+                      {p.scholarshipType === "NONE" || !p.scholarshipType ? (
+                        <span className="text-muted-foreground">—</span>
+                      ) : (
+                        <Badge variant="secondary">{p.scholarshipPercent}%</Badge>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button asChild size="sm" variant="ghost" className="opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Link href={`/admin/players/${p.id}`}>Abrir →</Link>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Card>
+        </>
       )}
     </div>
   );

@@ -96,7 +96,58 @@ export default async function CategoriesPage() {
         </Card>
       ) : (
         <Card className="p-0 overflow-hidden">
-          <Table>
+          {/* Mobile */}
+          <div className="md:hidden divide-y">
+            {categories.map((c) => {
+              const stats = playersByCat.get(c.id) ?? { total: 0, active: 0, injured: 0 };
+              const morosos = morosoPlayersByCat.get(c.id)?.size ?? 0;
+              const debt = debtByCat.get(c.id)?.debt ?? 0;
+              const att = attByCat.get(c.id);
+              const attPct = att && att.total > 0 ? Math.round((att.present / att.total) * 100) : null;
+              return (
+                <Link
+                  key={c.id}
+                  href={`/admin/categories/${c.id}`}
+                  className="block p-3 hover:bg-muted/40 transition-colors"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="font-medium text-sm truncate">{c.name}</p>
+                      <p className="text-[11px] text-muted-foreground">
+                        {c.type === "INFANTIL" ? "Infantil" : c.type === "JUVENIL" ? "Juvenil" : "Profesional"} · {stats.total} jugadores
+                      </p>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 mt-2 text-[11px]">
+                    <div>
+                      <p className="text-muted-foreground">Activos</p>
+                      <p className="font-semibold tabular-nums">{stats.active}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Lesion.</p>
+                      <p className="font-semibold tabular-nums">{stats.injured}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Asistencia</p>
+                      <p className={`font-semibold tabular-nums ${attPct === null ? "" : attPct >= 80 ? "text-emerald-600" : attPct >= 60 ? "text-amber-600" : "text-red-600"}`}>
+                        {attPct !== null ? `${attPct}%` : "s/d"}
+                      </p>
+                    </div>
+                  </div>
+                  {(morosos > 0 || debt > 0) && (
+                    <div className="flex items-center gap-2 mt-2 text-[11px]">
+                      {morosos > 0 && <Badge variant="danger" className="text-[10px]">{morosos} morosos</Badge>}
+                      {debt > 0 && <span className="text-red-600 font-semibold tabular-nums">{formatARS(debt)}</span>}
+                    </div>
+                  )}
+                </Link>
+              );
+            })}
+          </div>
+
+          {/* Desktop */}
+          <Table className="hidden md:table">
             <TableHeader>
               <TableRow>
                 <TableHead>Categoría</TableHead>

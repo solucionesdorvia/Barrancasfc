@@ -327,30 +327,54 @@ export default async function PlayerDetailPage({ params }: { params: { id: strin
               {player.payments.length === 0 ? (
                 <div className="p-6"><EmptyState icon={Wallet} title="Sin cuotas registradas" bare /></div>
               ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Período</TableHead>
-                      <TableHead>Vencimiento</TableHead>
-                      <TableHead>Pagado</TableHead>
-                      <TableHead>Método</TableHead>
-                      <TableHead className="text-right">Monto</TableHead>
-                      <TableHead className="text-right">Estado</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
+                <>
+                  {/* Mobile */}
+                  <div className="md:hidden divide-y">
                     {player.payments.map((p) => (
-                      <TableRow key={p.id}>
-                        <TableCell className="font-medium">{monthName(p.month)} {p.year}</TableCell>
-                        <TableCell className="text-sm text-muted-foreground">{formatDate(p.dueDate)}</TableCell>
-                        <TableCell className="text-sm">{p.paidAt ? formatDate(p.paidAt) : "—"}</TableCell>
-                        <TableCell className="text-sm">{p.paymentMethod ?? "—"}</TableCell>
-                        <TableCell className="text-right font-medium tabular-nums">{formatARS(Number(p.amount))}</TableCell>
-                        <TableCell className="text-right"><PaymentStatusBadge status={p.status} /></TableCell>
-                      </TableRow>
+                      <div key={p.id} className="p-3 space-y-1.5">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium">{monthName(p.month)} {p.year}</p>
+                            <p className="text-[11px] text-muted-foreground">
+                              {p.paidAt ? `Pagado ${formatDate(p.paidAt)}` : `Vence ${formatDate(p.dueDate)}`}
+                              {p.paymentMethod ? ` · ${p.paymentMethod}` : ""}
+                            </p>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <p className="text-sm font-medium tabular-nums">{formatARS(Number(p.amount))}</p>
+                            <div className="mt-1"><PaymentStatusBadge status={p.status} /></div>
+                          </div>
+                        </div>
+                      </div>
                     ))}
-                  </TableBody>
-                </Table>
+                  </div>
+
+                  {/* Desktop */}
+                  <Table className="hidden md:table">
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Período</TableHead>
+                        <TableHead>Vencimiento</TableHead>
+                        <TableHead>Pagado</TableHead>
+                        <TableHead>Método</TableHead>
+                        <TableHead className="text-right">Monto</TableHead>
+                        <TableHead className="text-right">Estado</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {player.payments.map((p) => (
+                        <TableRow key={p.id}>
+                          <TableCell className="font-medium">{monthName(p.month)} {p.year}</TableCell>
+                          <TableCell className="text-sm text-muted-foreground">{formatDate(p.dueDate)}</TableCell>
+                          <TableCell className="text-sm">{p.paidAt ? formatDate(p.paidAt) : "—"}</TableCell>
+                          <TableCell className="text-sm">{p.paymentMethod ?? "—"}</TableCell>
+                          <TableCell className="text-right font-medium tabular-nums">{formatARS(Number(p.amount))}</TableCell>
+                          <TableCell className="text-right"><PaymentStatusBadge status={p.status} /></TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </>
               )}
             </CardContent>
           </Card>

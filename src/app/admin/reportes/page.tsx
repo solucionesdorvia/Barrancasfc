@@ -199,7 +199,37 @@ export default async function ReportesPage() {
           <ExportButton rows={exportCategories} filename="resumen-por-categoria" />
         </CardHeader>
         <CardContent className="p-0">
-          <Table className="min-w-[640px]">
+          {/* Mobile */}
+          <div className="md:hidden divide-y">
+            {byCategory.map((c) => (
+              <div key={c.id} className="p-3 space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-sm font-medium truncate">{c.name}</p>
+                  <p className="text-xs text-muted-foreground tabular-nums shrink-0">{c.players} jugadores</p>
+                </div>
+                <div className="grid grid-cols-3 gap-2 text-[11px]">
+                  <div>
+                    <p className="text-muted-foreground">Activos</p>
+                    <p className="font-semibold tabular-nums">{c.active}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Morosos</p>
+                    <p className={`font-semibold tabular-nums ${c.overdueCount > 0 ? "text-red-600" : ""}`}>{c.overdueCount}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Asistencia</p>
+                    <p className="font-semibold tabular-nums">{c.attRate !== null ? `${c.attRate}%` : "—"}</p>
+                  </div>
+                </div>
+                {c.debt > 0 && (
+                  <p className="text-xs"><span className="text-muted-foreground">Deuda:</span> <span className="font-semibold text-red-600 tabular-nums">{formatARS(c.debt)}</span></p>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop */}
+          <Table className="hidden md:table">
             <TableHeader>
               <TableRow>
                 <TableHead>Categoría</TableHead>
@@ -239,29 +269,47 @@ export default async function ReportesPage() {
           {topMorosos.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-8">🎉 Sin morosos.</p>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Jugador</TableHead>
-                  <TableHead>Categoría</TableHead>
-                  <TableHead className="text-center">Meses</TableHead>
-                  <TableHead className="text-right">Deuda</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+            <>
+              {/* Mobile */}
+              <div className="md:hidden divide-y">
                 {topMorosos.map((m, i) => (
-                  <TableRow key={m.id}>
-                    <TableCell className="text-sm">
-                      <span className="text-muted-foreground mr-2">#{i + 1}</span>
-                      {m.name}
-                    </TableCell>
-                    <TableCell className="text-sm">{m.category}</TableCell>
-                    <TableCell className="text-center">{m.months}</TableCell>
-                    <TableCell className="text-right font-semibold text-red-600 tabular-nums">{formatARS(m.debt)}</TableCell>
-                  </TableRow>
+                  <div key={m.id} className="p-3 flex items-center justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium truncate">
+                        <span className="text-muted-foreground mr-1.5">#{i + 1}</span>{m.name}
+                      </p>
+                      <p className="text-[11px] text-muted-foreground truncate">{m.category} · {m.months} meses</p>
+                    </div>
+                    <p className="text-sm font-semibold text-red-600 tabular-nums shrink-0">{formatARS(m.debt)}</p>
+                  </div>
                 ))}
-              </TableBody>
-            </Table>
+              </div>
+
+              {/* Desktop */}
+              <Table className="hidden md:table">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Jugador</TableHead>
+                    <TableHead>Categoría</TableHead>
+                    <TableHead className="text-center">Meses</TableHead>
+                    <TableHead className="text-right">Deuda</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {topMorosos.map((m, i) => (
+                    <TableRow key={m.id}>
+                      <TableCell className="text-sm">
+                        <span className="text-muted-foreground mr-2">#{i + 1}</span>
+                        {m.name}
+                      </TableCell>
+                      <TableCell className="text-sm">{m.category}</TableCell>
+                      <TableCell className="text-center">{m.months}</TableCell>
+                      <TableCell className="text-right font-semibold text-red-600 tabular-nums">{formatARS(m.debt)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </>
           )}
         </CardContent>
       </Card>

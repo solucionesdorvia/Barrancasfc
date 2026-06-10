@@ -218,41 +218,74 @@ export default async function AdminDashboardPage() {
                 <EmptyState icon={Wallet} title="Aún no hay pagos cobrados" bare />
               </div>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Jugador</TableHead>
-                    <TableHead>Período</TableHead>
-                    <TableHead>Método</TableHead>
-                    <TableHead className="text-right">Cuándo</TableHead>
-                    <TableHead className="text-right">Monto</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
+              <>
+                {/* Mobile */}
+                <div className="md:hidden divide-y">
                   {recentPayments.map((p) => (
-                    <TableRow key={p.id}>
-                      <TableCell>
-                        <Link href={`/admin/players/${p.player.id}`} className="flex items-center gap-2 hover:underline">
-                          <Avatar className="h-7 w-7">
-                            <AvatarImage src={p.player.photo ?? undefined} />
-                            <AvatarFallback className="text-xs">{initials(fullName(p.player.firstName, p.player.lastName))}</AvatarFallback>
-                          </Avatar>
-                          <div className="min-w-0">
-                            <span className="text-sm font-medium block leading-tight">{p.player.firstName} {p.player.lastName}</span>
-                            <span className="text-xs text-muted-foreground">{p.player.category.name}</span>
-                          </div>
-                        </Link>
-                      </TableCell>
-                      <TableCell className="text-sm">{monthName(p.month, true)} {p.year}</TableCell>
-                      <TableCell className="text-sm">{p.paymentMethod ?? "—"}</TableCell>
-                      <TableCell className="text-right text-xs text-muted-foreground tabular-nums">
-                        {p.paidAt ? formatRelative(p.paidAt) : "—"}
-                      </TableCell>
-                      <TableCell className="text-right font-medium tabular-nums">{formatARS(Number(p.amount))}</TableCell>
-                    </TableRow>
+                    <Link
+                      key={p.id}
+                      href={`/admin/players/${p.player.id}`}
+                      className="flex items-start justify-between gap-3 p-3 hover:bg-muted/40 transition-colors"
+                    >
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <Avatar className="h-8 w-8 shrink-0">
+                          <AvatarImage src={p.player.photo ?? undefined} />
+                          <AvatarFallback className="text-xs">{initials(fullName(p.player.firstName, p.player.lastName))}</AvatarFallback>
+                        </Avatar>
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium truncate">{p.player.firstName} {p.player.lastName}</p>
+                          <p className="text-[11px] text-muted-foreground truncate">
+                            {monthName(p.month, true)} {p.year} · {p.paymentMethod ?? "—"}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <p className="text-sm font-medium tabular-nums">{formatARS(Number(p.amount))}</p>
+                        <p className="text-[10px] text-muted-foreground tabular-nums">
+                          {p.paidAt ? formatRelative(p.paidAt) : "—"}
+                        </p>
+                      </div>
+                    </Link>
                   ))}
-                </TableBody>
-              </Table>
+                </div>
+
+                {/* Desktop */}
+                <Table className="hidden md:table">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Jugador</TableHead>
+                      <TableHead>Período</TableHead>
+                      <TableHead>Método</TableHead>
+                      <TableHead className="text-right">Cuándo</TableHead>
+                      <TableHead className="text-right">Monto</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {recentPayments.map((p) => (
+                      <TableRow key={p.id}>
+                        <TableCell>
+                          <Link href={`/admin/players/${p.player.id}`} className="flex items-center gap-2 hover:underline">
+                            <Avatar className="h-7 w-7">
+                              <AvatarImage src={p.player.photo ?? undefined} />
+                              <AvatarFallback className="text-xs">{initials(fullName(p.player.firstName, p.player.lastName))}</AvatarFallback>
+                            </Avatar>
+                            <div className="min-w-0">
+                              <span className="text-sm font-medium block leading-tight">{p.player.firstName} {p.player.lastName}</span>
+                              <span className="text-xs text-muted-foreground">{p.player.category.name}</span>
+                            </div>
+                          </Link>
+                        </TableCell>
+                        <TableCell className="text-sm">{monthName(p.month, true)} {p.year}</TableCell>
+                        <TableCell className="text-sm">{p.paymentMethod ?? "—"}</TableCell>
+                        <TableCell className="text-right text-xs text-muted-foreground tabular-nums">
+                          {p.paidAt ? formatRelative(p.paidAt) : "—"}
+                        </TableCell>
+                        <TableCell className="text-right font-medium tabular-nums">{formatARS(Number(p.amount))}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </>
             )}
           </CardContent>
         </Card>

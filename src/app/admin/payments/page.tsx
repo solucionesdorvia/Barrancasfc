@@ -150,68 +150,125 @@ export default async function PaymentsPage({ searchParams }: { searchParams: { f
               />
             </div>
           ) : (
-            <Table className="min-w-[820px]">
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Jugador</TableHead>
-                  <TableHead>Categoría</TableHead>
-                  <TableHead>Período</TableHead>
-                  <TableHead>Vence</TableHead>
-                  <TableHead className="text-center">Días</TableHead>
-                  <TableHead className="text-right">Monto</TableHead>
-                  <TableHead>Estado</TableHead>
-                  <TableHead className="text-right">Acciones</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+            <>
+              {/* Mobile: tarjeta apilada por cuota */}
+              <div className="md:hidden divide-y">
                 {overdue.map((p) => {
                   const days = daysOverdue(p.dueDate, now);
                   const parent = p.player.parents?.[0] ?? null;
                   return (
-                    <TableRow key={p.id}>
-                      <TableCell>
-                        <Link href={`/admin/players/${p.player.id}`} className="flex items-center gap-2 hover:underline">
-                          <Avatar className="h-7 w-7">
+                    <div key={p.id} className="p-3 space-y-2">
+                      <div className="flex items-start justify-between gap-3">
+                        <Link
+                          href={`/admin/players/${p.player.id}`}
+                          className="flex items-center gap-2 min-w-0 flex-1 hover:underline"
+                        >
+                          <Avatar className="h-8 w-8 shrink-0">
                             <AvatarImage src={p.player.photo ?? undefined} />
                             <AvatarFallback className="text-xs">{initials(fullName(p.player.firstName, p.player.lastName))}</AvatarFallback>
                           </Avatar>
-                          <span className="text-sm font-medium">{p.player.firstName} {p.player.lastName}</span>
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium truncate">{p.player.firstName} {p.player.lastName}</p>
+                            <p className="text-[11px] text-muted-foreground truncate">{p.player.category.name}</p>
+                          </div>
                         </Link>
-                      </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{p.player.category.name}</TableCell>
-                      <TableCell className="text-sm">{monthName(p.month, true)} {p.year}</TableCell>
-                      <TableCell className="text-sm">{formatDate(p.dueDate)}</TableCell>
-                      <TableCell className="text-center tabular-nums">
-                        {days > 0 ? (
-                          <Badge variant="danger">+{days}d</Badge>
-                        ) : days === 0 ? (
-                          <Badge variant="warning">hoy</Badge>
-                        ) : (
-                          <Badge variant="outline">{Math.abs(days)}d</Badge>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-right font-semibold tabular-nums">{formatARS(Number(p.amount))}</TableCell>
-                      <TableCell><PaymentStatusBadge status={p.status} /></TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex gap-2 justify-end">
-                          {parent && (
-                            <WhatsappReminder
-                              playerName={fullName(p.player.firstName, p.player.lastName)}
-                              parentName={parent.name}
-                              amount={Number(p.amount)}
-                              month={p.month}
-                              year={p.year}
-                              daysOverdue={Math.max(0, days)}
-                            />
-                          )}
-                          <MarkPaidButton paymentId={p.id} />
+                        <div className="text-right shrink-0">
+                          <p className="text-sm font-semibold tabular-nums">{formatARS(Number(p.amount))}</p>
+                          <p className="text-[11px] text-muted-foreground">{monthName(p.month, true)} {p.year}</p>
                         </div>
-                      </TableCell>
-                    </TableRow>
+                      </div>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <PaymentStatusBadge status={p.status} />
+                        {days > 0 ? (
+                          <Badge variant="danger" className="text-[10px]">+{days}d vencida</Badge>
+                        ) : days === 0 ? (
+                          <Badge variant="warning" className="text-[10px]">vence hoy</Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-[10px]">vence en {Math.abs(days)}d</Badge>
+                        )}
+                      </div>
+                      <div className="flex gap-2">
+                        {parent && (
+                          <WhatsappReminder
+                            playerName={fullName(p.player.firstName, p.player.lastName)}
+                            parentName={parent.name}
+                            amount={Number(p.amount)}
+                            month={p.month}
+                            year={p.year}
+                            daysOverdue={Math.max(0, days)}
+                          />
+                        )}
+                        <MarkPaidButton paymentId={p.id} />
+                      </div>
+                    </div>
                   );
                 })}
-              </TableBody>
-            </Table>
+              </div>
+
+              {/* Desktop: tabla completa */}
+              <Table className="hidden md:table">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Jugador</TableHead>
+                    <TableHead>Categoría</TableHead>
+                    <TableHead>Período</TableHead>
+                    <TableHead>Vence</TableHead>
+                    <TableHead className="text-center">Días</TableHead>
+                    <TableHead className="text-right">Monto</TableHead>
+                    <TableHead>Estado</TableHead>
+                    <TableHead className="text-right">Acciones</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {overdue.map((p) => {
+                    const days = daysOverdue(p.dueDate, now);
+                    const parent = p.player.parents?.[0] ?? null;
+                    return (
+                      <TableRow key={p.id}>
+                        <TableCell>
+                          <Link href={`/admin/players/${p.player.id}`} className="flex items-center gap-2 hover:underline">
+                            <Avatar className="h-7 w-7">
+                              <AvatarImage src={p.player.photo ?? undefined} />
+                              <AvatarFallback className="text-xs">{initials(fullName(p.player.firstName, p.player.lastName))}</AvatarFallback>
+                            </Avatar>
+                            <span className="text-sm font-medium">{p.player.firstName} {p.player.lastName}</span>
+                          </Link>
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">{p.player.category.name}</TableCell>
+                        <TableCell className="text-sm">{monthName(p.month, true)} {p.year}</TableCell>
+                        <TableCell className="text-sm">{formatDate(p.dueDate)}</TableCell>
+                        <TableCell className="text-center tabular-nums">
+                          {days > 0 ? (
+                            <Badge variant="danger">+{days}d</Badge>
+                          ) : days === 0 ? (
+                            <Badge variant="warning">hoy</Badge>
+                          ) : (
+                            <Badge variant="outline">{Math.abs(days)}d</Badge>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right font-semibold tabular-nums">{formatARS(Number(p.amount))}</TableCell>
+                        <TableCell><PaymentStatusBadge status={p.status} /></TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex gap-2 justify-end">
+                            {parent && (
+                              <WhatsappReminder
+                                playerName={fullName(p.player.firstName, p.player.lastName)}
+                                parentName={parent.name}
+                                amount={Number(p.amount)}
+                                month={p.month}
+                                year={p.year}
+                                daysOverdue={Math.max(0, days)}
+                              />
+                            )}
+                            <MarkPaidButton paymentId={p.id} />
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </>
           )}
         </CardContent>
       </Card>

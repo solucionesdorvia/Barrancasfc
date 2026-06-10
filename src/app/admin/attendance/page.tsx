@@ -54,7 +54,49 @@ export default async function AttendanceOverviewPage() {
         </Card>
       ) : (
         <Card className="p-0 overflow-hidden">
-          <Table>
+          {/* Mobile */}
+          <div className="md:hidden divide-y">
+            {categories.map((c) => {
+              const playerCount = playersByCat.get(c.id) ?? 0;
+              const att = attByCat.get(c.id);
+              const total = att?.total ?? 0;
+              const present = att?.present ?? 0;
+              const pct = total > 0 ? Math.round((present / total) * 100) : 0;
+              return (
+                <Link
+                  key={c.id}
+                  href={`/admin/categories/${c.id}`}
+                  className="flex items-center gap-3 p-3 hover:bg-muted/40 transition-colors"
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm truncate">{c.name}</p>
+                    <p className="text-[11px] text-muted-foreground">
+                      {playerCount} jugadores · {total} asistencias tomadas
+                    </p>
+                    <div className="flex items-center gap-2 mt-1.5">
+                      <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
+                        {total > 0 && (
+                          <div
+                            className={
+                              pct >= 80 ? "h-full bg-emerald-500" : pct >= 60 ? "h-full bg-amber-500" : "h-full bg-red-500"
+                            }
+                            style={{ width: `${pct}%` }}
+                          />
+                        )}
+                      </div>
+                      <span className={`text-xs font-semibold w-10 text-right tabular-nums ${total === 0 ? "text-muted-foreground" : pct >= 80 ? "text-emerald-600" : pct >= 60 ? "text-amber-600" : "text-red-600"}`}>
+                        {total > 0 ? `${pct}%` : "s/d"}
+                      </span>
+                    </div>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                </Link>
+              );
+            })}
+          </div>
+
+          {/* Desktop */}
+          <Table className="hidden md:table">
             <TableHeader>
               <TableRow>
                 <TableHead>Categoría</TableHead>

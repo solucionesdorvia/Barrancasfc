@@ -171,11 +171,62 @@ export default async function CategoryDetailPage({ params }: { params: { id: str
           {debt > 0 ? <span className="text-red-600 font-semibold">{formatARS(debt)}</span> : <span className="text-muted-foreground">—</span>}
         </TableCell>
         <TableCell className="text-right">
-          <Button asChild size="sm" variant="ghost" className="opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+          <Button asChild size="sm" variant="ghost" className="opacity-0 group-hover:opacity-100 transition-opacity">
             <Link href={`/admin/players/${p.id}`}>Abrir →</Link>
           </Button>
         </TableCell>
       </TableRow>
+    );
+  }
+
+  function renderPlayerCard(p: typeof players[number], i: number) {
+    const age = ageFromBirth(p.birthDate);
+    const debt = debtByPlayer.get(p.id) ?? 0;
+    const att = attByPlayer.get(p.id);
+    const pPct = att && att.total > 0 ? Math.round((att.present / att.total) * 100) : null;
+    const fitnessExpired = p.fitnessExpiry ? new Date(p.fitnessExpiry) < now : false;
+    const fitnessSoon =
+      p.fitnessExpiry && !fitnessExpired &&
+      new Date(p.fitnessExpiry).getTime() - now.getTime() < 30 * 24 * 3600 * 1000;
+    const fee = Number(p.monthlyFee);
+
+    return (
+      <Link
+        key={p.id}
+        href={`/admin/players/${p.id}`}
+        className="flex items-start gap-3 p-3 hover:bg-muted/40 transition-colors"
+      >
+        <span className="text-[10px] text-muted-foreground font-mono w-5 text-center pt-1 shrink-0">{i + 1}</span>
+        <Avatar className="h-10 w-10 shrink-0">
+          <AvatarImage src={p.photo ?? undefined} />
+          <AvatarFallback className="text-xs">{initials(fullName(p.firstName, p.lastName))}</AvatarFallback>
+        </Avatar>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium truncate">{p.lastName}, {p.firstName}</p>
+          <p className="text-[11px] text-muted-foreground truncate">
+            {p.nationality === "Argentina" ? "🇦🇷" : "🌍"} {p.dni} · {age} años
+          </p>
+          <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+            <PlayerStatusBadge status={p.status} />
+            {!p.fitnessExpiry ? (
+              <Badge variant="secondary" className="text-[10px]">Sin apto</Badge>
+            ) : fitnessExpired ? (
+              <Badge variant="danger" className="text-[10px]">Apto vencido</Badge>
+            ) : fitnessSoon ? (
+              <Badge variant="warning" className="text-[10px]">Apto por vencer</Badge>
+            ) : null}
+            {pPct !== null && (
+              <span className={`text-[11px] font-semibold tabular-nums ${pPct >= 80 ? "text-emerald-600" : pPct >= 60 ? "text-amber-600" : "text-red-600"}`}>
+                {pPct}% asist.
+              </span>
+            )}
+          </div>
+        </div>
+        <div className="text-right shrink-0">
+          {fee > 0 && <p className="text-sm font-medium tabular-nums">{formatARS(fee)}</p>}
+          {debt > 0 && <p className="text-[11px] font-semibold text-red-600 tabular-nums">Debe {formatARS(debt)}</p>}
+        </div>
+      </Link>
     );
   }
 
@@ -213,7 +264,13 @@ export default async function CategoryDetailPage({ params }: { params: { id: str
               <span className="text-xs text-muted-foreground tabular-nums">{group.players.length} jugadores</span>
             </div>
           )}
-          <Table>
+          {/* Mobile */}
+          <div className="md:hidden divide-y">
+            {group.players.map((p, i) => renderPlayerCard(p, i))}
+          </div>
+
+          {/* Desktop */}
+          <Table className="hidden md:table">
             <TableHeader>
               <TableRow>
                 <TableHead className="w-10 text-center">#</TableHead>

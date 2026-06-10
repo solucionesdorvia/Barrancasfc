@@ -107,17 +107,9 @@ export default async function UsersListPage() {
               className="py-10"
             />
           ) : (
-            <Table className="min-w-[700px]">
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Email / Referencia</TableHead>
-                  <TableHead>Rol</TableHead>
-                  <TableHead>Contexto</TableHead>
-                  <TableHead>Estado</TableHead>
-                  <TableHead className="text-right">Acciones</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+            <>
+              {/* Mobile */}
+              <div className="md:hidden divide-y">
                 {invitations.map((inv) => {
                   const st = invitationStatus(inv);
                   const Icon = st.icon;
@@ -128,34 +120,81 @@ export default async function UsersListPage() {
                       ? `${inv.childrenIds.length} hijo${inv.childrenIds.length === 1 ? "" : "s"}`
                       : "—";
                   return (
-                    <TableRow key={inv.id}>
-                      <TableCell className="text-sm">
-                        <div className="flex flex-col">
-                          <span>{inv.email ?? <span className="text-muted-foreground italic">sin email</span>}</span>
-                          {inv.title && <span className="text-[10px] text-muted-foreground">{inv.title}</span>}
+                    <div key={inv.id} className="p-3 space-y-2">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm truncate">{inv.email ?? <span className="text-muted-foreground italic">sin email</span>}</p>
+                          {inv.title && <p className="text-[11px] text-muted-foreground truncate">{inv.title}</p>}
+                          <p className="text-[11px] text-muted-foreground mt-0.5">{ctx}</p>
                         </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={inv.role === "ADMIN" ? "default" : "secondary"}>
+                        <Badge variant={inv.role === "ADMIN" ? "default" : "secondary"} className="text-[10px] shrink-0">
                           {ROLE_LABEL[inv.role]}
                         </Badge>
-                      </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{ctx}</TableCell>
-                      <TableCell>
-                        <Badge variant={st.variant} className="gap-1">
+                      </div>
+                      <div className="flex items-center justify-between gap-2">
+                        <Badge variant={st.variant} className="gap-1 text-[10px]">
                           <Icon className="h-3 w-3" /> {st.label}
                         </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
                         {!inv.revoked && !inv.usedAt && inv.expiresAt > new Date() && (
                           <InvitationActions invitationId={inv.id} token={inv.token} baseUrl={baseUrl} />
                         )}
-                      </TableCell>
-                    </TableRow>
+                      </div>
+                    </div>
                   );
                 })}
-              </TableBody>
-            </Table>
+              </div>
+
+              {/* Desktop */}
+              <Table className="hidden md:table">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Email / Referencia</TableHead>
+                    <TableHead>Rol</TableHead>
+                    <TableHead>Contexto</TableHead>
+                    <TableHead>Estado</TableHead>
+                    <TableHead className="text-right">Acciones</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {invitations.map((inv) => {
+                    const st = invitationStatus(inv);
+                    const Icon = st.icon;
+                    const ctx =
+                      inv.role === "PROFESOR"
+                        ? `${inv.categoryIds.length} categoría${inv.categoryIds.length === 1 ? "" : "s"}`
+                        : inv.role === "PADRE"
+                        ? `${inv.childrenIds.length} hijo${inv.childrenIds.length === 1 ? "" : "s"}`
+                        : "—";
+                    return (
+                      <TableRow key={inv.id}>
+                        <TableCell className="text-sm">
+                          <div className="flex flex-col">
+                            <span>{inv.email ?? <span className="text-muted-foreground italic">sin email</span>}</span>
+                            {inv.title && <span className="text-[10px] text-muted-foreground">{inv.title}</span>}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={inv.role === "ADMIN" ? "default" : "secondary"}>
+                            {ROLE_LABEL[inv.role]}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">{ctx}</TableCell>
+                        <TableCell>
+                          <Badge variant={st.variant} className="gap-1">
+                            <Icon className="h-3 w-3" /> {st.label}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {!inv.revoked && !inv.usedAt && inv.expiresAt > new Date() && (
+                            <InvitationActions invitationId={inv.id} token={inv.token} baseUrl={baseUrl} />
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </>
           )}
         </CardContent>
       </Card>
@@ -170,72 +209,115 @@ export default async function UsersListPage() {
           {users.length === 0 ? (
             <EmptyState icon={UserCog} title="Sin staff cargado" bare className="py-12" />
           ) : (
-            <Table className="min-w-[820px]">
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Usuario</TableHead>
-                  <TableHead>Rol</TableHead>
-                  <TableHead>Categorías</TableHead>
-                  <TableHead className="text-center">Acciones</TableHead>
-                  <TableHead>Última actividad</TableHead>
-                  <TableHead className="text-right"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+            <>
+              {/* Mobile */}
+              <div className="md:hidden divide-y">
                 {users.map((u) => {
                   const stat = countMap.get(u.id);
                   return (
-                    <TableRow key={u.id} className="group">
-                      <TableCell>
-                        <Link href={`/admin/users/${u.id}`} className="flex items-center gap-3 hover:underline">
-                          <Avatar className="h-9 w-9">
-                            <AvatarFallback>{initials(u.name)}</AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="font-medium">{u.name}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {u.title ? `${u.title} · ` : ""}{u.email}
-                            </p>
+                    <Link key={u.id} href={`/admin/users/${u.id}`} className="block p-3 hover:bg-muted/40 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10 shrink-0">
+                          <AvatarFallback>{initials(u.name)}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium text-sm truncate">{u.name}</p>
+                            <Badge variant={u.role === "ADMIN" ? "default" : "secondary"} className="text-[10px] shrink-0">
+                              {ROLE_LABEL[u.role]}
+                            </Badge>
                           </div>
-                        </Link>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={u.role === "ADMIN" ? "default" : "secondary"}>
-                          {ROLE_LABEL[u.role]}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-sm">
-                        {u.assignedCategories.length === 0 ? (
-                          <span className="text-muted-foreground">—</span>
-                        ) : (
-                          <div className="flex flex-wrap gap-1">
-                            {u.assignedCategories.slice(0, 3).map((c) => (
-                              <Badge key={c.id} variant="outline" className="text-[10px]">{c.name}</Badge>
-                            ))}
-                            {u.assignedCategories.length > 3 && (
-                              <Badge variant="outline" className="text-[10px]">+{u.assignedCategories.length - 3}</Badge>
-                            )}
-                          </div>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-center font-semibold tabular-nums">{stat?._count ?? 0}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {stat?._max.createdAt ? (
-                          <span title={formatDate(stat._max.createdAt)}>{formatRelative(stat._max.createdAt)}</span>
-                        ) : (
-                          "Sin actividad"
-                        )}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button asChild size="sm" variant="ghost" className="opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                          <Link href={`/admin/users/${u.id}`}>Ver perfil →</Link>
-                        </Button>
-                      </TableCell>
-                    </TableRow>
+                          <p className="text-[11px] text-muted-foreground truncate">
+                            {u.title ? `${u.title} · ` : ""}{u.email}
+                          </p>
+                          {u.assignedCategories.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-1.5">
+                              {u.assignedCategories.slice(0, 3).map((c) => (
+                                <Badge key={c.id} variant="outline" className="text-[10px]">{c.name}</Badge>
+                              ))}
+                              {u.assignedCategories.length > 3 && (
+                                <Badge variant="outline" className="text-[10px]">+{u.assignedCategories.length - 3}</Badge>
+                              )}
+                            </div>
+                          )}
+                          <p className="text-[10px] text-muted-foreground mt-1">
+                            {stat?._count ?? 0} acciones · {stat?._max.createdAt ? formatRelative(stat._max.createdAt) : "sin actividad"}
+                          </p>
+                        </div>
+                      </div>
+                    </Link>
                   );
                 })}
-              </TableBody>
-            </Table>
+              </div>
+
+              {/* Desktop */}
+              <Table className="hidden md:table">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Usuario</TableHead>
+                    <TableHead>Rol</TableHead>
+                    <TableHead>Categorías</TableHead>
+                    <TableHead className="text-center">Acciones</TableHead>
+                    <TableHead>Última actividad</TableHead>
+                    <TableHead className="text-right"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {users.map((u) => {
+                    const stat = countMap.get(u.id);
+                    return (
+                      <TableRow key={u.id} className="group">
+                        <TableCell>
+                          <Link href={`/admin/users/${u.id}`} className="flex items-center gap-3 hover:underline">
+                            <Avatar className="h-9 w-9">
+                              <AvatarFallback>{initials(u.name)}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p className="font-medium">{u.name}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {u.title ? `${u.title} · ` : ""}{u.email}
+                              </p>
+                            </div>
+                          </Link>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={u.role === "ADMIN" ? "default" : "secondary"}>
+                            {ROLE_LABEL[u.role]}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-sm">
+                          {u.assignedCategories.length === 0 ? (
+                            <span className="text-muted-foreground">—</span>
+                          ) : (
+                            <div className="flex flex-wrap gap-1">
+                              {u.assignedCategories.slice(0, 3).map((c) => (
+                                <Badge key={c.id} variant="outline" className="text-[10px]">{c.name}</Badge>
+                              ))}
+                              {u.assignedCategories.length > 3 && (
+                                <Badge variant="outline" className="text-[10px]">+{u.assignedCategories.length - 3}</Badge>
+                              )}
+                            </div>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-center font-semibold tabular-nums">{stat?._count ?? 0}</TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {stat?._max.createdAt ? (
+                            <span title={formatDate(stat._max.createdAt)}>{formatRelative(stat._max.createdAt)}</span>
+                          ) : (
+                            "Sin actividad"
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button asChild size="sm" variant="ghost" className="opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Link href={`/admin/users/${u.id}`}>Ver perfil →</Link>
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </>
           )}
         </CardContent>
       </Card>
