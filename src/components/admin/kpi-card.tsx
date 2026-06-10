@@ -23,22 +23,26 @@ export function KpiCard({ label, value, hint, icon: Icon, tone = "default", tren
   const t = TONES[tone];
   return (
     <Card className="transition-shadow hover:shadow-sm">
-      <CardContent className="pt-6">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <p className="text-[10px] sm:text-[11px] font-medium uppercase tracking-wide text-muted-foreground truncate">{label}</p>
-            <p className="mt-2 text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight tabular-nums truncate">{value}</p>
-            {hint && <p className="mt-1 text-[10px] sm:text-xs text-muted-foreground truncate">{hint}</p>}
-            {trend && (
-              <p className={cn("mt-1 text-xs font-medium", trend.positive ? "text-emerald-600" : "text-red-600")}>
-                {trend.value}
-              </p>
-            )}
-          </div>
-          <div className={cn("rounded-lg p-2.5 shrink-0", t.bg, t.text)}>
-            <Icon className="h-5 w-5" />
+      <CardContent className="pt-4 sm:pt-6 px-3 sm:px-6">
+        {/* Header: label + icon chico, en una línea */}
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-[10px] sm:text-[11px] font-medium uppercase tracking-wide text-muted-foreground truncate">{label}</p>
+          <div className={cn("rounded-md p-1.5 sm:p-2 shrink-0", t.bg, t.text)}>
+            <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
           </div>
         </div>
+
+        {/* Value: full-width, sin truncate. Tamaño responsive conservador
+            para que "$ 11.880.000" entre en 150px de ancho en mobile. */}
+        <p className="mt-2 text-lg sm:text-2xl lg:text-3xl font-bold tracking-tight tabular-nums leading-tight break-words">
+          {value}
+        </p>
+        {hint && <p className="mt-1 text-[10px] sm:text-xs text-muted-foreground">{hint}</p>}
+        {trend && (
+          <p className={cn("mt-1 text-xs font-medium", trend.positive ? "text-emerald-600" : "text-red-600")}>
+            {trend.value}
+          </p>
+        )}
       </CardContent>
     </Card>
   );
