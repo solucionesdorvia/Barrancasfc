@@ -1,11 +1,12 @@
 import Link from "next/link";
-import { AlertTriangle, CheckCircle2, CircleDollarSign, Clock, Wallet } from "lucide-react";
+import { AlertTriangle, CheckCircle2, ChevronLeft, ChevronRight, CircleDollarSign, Clock, Wallet } from "lucide-react";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { KpiCard } from "@/components/admin/kpi-card";
@@ -22,16 +23,36 @@ type FilterKey = "all" | "overdue" | "overdue_30" | "overdue_90" | "overdue_180"
 const FILTER_LABELS: Record<FilterKey, string> = {
   all: "Todas",
   overdue: "Morosas",
-  overdue_30: "Morosas +30d",
-  overdue_90: "Morosas +90d",
-  overdue_180: "Morosas +180d",
+  overdue_30: "+30 días",
+  overdue_90: "+90 días",
+  overdue_180: "+180 días",
   pending: "Solo pendientes",
 };
 
-export default async function PaymentsPage({ searchParams }: { searchParams: { filter?: string } }) {
+function parseMonthYear(searchParams: { m?: string; y?: string }) {
   const now = new Date();
-  const month = now.getMonth() + 1;
-  const year = now.getFullYear();
+  const m = Number(searchParams.m);
+  const y = Number(searchParams.y);
+  const month = Number.isInteger(m) && m >= 1 && m <= 12 ? m : now.getMonth() + 1;
+  const year = Number.isInteger(y) && y >= 2000 && y <= 2100 ? y : now.getFullYear();
+  return { month, year };
+}
+
+function shiftMonth(m: number, y: number, delta: number): { m: number; y: number } {
+  const d = new Date(y, m - 1 + delta, 1);
+  return { m: d.getMonth() + 1, y: d.getFullYear() };
+}
+
+export default async function PaymentsPage({
+  searchParams,
+}: {
+  searchParams: { filter?: string; m?: string; y?: string };
+}) {
+  const now = new Date();
+  const { month, year } = parseMonthYear(searchParams);
+  const isCurrentMonth = month === now.getMonth() + 1 && year === now.getFullYear();
+  const prev = shiftMonth(month, year, -1);
+  const next = shiftMonth(month, year, 1);
 
   const filter: FilterKey = (Object.keys(FILTER_LABELS) as FilterKey[]).includes(searchParams.filter as FilterKey)
     ? (searchParams.filter as FilterKey)
@@ -52,7 +73,7 @@ export default async function PaymentsPage({ searchParams }: { searchParams: { f
     return { status: { in: ["OVERDUE", "PENDING"] } };
   }
 
-  const [overdue, monthPayments] = await Promise.all([
+  const [overdue, monthPayments, bucketCounts] = await Promise.all([
     prisma.payment.findMany({
       where: whereForFilter(),
       include: {
@@ -74,7 +95,31 @@ export default async function PaymentsPage({ searchParams }: { searchParams: { f
       where: { month, year },
       select: { amount: true, status: true },
     }),
+    // Contadores de morosos por antigüedad — para mostrar al lado de cada chip
+    Promise.all([
+      prisma.payment.count({ where: { status: "OVERDUE" } }),
+      prisma.payment.count({
+        where: { status: "OVERDUE", dueDate: { lte: new Date(now.getTime() - 30 * 24 * 3600 * 1000) } },
+      }),
+      prisma.payment.count({
+        where: { status: "OVERDUE", dueDate: { lte: new Date(now.getTime() - 90 * 24 * 3600 * 1000) } },
+      }),
+      prisma.payment.count({
+        where: { status: "OVERDUE", dueDate: { lte: new Date(now.getTime() - 180 * 24 * 3600 * 1000) } },
+      }),
+      prisma.payment.count({ where: { status: "PENDING" } }),
+    ]),
   ]);
+
+  const [cntOverdue, cntOverdue30, cntOverdue90, cntOverdue180, cntPending] = bucketCounts;
+  const filterCount: Record<FilterKey, number> = {
+    all: cntOverdue + cntPending,
+    overdue: cntOverdue,
+    overdue_30: cntOverdue30,
+    overdue_90: cntOverdue90,
+    overdue_180: cntOverdue180,
+    pending: cntPending,
+  };
 
   const totalThisMonth = monthPayments.reduce((s, p) => s + Number(p.amount), 0);
   const paidThisMonth = monthPayments.filter((p) => p.status === "PAID").reduce((s, p) => s + Number(p.amount), 0);
@@ -82,16 +127,64 @@ export default async function PaymentsPage({ searchParams }: { searchParams: { f
   const pendingAmount = monthPayments.filter((p) => p.status === "PENDING").reduce((s, p) => s + Number(p.amount), 0);
   const collectionRate = totalThisMonth ? Math.round((paidThisMonth / totalThisMonth) * 100) : 0;
 
+  function buildHref(opts: { m?: number; y?: number; filter?: string }) {
+    const params = new URLSearchParams();
+    const m = opts.m ?? month;
+    const y = opts.y ?? year;
+    const f = opts.filter ?? filter;
+    // Solo agregamos m/y si no es el mes actual (URL más limpia)
+    const targetIsCurrent = m === now.getMonth() + 1 && y === now.getFullYear();
+    if (!targetIsCurrent) {
+      params.set("m", String(m));
+      params.set("y", String(y));
+    }
+    if (f !== "all") params.set("filter", f);
+    const qs = params.toString();
+    return qs ? `/admin/payments?${qs}` : "/admin/payments";
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader
         title="Cobranza"
         description={monthYear(month, year, false)}
-        action={<GenerateFeesButton />}
+        action={isCurrentMonth ? <GenerateFeesButton /> : undefined}
       />
 
+      {/* Navegador de meses */}
+      <Card className="p-2">
+        <div className="flex items-center justify-between gap-2">
+          <Button asChild variant="ghost" size="sm" className="gap-1.5">
+            <Link href={buildHref({ m: prev.m, y: prev.y })}>
+              <ChevronLeft className="h-4 w-4" />
+              <span className="hidden sm:inline">{monthYear(prev.m, prev.y, true)}</span>
+              <span className="sm:hidden">Anterior</span>
+            </Link>
+          </Button>
+          <div className="text-center">
+            <p className="text-sm font-semibold">{monthYear(month, year, false)}</p>
+            {!isCurrentMonth && (
+              <Link
+                href={buildHref({ m: now.getMonth() + 1, y: now.getFullYear() })}
+                className="text-[10px] text-barrancas-red hover:underline"
+              >
+                Volver al mes actual
+              </Link>
+            )}
+          </div>
+          <Button asChild variant="ghost" size="sm" className="gap-1.5">
+            <Link href={buildHref({ m: next.m, y: next.y })}>
+              <span className="hidden sm:inline">{monthYear(next.m, next.y, true)}</span>
+              <span className="sm:hidden">Siguiente</span>
+              <ChevronRight className="h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
+      </Card>
+
+      {/* KPIs del mes seleccionado */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <KpiCard label="Total del mes" value={formatARS(totalThisMonth)} icon={CircleDollarSign} />
+        <KpiCard label={`Total ${monthName(month, true)}`} value={formatARS(totalThisMonth)} icon={CircleDollarSign} />
         <KpiCard
           label="Cobrado"
           value={formatARS(paidThisMonth)}
@@ -114,29 +207,41 @@ export default async function PaymentsPage({ searchParams }: { searchParams: { f
       </div>
 
       <Card className="p-0 overflow-hidden">
-        <CardHeader className="px-6 py-4 border-b bg-muted/30 space-y-3">
+        <CardHeader className="px-4 sm:px-6 py-4 border-b bg-muted/30 space-y-3">
           <div>
             <CardTitle className="text-base">Cuotas pendientes y morosas</CardTitle>
             <CardDescription>
               {overdue.length === 0
                 ? "Sin cuotas para reclamar con este filtro"
                 : `${overdue.length} ${overdue.length === 1 ? "cuota" : "cuotas"} · filtro: ${FILTER_LABELS[filter]}`}
+              <span className="block text-[11px] mt-0.5">Vista global — independiente del mes seleccionado arriba.</span>
             </CardDescription>
           </div>
+          {/* Chips de filtros con contadores reales por bucket */}
           <div className="flex flex-wrap gap-1.5">
-            {(Object.entries(FILTER_LABELS) as [FilterKey, string][]).map(([k, label]) => (
-              <Link
-                key={k}
-                href={k === "all" ? "/admin/payments" : `/admin/payments?filter=${k}`}
-                className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
-                  filter === k
-                    ? "bg-barrancas-red text-white"
-                    : "bg-background border text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {label}
-              </Link>
-            ))}
+            {(Object.entries(FILTER_LABELS) as [FilterKey, string][]).map(([k, label]) => {
+              const count = filterCount[k];
+              return (
+                <Link
+                  key={k}
+                  href={buildHref({ filter: k })}
+                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                    filter === k
+                      ? "bg-barrancas-red text-white"
+                      : "bg-background border text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {label}
+                  <span
+                    className={`tabular-nums text-[10px] px-1.5 rounded ${
+                      filter === k ? "bg-white/20" : "bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    {count}
+                  </span>
+                </Link>
+              );
+            })}
           </div>
         </CardHeader>
         <CardContent className="p-0">
@@ -273,12 +378,12 @@ export default async function PaymentsPage({ searchParams }: { searchParams: { f
         </CardContent>
       </Card>
 
-      {/* Hint útil cuando no hay nada que cobrar */}
-      {overdue.length === 0 && totalThisMonth === 0 && (
+      {monthPayments.length === 0 && (
         <Card>
           <CardContent className="py-6 text-center text-sm text-muted-foreground">
             <Wallet className="h-5 w-5 mx-auto mb-2 opacity-60" />
-            Todavía no hay cuotas de {monthName(month)}. Generalas para arrancar el mes.
+            Todavía no hay cuotas de {monthName(month)} {year}.
+            {isCurrentMonth && " Generalas desde el botón de arriba para arrancar el mes."}
           </CardContent>
         </Card>
       )}
