@@ -16,7 +16,7 @@ const ROLE_LABEL: Record<string, string> = {
   PADRE: "Padre / tutor",
 };
 
-export default async function InvitePage({ params }: { params: { token: string } }) {
+export default async function InvitePage({ params }: { params: { token: string; rest?: string[] } }) {
   const { userId } = auth();
   const result = await lookupInvitation(params.token);
 
@@ -109,12 +109,13 @@ async function ValidContent({
         </div>
       ) : (
         <div className="flex justify-center">
-          {/* routing="hash" mantiene los pasos del SignUp (verificación de
-              email, etc.) dentro de la misma URL como #/verify-email-address.
-              Si no, Clerk redirige a /invite/[token]/verify-email-address y
-              esa ruta no existe → 404. */}
+          {/* Clerk hace path routing para verify-email-address y sub-pasos.
+              Necesitamos `path` explícito + una catch-all sibling route
+              (/invite/[token]/[[...rest]]/page.tsx) que renderea este mismo
+              componente, así verify-email-address cae bien. */}
           <SignUp
-            routing="hash"
+            routing="path"
+            path={`/invite/${token}`}
             forceRedirectUrl={`/invite/${token}/accept`}
             signInForceRedirectUrl={`/invite/${token}/accept`}
             initialValues={invitation.email ? { emailAddress: invitation.email } : undefined}
