@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Users, ClipboardCheck, Calendar } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
@@ -35,6 +36,9 @@ export default async function ProfesorPage({
   searchParams: { fecha?: string; categoria?: string };
 }) {
   const user = await requireRole(["PROFESOR", "ADMIN"]);
+  if (user.role === "PROFESOR" && !user.profileCompleted) {
+    redirect("/profesor/onboarding");
+  }
 
   // Categorías asignadas al profesor. Si no tiene ninguna, caemos al fallback.
   let categories = (user.assignedCategories ?? []) as { id: string; name: string }[];

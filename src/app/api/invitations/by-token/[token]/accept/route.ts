@@ -60,6 +60,8 @@ export const POST = withErrorHandler(async (_req: Request, { params }: { params:
     });
   } else {
     // Caso B: crear User nuevo
+    // Los profes arrancan con profileCompleted=false → onboarding obligatorio.
+    // Admins y padres no requieren onboarding por ahora.
     user = await prisma.user.create({
       data: {
         clerkId,
@@ -68,6 +70,7 @@ export const POST = withErrorHandler(async (_req: Request, { params }: { params:
         role: inv.role,
         title: inv.title,
         clubId: inv.clubId,
+        profileCompleted: inv.role !== "PROFESOR",
         assignedCategories: inv.categoryIds.length
           ? { connect: inv.categoryIds.map((id) => ({ id })) }
           : undefined,

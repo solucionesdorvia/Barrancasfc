@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { requireRole } from "@/lib/auth";
 import { Card, CardContent } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
@@ -14,6 +15,9 @@ export default async function ProfesorCalendarPage({
   searchParams: { view?: string; y?: string; m?: string };
 }) {
   const user = await requireRole(["PROFESOR", "ADMIN"]);
+  if (user.role === "PROFESOR" && !user.profileCompleted) {
+    redirect("/profesor/onboarding");
+  }
   const view: "list" | "month" = searchParams.view === "month" ? "month" : "list";
   const now = new Date();
 

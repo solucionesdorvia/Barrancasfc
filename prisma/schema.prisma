@@ -124,8 +124,17 @@ model User {
   clerkId            String?    @unique
   email              String     @unique
   name               String
+  // Desglose de nombre — opcionales para mantener compatibilidad con usuarios viejos
+  // que solo tienen `name`. Cuando el profe completa su onboarding, se llenan.
+  firstName          String?
+  lastName           String?
+  phone              String?
+  photo              String?    // URL Uploadthing o data URI Dicebear
   role               Role
   title              String?    // ej "DT", "Coordinador", "Preparador físico" — cosmético
+  // Onboarding: los usuarios nuevos creados por invitación arrancan en false
+  // y el layout /profesor los manda a /profesor/onboarding hasta que completen.
+  profileCompleted   Boolean    @default(true)
   clubId             String
   club               Club       @relation(fields: [clubId], references: [id])
   children           Player[]   @relation("ParentChildren")
