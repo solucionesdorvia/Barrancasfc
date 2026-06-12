@@ -102,7 +102,8 @@ export async function sendNoticeNotification(opts: {
       <div style="font-size:14px;color:#334155;line-height:1.6;white-space:pre-line;">${escapeHtml(opts.noticeBody)}</div>
       ${link}
       <hr style="border:none;border-top:1px solid #e2e8f0;margin:24px 0;" />
-      <p style="font-size:11px;color:#94a3b8;margin:0;">Estás recibiendo este mail porque sos parte del Club Barrancas FC.</p>
+      <p style="font-size:11px;color:#94a3b8;margin:0 0 4px;">Estás recibiendo este mail porque sos parte del Club Barrancas FC.</p>
+      <p style="font-size:10px;color:#cbd5e1;margin:0;">Enviado desde NEXCLUB · plataforma de gestión del club.</p>
     </div>
   `;
 

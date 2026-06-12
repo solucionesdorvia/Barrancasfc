@@ -34,7 +34,7 @@ export default async function Home() {
         />
         <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs uppercase tracking-wider text-zinc-300">
           <span className="h-1.5 w-1.5 rounded-full bg-barrancas-red animate-pulse" />
-          Plataforma del club
+          NEXCLUB · Plataforma del club
         </span>
         <h1 className="mt-5 text-4xl font-bold tracking-tight md:text-6xl">
           Barrancas FC<br />

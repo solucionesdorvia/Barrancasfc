@@ -16,7 +16,7 @@ export function BrandLogo({
     <div className={cn("flex items-center gap-2.5", className)}>
       <Image
         src="/logo.png"
-        alt="Barrancas FC"
+        alt="NEXCLUB Barrancas"
         width={size}
         height={size}
         priority
@@ -25,8 +25,8 @@ export function BrandLogo({
       />
       {showText && (
         <div className="flex flex-col leading-none">
-          <span className={cn("text-sm font-semibold", textTone === "light" && "text-white")}>
-            Barrancas FC
+          <span className={cn("text-sm font-bold tracking-tight", textTone === "light" && "text-white")}>
+            NEXCLUB
           </span>
           <span
             className={cn(
@@ -34,7 +34,7 @@ export function BrandLogo({
               textTone === "light" ? "text-zinc-400" : "text-muted-foreground"
             )}
           >
-            Gestión
+            Barrancas FC
           </span>
         </div>
       )}

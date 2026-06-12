@@ -12,27 +12,27 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://barrancas-fc.up.rail
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
   title: {
-    default: "Barrancas FC — Gestión integral del club",
-    template: "%s · Barrancas FC",
+    default: "NEXCLUB Barrancas — Gestión integral del club",
+    template: "%s · NEXCLUB Barrancas",
   },
   description:
-    "Plataforma de gestión integral del club: jugadores, cobranza, asistencia, comunicación con padres, calendario y reportes.",
-  keywords: ["Barrancas FC", "gestión de club", "fútbol", "jugadores", "cobranza", "asistencia"],
-  applicationName: "Barrancas FC",
+    "Plataforma NEXCLUB de gestión integral del club Barrancas FC: jugadores, cobranza, asistencia, comunicación con padres, calendario y reportes.",
+  keywords: ["NEXCLUB", "Barrancas FC", "gestión de club", "fútbol", "jugadores", "cobranza", "asistencia"],
+  applicationName: "NEXCLUB Barrancas",
   authors: [{ name: "Dorvia" }],
   openGraph: {
     type: "website",
     locale: "es_AR",
     url: APP_URL,
-    siteName: "Barrancas FC",
-    title: "Barrancas FC — Gestión integral del club",
+    siteName: "NEXCLUB Barrancas",
+    title: "NEXCLUB Barrancas — Gestión integral del club",
     description:
       "Una sola plataforma para jugadores, cobranza y comunicación con padres. Todo en un lugar, accesible desde el celu.",
-    images: [{ url: "/logo.png", width: 1200, height: 630, alt: "Barrancas FC" }],
+    images: [{ url: "/logo.png", width: 1200, height: 630, alt: "NEXCLUB Barrancas" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Barrancas FC — Gestión integral del club",
+    title: "NEXCLUB Barrancas — Gestión integral del club",
     description: "Plataforma de gestión del club: jugadores, cobranza, asistencia.",
     images: ["/logo.png"],
   },
@@ -67,7 +67,7 @@ const clerkLocalization: any = {
     start: {
       ...(esBase.signUp?.start ?? {}),
       title: "Creá tu cuenta",
-      subtitle: "para entrar a Barrancas FC",
+      subtitle: "para entrar a NEXCLUB Barrancas",
     },
   },
   unstable__errors: {
