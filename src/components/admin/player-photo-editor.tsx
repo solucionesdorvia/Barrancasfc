@@ -1,8 +1,8 @@
 "use client";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Camera, Trash2 } from "lucide-react";
+import { Camera, Trash2, Upload, Link as LinkIcon, Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,28 +20,81 @@ type Props = {
   playerId: string;
   initialPhoto: string | null;
   initialsLabel: string;
-  /** Solo admin puede editar; otros roles ven el avatar sin botón */
   canEdit: boolean;
 };
 
 /**
- * Avatar grande del jugador con botón de cámara para editar la foto.
- * Por ahora acepta URL — para upload real con archivo se agregará en el
- * próximo iteración con uploadthing. El input ya permite pegar links de
- * Drive, WhatsApp Web, etc. que el club use.
+ * Reduce una imagen a max 400×400 JPEG 80%. Devuelve un dataURL listo para
+ * enviar al servidor. Pesa ~20-30 KB típico — entra cómodo en la columna
+ * `photo` de Player (text). Evita depender de UploadThing/S3 para fotos de
+ * perfil chicas.
  */
+async function resizeImage(file: File, maxSize = 400, quality = 0.8): Promise<string> {
+  const dataUrl: string = await new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result as string);
+    r.onerror = () => reject(new Error("No se pudo leer el archivo"));
+    r.readAsDataURL(file);
+  });
+  const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+    const i = new Image();
+    i.onload = () => resolve(i);
+    i.onerror = () => reject(new Error("No se pudo decodificar la imagen"));
+    i.src = dataUrl;
+  });
+  const ratio = Math.min(maxSize / img.width, maxSize / img.height, 1);
+  const w = Math.round(img.width * ratio);
+  const h = Math.round(img.height * ratio);
+  const canvas = document.createElement("canvas");
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Canvas no disponible");
+  ctx.drawImage(img, 0, 0, w, h);
+  return canvas.toDataURL("image/jpeg", quality);
+}
+
 export function PlayerPhotoEditor({ playerId, initialPhoto, initialsLabel, canEdit }: Props) {
   const router = useRouter();
+  const inputRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
-  const [url, setUrl] = useState(initialPhoto ?? "");
+  const [preview, setPreview] = useState<string | null>(initialPhoto);
+  const [mode, setMode] = useState<"upload" | "url">("upload");
+  const [urlInput, setUrlInput] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function save(newUrl: string | null) {
+  function reset() {
+    setPreview(initialPhoto);
+    setUrlInput("");
+    setMode("upload");
+  }
+
+  async function onFile(file: File) {
+    if (!file.type.startsWith("image/")) {
+      toast.error("Tiene que ser una imagen (JPG, PNG, HEIC, etc.)");
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("La imagen es muy grande (máx 10 MB)");
+      return;
+    }
+    setLoading(true);
+    try {
+      const dataUrl = await resizeImage(file);
+      setPreview(dataUrl);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "No se pudo procesar la imagen");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function save(value: string | null) {
     setLoading(true);
     const res = await fetch(`/api/players/${playerId}/photo`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ photo: newUrl }),
+      body: JSON.stringify({ photo: value }),
     });
     setLoading(false);
     if (!res.ok) {
@@ -49,9 +102,27 @@ export function PlayerPhotoEditor({ playerId, initialPhoto, initialsLabel, canEd
       toast.error(err.error || "No se pudo guardar la foto");
       return;
     }
-    toast.success(newUrl ? "Foto actualizada" : "Foto eliminada");
+    toast.success(value ? "Foto actualizada" : "Foto eliminada");
     setOpen(false);
     router.refresh();
+  }
+
+  function onSave() {
+    if (mode === "url") {
+      const trimmed = urlInput.trim();
+      if (trimmed && !/^https?:\/\//i.test(trimmed)) {
+        toast.error("La URL tiene que empezar con http:// o https://");
+        return;
+      }
+      save(trimmed || null);
+    } else {
+      // Si preview no cambió, no enviamos nada
+      if (preview === initialPhoto) {
+        setOpen(false);
+        return;
+      }
+      save(preview);
+    }
   }
 
   return (
@@ -64,7 +135,7 @@ export function PlayerPhotoEditor({ playerId, initialPhoto, initialsLabel, canEd
         {canEdit && (
           <button
             type="button"
-            onClick={() => setOpen(true)}
+            onClick={() => { reset(); setOpen(true); }}
             aria-label="Cambiar foto del jugador"
             className="absolute -bottom-1 -right-1 h-8 w-8 rounded-full bg-barrancas-red text-white grid place-items-center shadow-md hover:scale-105 transition-transform"
           >
@@ -73,36 +144,97 @@ export function PlayerPhotoEditor({ playerId, initialPhoto, initialsLabel, canEd
         )}
       </div>
 
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) reset(); }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Cambiar foto del jugador</DialogTitle>
             <DialogDescription>
-              Pegá la URL de una foto. Si la dejás vacía, vuelve al avatar con sus iniciales.
+              Subí una foto desde tus archivos o cámara. Si dejás vacío, vuelve al avatar con iniciales.
             </DialogDescription>
           </DialogHeader>
+
+          {/* Toggle modo: subir / URL */}
+          <div className="inline-flex rounded-md border p-0.5 self-start">
+            <button
+              type="button"
+              onClick={() => setMode("upload")}
+              className={`px-3 py-1 text-xs font-medium rounded gap-1.5 inline-flex items-center transition-colors ${
+                mode === "upload" ? "bg-barrancas-red text-white" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Upload className="h-3 w-3" /> Subir archivo
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode("url")}
+              className={`px-3 py-1 text-xs font-medium rounded gap-1.5 inline-flex items-center transition-colors ${
+                mode === "url" ? "bg-barrancas-red text-white" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <LinkIcon className="h-3 w-3" /> Pegar URL
+            </button>
+          </div>
+
           <div className="space-y-4">
+            {/* Preview siempre visible */}
             <div className="flex justify-center">
               <Avatar className="h-24 w-24 ring-2 ring-rose-100">
-                <AvatarImage src={url || undefined} alt="Preview" />
+                <AvatarImage
+                  src={(mode === "url" ? urlInput : preview) || undefined}
+                  alt="Preview"
+                />
                 <AvatarFallback className="text-lg">{initialsLabel}</AvatarFallback>
               </Avatar>
             </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="photo-url">URL de la foto</Label>
-              <Input
-                id="photo-url"
-                type="url"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                placeholder="https://…"
-                inputMode="url"
-              />
-              <p className="text-[11px] text-muted-foreground">
-                Pegá una URL de imagen pública (Drive con acceso, WhatsApp Web, etc.).
-              </p>
-            </div>
+
+            {mode === "upload" ? (
+              <>
+                <input
+                  ref={inputRef}
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) onFile(f);
+                  }}
+                />
+                <Button
+                  variant="outline"
+                  className="w-full gap-2 h-12"
+                  onClick={() => inputRef.current?.click()}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Upload className="h-4 w-4" />
+                  )}
+                  {preview && preview !== initialPhoto ? "Elegir otra foto" : "Elegir foto desde el dispositivo"}
+                </Button>
+                <p className="text-[11px] text-muted-foreground text-center">
+                  Aceptamos JPG, PNG y HEIC. La foto se ajusta automáticamente a 400×400 para que cargue rápido.
+                </p>
+              </>
+            ) : (
+              <div className="space-y-1.5">
+                <Label htmlFor="photo-url">URL de la foto</Label>
+                <Input
+                  id="photo-url"
+                  type="url"
+                  value={urlInput}
+                  onChange={(e) => setUrlInput(e.target.value)}
+                  placeholder="https://…"
+                  inputMode="url"
+                />
+                <p className="text-[11px] text-muted-foreground">
+                  Pegá una URL de imagen pública (Drive con acceso, WhatsApp Web, etc.).
+                </p>
+              </div>
+            )}
           </div>
+
           <DialogFooter className="gap-2 sm:gap-2 flex-col sm:flex-row">
             {initialPhoto && (
               <Button
@@ -115,11 +247,8 @@ export function PlayerPhotoEditor({ playerId, initialPhoto, initialsLabel, canEd
               </Button>
             )}
             <div className="flex-1" />
-            <Button variant="ghost" onClick={() => setOpen(false)}>Cancelar</Button>
-            <Button
-              onClick={() => save(url.trim() || null)}
-              disabled={loading}
-            >
+            <Button variant="ghost" onClick={() => setOpen(false)} disabled={loading}>Cancelar</Button>
+            <Button onClick={onSave} disabled={loading}>
               {loading ? "Guardando…" : "Guardar"}
             </Button>
           </DialogFooter>

@@ -12,11 +12,17 @@ export const PATCH = withErrorHandler(async (req: Request, { params }: { params:
   const json = (await req.json().catch(() => ({}))) as { photo?: string | null };
   const raw = typeof json.photo === "string" ? json.photo.trim() : null;
 
-  if (raw && !/^https?:\/\//i.test(raw)) {
-    return apiBadRequest("La URL tiene que empezar con http:// o https://");
-  }
-  if (raw && raw.length > 1000) {
-    return apiBadRequest("La URL es demasiado larga");
+  if (raw) {
+    const isHttp = /^https?:\/\//i.test(raw);
+    const isDataImage = /^data:image\/(jpeg|jpg|png|webp|heic|heif);base64,/i.test(raw);
+    if (!isHttp && !isDataImage) {
+      return apiBadRequest("Tiene que ser una URL http(s) o una imagen subida desde el dispositivo");
+    }
+    // Data URIs de imagen redimensionadas a 400px pesan ~30KB; ponemos un techo
+    // generoso de 1MB en base64 (~750KB de imagen) para evitar inflar la columna.
+    if (raw.length > 1_500_000) {
+      return apiBadRequest("La imagen es demasiado grande. Probá con una más liviana.");
+    }
   }
 
   const player = await prisma.player.findUnique({ where: { id: params.id }, select: { id: true, firstName: true, lastName: true } });

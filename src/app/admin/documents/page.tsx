@@ -5,7 +5,6 @@ import {
   ImageOff,
   IdCard,
   Phone,
-  ChevronRight,
   ArrowUpRight,
   Heart,
 } from "lucide-react";
@@ -17,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { KpiCard } from "@/components/admin/kpi-card";
+import { ApproveFitnessButton } from "@/components/admin/approve-fitness-button";
 import { formatRelative, formatDate, initials, fullName, pluralize } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
@@ -212,35 +212,41 @@ export default async function DocumentsPage({
                 const missingLabels = (Object.entries(p.checks) as [CheckKey, boolean][])
                   .filter(([, ok]) => !ok)
                   .map(([k]) => CHECK_LABEL[k]);
+                const needsFitness = !p.checks.fitness;
                 return (
-                  <Link
+                  <div
                     key={p.id}
-                    href={`/admin/players/${p.id}`}
-                    className="flex items-center gap-3 p-3 hover:bg-muted/40 transition-colors"
+                    className="flex items-start gap-3 p-3 hover:bg-muted/40 transition-colors"
                   >
-                    <Avatar className="h-10 w-10 shrink-0">
-                      <AvatarImage src={p.photo ?? undefined} />
-                      <AvatarFallback className="text-xs">
-                        {initials(fullName(p.firstName, p.lastName))}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className="text-sm font-medium truncate">{p.lastName}, {p.firstName}</p>
-                        <Badge variant="outline" className="text-[10px] shrink-0">{p.category.name}</Badge>
+                    <Link href={`/admin/players/${p.id}`} className="flex items-center gap-3 flex-1 min-w-0">
+                      <Avatar className="h-10 w-10 shrink-0">
+                        <AvatarImage src={p.photo ?? undefined} />
+                        <AvatarFallback className="text-xs">
+                          {initials(fullName(p.firstName, p.lastName))}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-medium truncate">{p.lastName}, {p.firstName}</p>
+                          <Badge variant="outline" className="text-[10px] shrink-0">{p.category.name}</Badge>
+                        </div>
+                        <div className="flex items-center flex-wrap gap-1 mt-1">
+                          {missingLabels.map((m) => (
+                            <Badge key={m} variant="danger" className="text-[10px]">{m}</Badge>
+                          ))}
+                        </div>
                       </div>
-                      <div className="flex items-center flex-wrap gap-1 mt-1">
-                        {missingLabels.map((m) => (
-                          <Badge key={m} variant="danger" className="text-[10px]">{m}</Badge>
-                        ))}
+                    </Link>
+                    <div className="flex flex-col items-end gap-1.5 shrink-0">
+                      <div className="text-right">
+                        <p className="text-xs font-semibold tabular-nums text-rose-600">{p.missing}/8</p>
+                        <p className="text-[10px] text-muted-foreground">faltan</p>
                       </div>
+                      {needsFitness && (
+                        <ApproveFitnessButton playerId={p.id} currentExpiry={p.fitnessExpiry ?? null} />
+                      )}
                     </div>
-                    <div className="text-right shrink-0">
-                      <p className="text-xs font-semibold tabular-nums text-rose-600">{p.missing}/8</p>
-                      <p className="text-[10px] text-muted-foreground">faltan</p>
-                    </div>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
-                  </Link>
+                  </div>
                 );
               })}
             </div>
