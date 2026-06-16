@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Users, ClipboardCheck, Calendar } from "lucide-react";
+import { Users, ClipboardCheck } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -9,6 +9,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { AttendanceForm } from "@/components/profesor/attendance-form";
+import { ProfesorDatePicker } from "@/components/profesor/date-picker";
 import { initials, fullName, formatDate } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
@@ -81,11 +82,30 @@ export default async function ProfesorPage({
     },
   });
 
-  const dayAttendance = await prisma.attendance.findMany({
-    where: { playerId: { in: players.map((p) => p.id) }, date: selectedDate },
-  });
+  const playerIds = players.map((p) => p.id);
+
+  const [dayAttendance, trainingDateRows] = await Promise.all([
+    prisma.attendance.findMany({
+      where: { playerId: { in: playerIds }, date: selectedDate },
+    }),
+    // Fechas distintas con al menos una asistencia tomada en los últimos 90
+    // días — el date-picker las usa para los botones "anterior/siguiente"
+    // y para sugerir la más cercana si la fecha elegida no tuvo entrenamiento.
+    prisma.attendance.findMany({
+      where: {
+        playerId: { in: playerIds },
+        date: { gte: new Date(Date.now() - 90 * 24 * 3600 * 1000) },
+      },
+      select: { date: true },
+      distinct: ["date"],
+      orderBy: { date: "desc" },
+    }),
+  ]);
   const initial: Record<string, boolean> = {};
   for (const a of dayAttendance) initial[a.playerId] = a.present;
+
+  const trainingDates = trainingDateRows.map((r) => r.date.toISOString().slice(0, 10));
+  const selectedDateIso = selectedDate.toISOString().slice(0, 10);
 
   return (
     <div className="space-y-5">
@@ -121,26 +141,7 @@ export default async function ProfesorPage({
         </TabsList>
 
         <TabsContent value="hoy" className="space-y-3">
-          <Card>
-            <CardContent className="pt-5 flex items-center gap-3">
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-              <label htmlFor="fecha" className="text-sm font-medium">Día</label>
-              <form action="" className="flex items-center gap-2 ml-auto" method="get">
-                {searchParams.categoria && <input type="hidden" name="categoria" value={searchParams.categoria} />}
-                <input
-                  id="fecha"
-                  name="fecha"
-                  type="date"
-                  defaultValue={selectedDate.toISOString().slice(0, 10)}
-                  max={new Date().toISOString().slice(0, 10)}
-                  className="text-sm border rounded-md px-2 py-1.5 bg-background"
-                />
-                <button type="submit" className="text-xs font-medium text-barrancas-red hover:underline">
-                  Cambiar
-                </button>
-              </form>
-            </CardContent>
-          </Card>
+          <ProfesorDatePicker selectedDate={selectedDateIso} trainingDates={trainingDates} />
           <AttendanceForm
             players={players.map((p) => ({ id: p.id, firstName: p.firstName, lastName: p.lastName, photo: p.photo }))}
             date={selectedDate}
