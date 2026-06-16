@@ -1,8 +1,8 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Link as LinkIcon, Camera, Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { resizeImageToDataUrl } from "@/lib/resize-image";
 
 const TITLES = ["DT", "Ayudante", "Preparador físico", "Coordinador", "Otro"] as const;
 
@@ -29,14 +30,14 @@ function initials(first: string, last: string): string {
 }
 
 type Props = {
-  /** Pre-fill si Clerk trajo algo en el name al crear el user */
   initialFirstName?: string;
   initialLastName?: string;
   email: string;
-  /** Cuántas categorías tiene asignadas, para el copy de bienvenida */
   assignedCategoriesCount: number;
   assignedCategoryNames: string[];
 };
+
+type PhotoMode = "auto" | "upload" | "url";
 
 export function OnboardingForm({
   initialFirstName,
@@ -46,18 +47,55 @@ export function OnboardingForm({
   assignedCategoryNames,
 }: Props) {
   const router = useRouter();
+  const fileRef = useRef<HTMLInputElement>(null);
   const [firstName, setFirstName] = useState(initialFirstName ?? "");
   const [lastName, setLastName] = useState(initialLastName ?? "");
   const [phone, setPhone] = useState("");
   const [title, setTitle] = useState<typeof TITLES[number] | "">("");
-  const [usePhoto, setUsePhoto] = useState(false);
+  const [photoMode, setPhotoMode] = useState<PhotoMode>("auto");
+  const [photoDataUrl, setPhotoDataUrl] = useState("");
   const [photoUrl, setPhotoUrl] = useState("");
+  const [photoLoading, setPhotoLoading] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const previewPhoto = useMemo(() => {
-    if (usePhoto && photoUrl.trim()) return photoUrl.trim();
+    if (photoMode === "upload" && photoDataUrl) return photoDataUrl;
+    if (photoMode === "url" && photoUrl.trim()) return photoUrl.trim();
     return dicebearUrl(`${firstName} ${lastName}`);
-  }, [usePhoto, photoUrl, firstName, lastName]);
+  }, [photoMode, photoDataUrl, photoUrl, firstName, lastName]);
+
+  function resolvedPhotoValue(): string {
+    if (photoMode === "upload" && photoDataUrl) return photoDataUrl;
+    if (photoMode === "url") return photoUrl.trim();
+    return "";
+  }
+
+  async function onFile(file: File) {
+    if (!file.type.startsWith("image/")) {
+      toast.error("Tiene que ser una imagen");
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("La imagen es muy grande (máx 10 MB)");
+      return;
+    }
+    setPhotoLoading(true);
+    try {
+      const dataUrl = await resizeImageToDataUrl(file);
+      setPhotoDataUrl(dataUrl);
+      setPhotoMode("upload");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "No se pudo procesar la imagen");
+    } finally {
+      setPhotoLoading(false);
+    }
+  }
+
+  function clearPhoto() {
+    setPhotoMode("auto");
+    setPhotoDataUrl("");
+    setPhotoUrl("");
+  }
 
   async function submit() {
     if (!firstName.trim() || !lastName.trim()) {
@@ -72,7 +110,8 @@ export function OnboardingForm({
       toast.error("Elegí tu cargo");
       return;
     }
-    if (usePhoto && photoUrl.trim() && !/^https?:\/\//i.test(photoUrl.trim())) {
+    const photoVal = resolvedPhotoValue();
+    if (photoMode === "url" && photoVal && !/^https?:\/\//i.test(photoVal)) {
       toast.error("La URL de la foto tiene que empezar con http:// o https://");
       return;
     }
@@ -86,7 +125,7 @@ export function OnboardingForm({
         lastName: lastName.trim(),
         phone: phone.trim(),
         title,
-        photo: usePhoto && photoUrl.trim() ? photoUrl.trim() : "",
+        photo: photoVal,
       }),
     });
     setLoading(false);
@@ -177,21 +216,48 @@ export function OnboardingForm({
         </Select>
       </div>
 
-      {/* Foto opcional */}
+      {/* Foto opcional — file picker (cámara/galería) + URL como alternativa */}
       <div className="space-y-2 rounded-md border bg-muted/20 p-3">
-        <div className="flex items-center justify-between gap-2">
-          <Label className="text-xs uppercase tracking-wide text-muted-foreground">
-            Foto de perfil (opcional)
-          </Label>
-          <button
-            type="button"
-            onClick={() => setUsePhoto((v) => !v)}
-            className="text-xs text-barrancas-red font-medium hover:underline"
-          >
-            {usePhoto ? "Usar avatar automático" : "Pegar URL de foto"}
-          </button>
-        </div>
-        {usePhoto ? (
+        <Label className="text-xs uppercase tracking-wide text-muted-foreground">
+          Foto de perfil (opcional)
+        </Label>
+
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          className="hidden"
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) onFile(f);
+          }}
+        />
+
+        {photoMode === "upload" && photoDataUrl ? (
+          <div className="flex items-center gap-2 rounded-md bg-background border p-2">
+            <Avatar className="h-10 w-10">
+              <AvatarImage src={photoDataUrl} alt="Tu foto" />
+              <AvatarFallback>{initials(firstName, lastName)}</AvatarFallback>
+            </Avatar>
+            <span className="text-xs text-muted-foreground flex-1">Foto cargada ✓</span>
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              className="text-xs text-muted-foreground hover:text-foreground"
+            >
+              Cambiar
+            </button>
+            <button
+              type="button"
+              onClick={clearPhoto}
+              aria-label="Quitar foto"
+              className="text-muted-foreground hover:text-rose-600"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        ) : photoMode === "url" ? (
           <>
             <Input
               type="url"
@@ -200,14 +266,49 @@ export function OnboardingForm({
               placeholder="https://…"
               inputMode="url"
             />
-            <p className="text-[11px] text-muted-foreground">
-              Pegá la URL de una foto tuya. Si la dejás vacío usamos tus iniciales.
-            </p>
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-[11px] text-muted-foreground">
+                Pegá la URL de una foto tuya.
+              </p>
+              <button
+                type="button"
+                onClick={() => setPhotoMode("auto")}
+                className="text-[11px] text-muted-foreground hover:text-foreground"
+              >
+                Volver
+              </button>
+            </div>
           </>
         ) : (
-          <p className="text-[11px] text-muted-foreground">
-            Te generamos un avatar con tus iniciales. Podés cambiarlo después.
-          </p>
+          <>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => fileRef.current?.click()}
+                disabled={photoLoading}
+                className="flex-1 gap-2 h-10"
+              >
+                {photoLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Camera className="h-4 w-4" />
+                )}
+                Sacar / subir foto
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setPhotoMode("url")}
+                className="gap-2 h-10"
+              >
+                <LinkIcon className="h-4 w-4" /> URL
+              </Button>
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              En el celular podés sacar la foto al momento. Si no, usamos un avatar con tus iniciales.
+            </p>
+          </>
         )}
       </div>
 

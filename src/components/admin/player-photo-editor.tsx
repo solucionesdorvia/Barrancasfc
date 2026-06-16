@@ -15,6 +15,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { resizeImageToDataUrl } from "@/lib/resize-image";
 
 type Props = {
   playerId: string;
@@ -22,37 +23,6 @@ type Props = {
   initialsLabel: string;
   canEdit: boolean;
 };
-
-/**
- * Reduce una imagen a max 400×400 JPEG 80%. Devuelve un dataURL listo para
- * enviar al servidor. Pesa ~20-30 KB típico — entra cómodo en la columna
- * `photo` de Player (text). Evita depender de UploadThing/S3 para fotos de
- * perfil chicas.
- */
-async function resizeImage(file: File, maxSize = 400, quality = 0.8): Promise<string> {
-  const dataUrl: string = await new Promise((resolve, reject) => {
-    const r = new FileReader();
-    r.onload = () => resolve(r.result as string);
-    r.onerror = () => reject(new Error("No se pudo leer el archivo"));
-    r.readAsDataURL(file);
-  });
-  const img = await new Promise<HTMLImageElement>((resolve, reject) => {
-    const i = new Image();
-    i.onload = () => resolve(i);
-    i.onerror = () => reject(new Error("No se pudo decodificar la imagen"));
-    i.src = dataUrl;
-  });
-  const ratio = Math.min(maxSize / img.width, maxSize / img.height, 1);
-  const w = Math.round(img.width * ratio);
-  const h = Math.round(img.height * ratio);
-  const canvas = document.createElement("canvas");
-  canvas.width = w;
-  canvas.height = h;
-  const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error("Canvas no disponible");
-  ctx.drawImage(img, 0, 0, w, h);
-  return canvas.toDataURL("image/jpeg", quality);
-}
 
 export function PlayerPhotoEditor({ playerId, initialPhoto, initialsLabel, canEdit }: Props) {
   const router = useRouter();
@@ -80,7 +50,7 @@ export function PlayerPhotoEditor({ playerId, initialPhoto, initialsLabel, canEd
     }
     setLoading(true);
     try {
-      const dataUrl = await resizeImage(file);
+      const dataUrl = await resizeImageToDataUrl(file);
       setPreview(dataUrl);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "No se pudo procesar la imagen");

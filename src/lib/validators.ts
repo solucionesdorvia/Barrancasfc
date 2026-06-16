@@ -102,7 +102,20 @@ export const profesorOnboardingSchema = z.object({
   lastName: z.string().trim().min(1, "Ingresá tu apellido").max(60),
   phone: z.string().trim().min(6, "Ingresá un teléfono válido").max(30),
   title: z.enum(["DT", "Ayudante", "Preparador físico", "Coordinador", "Otro"]),
-  photo: z.string().url().optional().or(z.literal("")),
+  // Foto: http(s) URL o data URI de imagen (resize en cliente a ~30KB).
+  // Tope generoso de 1.5MB en la string para evitar inflar la columna.
+  photo: z
+    .string()
+    .max(1_500_000)
+    .refine(
+      (v) =>
+        v === "" ||
+        /^https?:\/\//i.test(v) ||
+        /^data:image\/(jpeg|jpg|png|webp|heic|heif);base64,/i.test(v),
+      "La foto tiene que ser una URL http(s) o una imagen subida desde el dispositivo"
+    )
+    .optional()
+    .or(z.literal("")),
 });
 
 export const padreOnboardingSchema = z.object({
