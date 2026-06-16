@@ -35,6 +35,7 @@ import { InstallmentPlanDialog } from "@/components/admin/installment-plan-dialo
 import { FamilyGroupForm } from "@/components/admin/family-group-form";
 import { PlayerPhotoEditor } from "@/components/admin/player-photo-editor";
 import { UploadDocumentButton } from "@/components/admin/upload-document-button";
+import { DocumentRow } from "@/components/admin/document-row";
 import { Users } from "lucide-react";
 import { requireRole } from "@/lib/auth";
 import { StickyNote, CalendarRange } from "lucide-react";
@@ -515,20 +516,14 @@ export default async function PlayerDetailPage({ params }: { params: { id: strin
                 />
               ) : (
                 player.documents.map((d) => (
-                  <div key={d.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors">
-                    <div className="flex items-center gap-3">
-                      <div className="h-9 w-9 rounded-lg bg-violet-100 text-violet-700 grid place-items-center">
-                        <FileText className="h-4 w-4" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium">{d.name}</p>
-                        <p className="text-xs text-muted-foreground">{d.type} · {formatDate(d.uploadedAt)}</p>
-                      </div>
-                    </div>
-                    <Button asChild size="sm" variant="outline">
-                      <a href={d.url} target="_blank" rel="noopener noreferrer">Ver</a>
-                    </Button>
-                  </div>
+                  <DocumentRow
+                    key={d.id}
+                    id={d.id}
+                    name={d.name}
+                    typeLabel={d.type}
+                    uploadedHint={formatDate(d.uploadedAt)}
+                    canDelete={user.role === "ADMIN"}
+                  />
                 ))
               )}
             </CardContent>

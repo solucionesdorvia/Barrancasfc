@@ -305,7 +305,7 @@ export default async function DocumentsPage({
                     </Link>
                   </div>
                   <Button asChild size="sm" variant="ghost" className="shrink-0 gap-1">
-                    <a href={d.url} target="_blank" rel="noopener noreferrer">
+                    <a href={`/api/documents/${d.id}/file`} target="_blank" rel="noopener noreferrer">
                       Ver <ArrowUpRight className="h-3 w-3" />
                     </a>
                   </Button>

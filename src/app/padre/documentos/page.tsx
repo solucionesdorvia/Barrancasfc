@@ -77,7 +77,7 @@ export default async function PadreDocumentosPage({ searchParams }: { searchPara
                 </div>
                 <Badge variant="secondary" className="hidden sm:inline">Cargado</Badge>
                 <Button asChild size="sm" variant="ghost">
-                  <a href={d.url} target="_blank" rel="noreferrer">Ver</a>
+                  <a href={`/api/documents/${d.id}/file`} target="_blank" rel="noreferrer">Ver</a>
                 </Button>
               </CardContent>
             </Card>
