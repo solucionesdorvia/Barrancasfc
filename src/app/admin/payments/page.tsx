@@ -13,6 +13,7 @@ import { KpiCard } from "@/components/admin/kpi-card";
 import { GenerateFeesButton } from "@/components/admin/generate-fees-button";
 import { MarkPaidButton } from "@/components/admin/mark-paid-button";
 import { WhatsappReminder } from "@/components/admin/whatsapp-reminder";
+import { PaymentsToolbar } from "@/components/admin/payments-toolbar";
 import { PaymentStatusBadge } from "@/components/payment-status-badge";
 import { formatARS, formatDate, monthName, monthYear, initials, fullName, daysOverdue } from "@/lib/format";
 
@@ -46,7 +47,7 @@ function shiftMonth(m: number, y: number, delta: number): { m: number; y: number
 export default async function PaymentsPage({
   searchParams,
 }: {
-  searchParams: { filter?: string; m?: string; y?: string };
+  searchParams: { filter?: string; m?: string; y?: string; q?: string; cat?: string };
 }) {
   const now = new Date();
   const { month, year } = parseMonthYear(searchParams);
@@ -57,23 +58,41 @@ export default async function PaymentsPage({
   const filter: FilterKey = (Object.keys(FILTER_LABELS) as FilterKey[]).includes(searchParams.filter as FilterKey)
     ? (searchParams.filter as FilterKey)
     : "all";
+  const q = searchParams.q?.trim() ?? "";
+  const cat = searchParams.cat?.trim() ?? "";
 
   function whereForFilter(): Prisma.PaymentWhereInput {
-    if (filter === "pending") return { status: "PENDING" };
-    if (filter === "overdue") return { status: "OVERDUE" };
-    if (filter === "overdue_30") {
-      return { status: "OVERDUE", dueDate: { lte: new Date(now.getTime() - 30 * 24 * 3600 * 1000) } };
+    // Base por bucket de morosidad/pendiente
+    const base: Prisma.PaymentWhereInput =
+      filter === "pending"
+        ? { status: "PENDING" }
+        : filter === "overdue"
+        ? { status: "OVERDUE" }
+        : filter === "overdue_30"
+        ? { status: "OVERDUE", dueDate: { lte: new Date(now.getTime() - 30 * 24 * 3600 * 1000) } }
+        : filter === "overdue_90"
+        ? { status: "OVERDUE", dueDate: { lte: new Date(now.getTime() - 90 * 24 * 3600 * 1000) } }
+        : filter === "overdue_180"
+        ? { status: "OVERDUE", dueDate: { lte: new Date(now.getTime() - 180 * 24 * 3600 * 1000) } }
+        : { status: { in: ["OVERDUE", "PENDING"] } };
+
+    // Layer de filtros sobre el player (búsqueda + categoría)
+    const playerWhere: Prisma.PlayerWhereInput = {};
+    if (q) {
+      playerWhere.OR = [
+        { firstName: { contains: q, mode: "insensitive" } },
+        { lastName: { contains: q, mode: "insensitive" } },
+      ];
     }
-    if (filter === "overdue_90") {
-      return { status: "OVERDUE", dueDate: { lte: new Date(now.getTime() - 90 * 24 * 3600 * 1000) } };
+    if (cat) playerWhere.categoryId = cat;
+
+    if (Object.keys(playerWhere).length > 0) {
+      return { ...base, player: playerWhere };
     }
-    if (filter === "overdue_180") {
-      return { status: "OVERDUE", dueDate: { lte: new Date(now.getTime() - 180 * 24 * 3600 * 1000) } };
-    }
-    return { status: { in: ["OVERDUE", "PENDING"] } };
+    return base;
   }
 
-  const [overdue, monthPayments, bucketCounts] = await Promise.all([
+  const [overdue, monthPayments, bucketCounts, categories] = await Promise.all([
     prisma.payment.findMany({
       where: whereForFilter(),
       include: {
@@ -109,6 +128,10 @@ export default async function PaymentsPage({
       }),
       prisma.payment.count({ where: { status: "PENDING" } }),
     ]),
+    prisma.category.findMany({
+      orderBy: [{ type: "asc" }, { year: "desc" }],
+      select: { id: true, name: true },
+    }),
   ]);
 
   const [cntOverdue, cntOverdue30, cntOverdue90, cntOverdue180, cntPending] = bucketCounts;
@@ -213,10 +236,13 @@ export default async function PaymentsPage({
             <CardDescription>
               {overdue.length === 0
                 ? "Sin cuotas para reclamar con este filtro"
-                : `${overdue.length} ${overdue.length === 1 ? "cuota" : "cuotas"} · filtro: ${FILTER_LABELS[filter]}`}
+                : `${overdue.length} ${overdue.length === 1 ? "cuota" : "cuotas"} · filtro: ${FILTER_LABELS[filter]}${q ? ` · "${q}"` : ""}${cat ? ` · ${categories.find((c) => c.id === cat)?.name ?? "categoría"}` : ""}`}
               <span className="block text-[11px] mt-0.5">Vista global — independiente del mes seleccionado arriba.</span>
             </CardDescription>
           </div>
+
+          {/* Búsqueda + filtro de división */}
+          <PaymentsToolbar categories={categories} />
           {/* Chips de filtros con contadores reales por bucket */}
           <div className="flex flex-wrap gap-1.5">
             {(Object.entries(FILTER_LABELS) as [FilterKey, string][]).map(([k, label]) => {
