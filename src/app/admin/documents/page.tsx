@@ -17,6 +17,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { KpiCard } from "@/components/admin/kpi-card";
 import { ApproveFitnessButton } from "@/components/admin/approve-fitness-button";
+import { UploadDocumentButton } from "@/components/admin/upload-document-button";
 import { formatRelative, formatDate, initials, fullName, pluralize } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
@@ -256,11 +257,16 @@ export default async function DocumentsPage({
 
       {/* Documentos subidos recientes */}
       <Card className="p-0 overflow-hidden">
-        <CardHeader className="px-6 py-4 border-b bg-muted/30">
-          <CardTitle className="text-base">Documentos subidos recientemente</CardTitle>
-          <CardDescription>
-            Los padres suben docs desde su portal. Acá aparecen los últimos {docs.length}.
-          </CardDescription>
+        <CardHeader className="px-6 py-4 border-b bg-muted/30 flex flex-row items-start justify-between gap-3">
+          <div>
+            <CardTitle className="text-base">Documentos subidos recientemente</CardTitle>
+            <CardDescription>
+              Los padres suben docs desde su portal. Acá aparecen los últimos {docs.length}.
+            </CardDescription>
+          </div>
+          <UploadDocumentButton
+            players={players.map((p) => ({ id: p.id, firstName: p.firstName, lastName: p.lastName }))}
+          />
         </CardHeader>
         <CardContent className="p-0">
           {docs.length === 0 ? (

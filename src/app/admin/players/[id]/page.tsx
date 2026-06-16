@@ -34,6 +34,7 @@ import { PlayerNotes } from "@/components/admin/player-notes";
 import { InstallmentPlanDialog } from "@/components/admin/installment-plan-dialog";
 import { FamilyGroupForm } from "@/components/admin/family-group-form";
 import { PlayerPhotoEditor } from "@/components/admin/player-photo-editor";
+import { UploadDocumentButton } from "@/components/admin/upload-document-button";
 import { Users } from "lucide-react";
 import { requireRole } from "@/lib/auth";
 import { StickyNote, CalendarRange } from "lucide-react";
@@ -493,16 +494,23 @@ export default async function PlayerDetailPage({ params }: { params: { id: strin
 
         <TabsContent value="documentos">
           <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Documentación cargada</CardTitle>
-              <CardDescription>{player.documents.length} archivos</CardDescription>
+            <CardHeader className="flex flex-row items-start justify-between gap-3">
+              <div>
+                <CardTitle className="text-base">Documentación cargada</CardTitle>
+                <CardDescription>{player.documents.length} archivos</CardDescription>
+              </div>
+              {user.role === "ADMIN" && (
+                <UploadDocumentButton
+                  player={{ id: player.id, firstName: player.firstName, lastName: player.lastName }}
+                />
+              )}
             </CardHeader>
             <CardContent className="space-y-2">
               {player.documents.length === 0 ? (
                 <EmptyState
                   icon={FileText}
                   title="Sin documentación cargada"
-                  description="Subí DNI, ficha médica, apto físico o cualquier otro documento desde el portal del padre."
+                  description="Subí DNI, ficha médica, apto físico o cualquier otro documento desde el botón de arriba."
                   bare
                 />
               ) : (

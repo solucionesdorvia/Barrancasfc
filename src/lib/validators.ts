@@ -118,6 +118,19 @@ export const profesorOnboardingSchema = z.object({
     .or(z.literal("")),
 });
 
+export const documentUploadSchema = z.object({
+  name: z.string().trim().min(1, "Poné un nombre").max(120),
+  type: z.enum(["BIRTH_CERT", "DNI", "DNI_FRONT", "DNI_BACK", "PARENT_DOC", "MEDICAL", "REPORT_CARD", "OTHER"]),
+  // Acepta data URI (image/* o application/pdf) o URL http(s).
+  // Tope: 4MB en base64 (~3MB binario) — los PDFs livianos entran.
+  dataUrl: z.string().max(4_000_000).refine(
+    (v) =>
+      /^https?:\/\//i.test(v) ||
+      /^data:(image\/(jpeg|jpg|png|webp|heic|heif|gif)|application\/pdf);base64,/i.test(v),
+    "Archivo no válido. Usá imagen (JPG/PNG/HEIC) o PDF."
+  ),
+});
+
 export const padreOnboardingSchema = z.object({
   firstName: z.string().trim().min(1, "Ingresá tu nombre").max(60),
   lastName: z.string().trim().min(1, "Ingresá tu apellido").max(60),
