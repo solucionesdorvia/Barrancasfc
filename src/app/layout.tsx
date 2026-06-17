@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Instrument_Serif } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { esES } from "@clerk/localizations";
 import { Toaster } from "sonner";
@@ -7,6 +7,13 @@ import { getCurrentClub, clubCssVars } from "@/lib/club";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const instrumentSerif = Instrument_Serif({
+  subsets: ["latin"],
+  weight: "400",
+  style: ["normal", "italic"],
+  variable: "--font-serif",
+  display: "swap",
+});
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://barrancas-fc.up.railway.app";
 
@@ -99,7 +106,7 @@ export default async function RootLayout({
         data-club={club?.slug ?? "default"}
         style={clubCssVars(club)}
       >
-        <body className={`${inter.variable} font-sans antialiased`}>
+        <body className={`${inter.variable} ${instrumentSerif.variable} font-sans antialiased`}>
           {children}
           <Toaster position="top-right" richColors />
         </body>

@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
@@ -12,7 +11,8 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { NexClubWordmark } from "@/components/nex/wordmark";
+import { MarketingHeader } from "@/components/marketing/marketing-header";
+import { MarketingFooter } from "@/components/marketing/marketing-footer";
 import { prisma } from "@/lib/prisma";
 import { NEXCLUB_WHATSAPP_DEMO_URL } from "@/lib/constants";
 
@@ -34,36 +34,11 @@ export default async function NexClubLandingPage() {
   }
 
   // Sin subdomain: estamos en `nexclub.app/` (o legacy URL). Servimos la
-  // landing pública. Si el usuario está logueado, le mostramos el atajo
-  // al panel arriba a la derecha (sin redirect automático).
-  const { userId } = auth();
+  // landing pública. El header lee el estado de auth internamente.
 
   return (
     <main>
-      {/* Nav fijo arriba */}
-      <header className="sticky top-0 z-30 backdrop-blur bg-nex-bg/85 border-b border-nex-border/60">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <NexClubWordmark size="md" />
-          </Link>
-          <nav className="hidden sm:flex items-center gap-6 text-sm text-nex-muted">
-            <a href="#features" className="hover:text-nex-ink transition-colors">Producto</a>
-            <a href="#para-quien" className="hover:text-nex-ink transition-colors">Para quién</a>
-            <a href="#contacto" className="hover:text-nex-ink transition-colors">Contacto</a>
-          </nav>
-          <div className="flex items-center gap-2">
-            {userId ? (
-              <Button asChild size="sm" className="bg-nex hover:bg-nex-hover text-white gap-1.5">
-                <Link href="/admin">Ir al panel <ArrowRight className="h-3.5 w-3.5" /></Link>
-              </Button>
-            ) : (
-              <Button asChild size="sm" variant="ghost" className="text-nex-ink hover:text-nex">
-                <Link href="/sign-in">Ingresar</Link>
-              </Button>
-            )}
-          </div>
-        </div>
-      </header>
+      <MarketingHeader />
 
       {/* 1. HERO */}
       <section className="relative overflow-hidden">
@@ -274,39 +249,7 @@ export default async function NexClubLandingPage() {
         </div>
       </section>
 
-      {/* 8. FOOTER */}
-      <footer className="bg-white border-t border-nex-border">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
-          <div>
-            <NexClubWordmark size="md" />
-            <p className="mt-2 text-xs text-nex-muted leading-relaxed max-w-xs">
-              Plataforma SaaS de gestión integral para clubes deportivos.
-            </p>
-          </div>
-          <div className="text-sm">
-            <p className="text-[11px] uppercase tracking-widest text-nex-muted font-semibold mb-2">
-              Contacto
-            </p>
-            <a
-              href={WHATSAPP_DEMO}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block text-nex-ink hover:text-nex transition-colors"
-            >
-              WhatsApp
-            </a>
-            <a
-              href="mailto:hola@nexclub.app"
-              className="block text-nex-ink hover:text-nex transition-colors"
-            >
-              hola@nexclub.app
-            </a>
-          </div>
-          <div className="text-xs text-nex-muted md:text-right">
-            © {new Date().getFullYear()} NEXCLUB · Todos los derechos reservados.
-          </div>
-        </div>
-      </footer>
+      <MarketingFooter />
     </main>
   );
 }

@@ -5,7 +5,7 @@ import {
   isRootHost,
   RAILWAY_LEGACY_HOSTS,
   ROOT_DOMAIN_ACTIVE,
-} from "@/lib/club";
+} from "@/lib/club-edge";
 
 const isPublic = createRouteMatcher([
   "/",
