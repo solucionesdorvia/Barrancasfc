@@ -9,7 +9,13 @@ import { cn } from "@/lib/utils";
 import { BrandLogo } from "@/components/brand-logo";
 import { ADMIN_NAV } from "@/components/admin/nav-items";
 
-export function AdminMobileNav() {
+export function AdminMobileNav({
+  clubName,
+  logoUrl,
+}: {
+  clubName?: string | null;
+  logoUrl?: string | null;
+} = {}) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
@@ -33,7 +39,7 @@ export function AdminMobileNav() {
   return (
     <>
       <header className="md:hidden sticky top-0 z-30 flex items-center justify-between h-14 px-4 border-b bg-background/95 backdrop-blur">
-        <BrandLogo />
+        <BrandLogo clubName={clubName} logoUrl={logoUrl} />
         <div className="flex items-center gap-1">
           <UserButton appearance={{ elements: { avatarBox: "h-7 w-7" } }} />
           <Button variant="ghost" size="icon" onClick={() => setOpen(true)} aria-label="Abrir menú">
@@ -53,7 +59,7 @@ export function AdminMobileNav() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">
-              <BrandLogo textTone="light" size={32} />
+              <BrandLogo textTone="light" size={32} clubName={clubName} logoUrl={logoUrl} />
               <Button variant="ghost" size="icon" onClick={() => setOpen(false)} aria-label="Cerrar menú" className="text-zinc-400 hover:text-white hover:bg-sidebar-accent">
                 <X className="h-5 w-5" />
               </Button>

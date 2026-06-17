@@ -7,13 +7,21 @@ import { cn } from "@/lib/utils";
 import { BrandLogo } from "@/components/brand-logo";
 import { ADMIN_NAV } from "@/components/admin/nav-items";
 
-export function AdminSidebar({ userName }: { userName: string }) {
+export function AdminSidebar({
+  userName,
+  clubName,
+  logoUrl,
+}: {
+  userName: string;
+  clubName?: string | null;
+  logoUrl?: string | null;
+}) {
   const pathname = usePathname();
 
   return (
     <aside className="hidden md:flex md:flex-col md:w-64 md:fixed md:inset-y-0 md:left-0 bg-sidebar text-sidebar-foreground border-r border-sidebar-border">
       <div className="flex items-center gap-2 px-5 h-16 border-b border-sidebar-border">
-        <BrandLogo textTone="light" size={32} />
+        <BrandLogo textTone="light" size={32} clubName={clubName} logoUrl={logoUrl} />
       </div>
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
         {ADMIN_NAV.map((item) => {
