@@ -13,6 +13,7 @@ import { KpiCard } from "@/components/admin/kpi-card";
 import { GenerateFeesButton } from "@/components/admin/generate-fees-button";
 import { MarkPaidButton } from "@/components/admin/mark-paid-button";
 import { WhatsappReminder } from "@/components/admin/whatsapp-reminder";
+import { getCurrentClub } from "@/lib/club";
 import { PaymentsToolbar } from "@/components/admin/payments-toolbar";
 import { PaymentStatusBadge } from "@/components/payment-status-badge";
 import { formatARS, formatDate, monthName, monthYear, initials, fullName, daysOverdue } from "@/lib/format";
@@ -54,6 +55,9 @@ export default async function PaymentsPage({
   const isCurrentMonth = month === now.getMonth() + 1 && year === now.getFullYear();
   const prev = shiftMonth(month, year, -1);
   const next = shiftMonth(month, year, 1);
+
+  const club = await getCurrentClub();
+  const clubName = club?.name ?? "el club";
 
   const filter: FilterKey = (Object.keys(FILTER_LABELS) as FilterKey[]).includes(searchParams.filter as FilterKey)
     ? (searchParams.filter as FilterKey)
@@ -327,6 +331,7 @@ export default async function PaymentsPage({
                             month={p.month}
                             year={p.year}
                             daysOverdue={Math.max(0, days)}
+                            clubName={clubName}
                           />
                         )}
                         <MarkPaidButton paymentId={p.id} />
@@ -389,6 +394,7 @@ export default async function PaymentsPage({
                                 month={p.month}
                                 year={p.year}
                                 daysOverdue={Math.max(0, days)}
+                                clubName={clubName}
                               />
                             )}
                             <MarkPaidButton paymentId={p.id} />

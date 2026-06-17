@@ -25,7 +25,7 @@ type Player = { id: string; firstName: string; lastName: string; category: { nam
 
 type Role = "ADMIN" | "PROFESOR" | "PADRE";
 
-export function InvitationDialog({ categories, players }: { categories: Category[]; players: Player[] }) {
+export function InvitationDialog({ categories, players, clubName }: { categories: Category[]; players: Player[]; clubName: string }) {
   const router = useRouter();
   const [, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
@@ -123,7 +123,7 @@ export function InvitationDialog({ categories, players }: { categories: Category
         ? ` para ver a ${players.filter((p) => childrenIds.has(p.id)).map((p) => p.firstName).join(", ")}`
         : "";
     return encodeURIComponent(
-      `¡Hola! Te invitamos a sumarte a *Barrancas FC* como ${roleLabel}${ctx}.\n\nIngresá a este link para crear tu cuenta:\n${url}\n\nEl link es personal y expira pronto.`
+      `¡Hola! Te invitamos a sumarte a *${clubName}* como ${roleLabel}${ctx}.\n\nIngresá a este link para crear tu cuenta:\n${url}\n\nEl link es personal y expira pronto.`
     );
   }
 

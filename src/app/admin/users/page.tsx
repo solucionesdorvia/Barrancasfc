@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { InvitationDialog } from "@/components/admin/invitation-dialog";
+import { getCurrentClub } from "@/lib/club";
 import { InvitationActions } from "@/components/admin/invitation-actions";
 import { CreateUserDialog } from "@/components/admin/create-user-dialog";
 import { initials, formatRelative, formatDate, pluralize } from "@/lib/format";
@@ -34,6 +35,8 @@ export default async function UsersListPage() {
   // URL base inferida del request actual (proto + host). Si en algún
   // momento se setea NEXT_PUBLIC_APP_URL en Railway, esa gana.
   const baseUrl = getBaseUrl();
+  const club = await getCurrentClub();
+  const clubName = club?.name ?? "el club";
 
   const [users, counts, invitations, categories, players] = await Promise.all([
     prisma.user.findMany({
@@ -85,7 +88,7 @@ export default async function UsersListPage() {
         action={
           <>
             <CreateUserDialog categories={categories} players={players} />
-            <InvitationDialog categories={categories} players={players} />
+            <InvitationDialog categories={categories} players={players} clubName={clubName} />
           </>
         }
       />

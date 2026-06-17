@@ -5,6 +5,7 @@ import { noticeCreateSchema, safeParse } from "@/lib/validators";
 import { apiBadRequest, apiOk, withErrorHandler } from "@/lib/api";
 import { sendNoticeNotification, isMailerEnabled } from "@/lib/mailer";
 import { getBaseUrl } from "@/lib/base-url";
+import { getCurrentClub } from "@/lib/club";
 
 export const POST = withErrorHandler(async (req: Request) => {
   const user = await requireRole("ADMIN");
@@ -47,12 +48,15 @@ export const POST = withErrorHandler(async (req: Request) => {
       });
       const emails = padres.map((p) => p.email).filter(Boolean);
       if (emails.length > 0) {
+        const club = await getCurrentClub();
         await sendNoticeNotification({
           recipients: emails,
           noticeTitle: notice.title,
           noticeBody: notice.body,
           isPoll: notice.pollOptions.length > 0,
           appUrl: getBaseUrl(),
+          clubName: club?.name,
+          clubPrimaryHex: club?.primary,
         });
       }
     } catch (e) {

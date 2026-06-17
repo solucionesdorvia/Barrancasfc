@@ -21,6 +21,7 @@ export function WhatsappReminder({
   month,
   year,
   daysOverdue,
+  clubName,
 }: {
   playerName: string;
   parentName: string;
@@ -28,11 +29,12 @@ export function WhatsappReminder({
   month: number;
   year: number;
   daysOverdue: number;
+  clubName: string;
 }) {
   const [open, setOpen] = useState(false);
   const [sending, setSending] = useState(false);
 
-  const baseMessage = `Hola ${parentName}! 👋\n\nTe escribimos desde *Barrancas FC* para recordarte que la cuota de ${playerName} correspondiente a *${monthName(month)} ${year}* (${formatARS(amount)}) figura como impaga${daysOverdue > 0 ? ` desde hace ${daysOverdue} ${daysOverdue === 1 ? "día" : "días"}` : ""}.\n\nPodés regularizarla por transferencia o Mercado Pago. Si ya hiciste el pago, mandanos el comprobante para actualizar el estado.\n\n¡Gracias!\n_Tesorería Barrancas FC_`;
+  const baseMessage = `Hola ${parentName}! 👋\n\nTe escribimos desde *${clubName}* para recordarte que la cuota de ${playerName} correspondiente a *${monthName(month)} ${year}* (${formatARS(amount)}) figura como impaga${daysOverdue > 0 ? ` desde hace ${daysOverdue} ${daysOverdue === 1 ? "día" : "días"}` : ""}.\n\nPodés regularizarla por transferencia o Mercado Pago. Si ya hiciste el pago, mandanos el comprobante para actualizar el estado.\n\n¡Gracias!\n_Tesorería ${clubName}_`;
 
   const [message, setMessage] = useState(baseMessage);
 

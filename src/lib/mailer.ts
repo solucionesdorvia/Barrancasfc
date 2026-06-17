@@ -30,7 +30,7 @@ type SendResult =
   | { ok: false; skipped: true; reason: string }
   | { ok: false; error: string };
 
-const FROM_DEFAULT = process.env.RESEND_FROM_EMAIL || "Barrancas FC <noreply@barrancasfc.local>";
+const FROM_DEFAULT = process.env.RESEND_FROM_EMAIL || "NEXCLUB <noreply@nexclub.app>";
 const REPLY_TO = process.env.RESEND_REPLY_TO;
 
 export function isMailerEnabled(): boolean {
@@ -89,11 +89,19 @@ export async function sendNoticeNotification(opts: {
   noticeBody: string;
   isPoll?: boolean;
   appUrl?: string;
+  /** Nombre del club que firma el mensaje. Si no viene, omite la línea. */
+  clubName?: string;
+  /** Color primario del club para el botón del mail. Default: NexClub. */
+  clubPrimaryHex?: string;
 }) {
   const valid = opts.recipients.filter((r) => /\S+@\S+\.\S+/.test(r));
   if (valid.length === 0) return { ok: false, skipped: true, reason: "no recipients" } as const;
 
-  const link = opts.appUrl ? `<p style="margin:24px 0;"><a href="${opts.appUrl}/padre/avisos" style="background:#dc2626;color:white;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:600;">Abrir en Barrancas FC</a></p>` : "";
+  const buttonColor = opts.clubPrimaryHex ?? "#0F766E";
+  const club = opts.clubName ?? "tu club";
+  const link = opts.appUrl
+    ? `<p style="margin:24px 0;"><a href="${opts.appUrl}/padre/avisos" style="background:${buttonColor};color:white;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:600;">Abrir el aviso</a></p>`
+    : "";
 
   const html = `
     <div style="font-family:-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;max-width:560px;margin:0 auto;padding:20px;">
@@ -102,7 +110,7 @@ export async function sendNoticeNotification(opts: {
       <div style="font-size:14px;color:#334155;line-height:1.6;white-space:pre-line;">${escapeHtml(opts.noticeBody)}</div>
       ${link}
       <hr style="border:none;border-top:1px solid #e2e8f0;margin:24px 0;" />
-      <p style="font-size:11px;color:#94a3b8;margin:0 0 4px;">Estás recibiendo este mail porque sos parte del Club Barrancas FC.</p>
+      <p style="font-size:11px;color:#94a3b8;margin:0 0 4px;">Estás recibiendo este mail porque sos parte de ${escapeHtml(club)}.</p>
       <p style="font-size:10px;color:#cbd5e1;margin:0;">Enviado desde NEXCLUB · plataforma de gestión del club.</p>
     </div>
   `;
