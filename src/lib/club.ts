@@ -9,7 +9,7 @@ import { prisma } from "@/lib/prisma";
  */
 export type ClubBrand = {
   id: string;
-  slug: string;
+  slug: string | null;
   name: string;
   logo: string | null;
   tagline: string | null;
@@ -33,7 +33,7 @@ const NEX_DEFAULTS = {
 
 function hydrate(c: {
   id: string;
-  slug: string;
+  slug: string | null;
   name: string;
   logo: string | null;
   tagline: string | null;
