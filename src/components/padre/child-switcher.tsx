@@ -27,7 +27,7 @@ export function ChildSwitcher({ items, activeId }: { items: Child[]; activeId: s
             onClick={() => select(c.id)}
             className={cn(
               "flex items-center gap-2 px-3 py-2 rounded-full border text-sm shrink-0 transition-all",
-              active ? "bg-barrancas-red text-white border-barrancas-red" : "bg-background"
+              active ? "bg-club text-white border-club" : "bg-background"
             )}
           >
             <Avatar className="h-6 w-6">

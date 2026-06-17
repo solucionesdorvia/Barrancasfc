@@ -215,7 +215,7 @@ export function EventDialog({
                 type="checkbox"
                 checked={form.repeat}
                 onChange={(e) => setForm({ ...form, repeat: e.target.checked })}
-                className="h-4 w-4 rounded accent-barrancas-red"
+                className="h-4 w-4 rounded accent-club"
               />
               <Repeat className="h-3.5 w-3.5 text-muted-foreground" />
               <span className="text-sm font-medium">Repetir este evento</span>
@@ -261,7 +261,7 @@ export function EventDialog({
                             className={cn(
                               "h-8 w-8 rounded-md text-xs font-semibold transition-colors",
                               active
-                                ? "bg-barrancas-red text-white"
+                                ? "bg-club text-white"
                                 : "bg-background border text-muted-foreground hover:text-foreground"
                             )}
                           >

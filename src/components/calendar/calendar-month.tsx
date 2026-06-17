@@ -139,7 +139,7 @@ export function CalendarMonth({
                       <span
                         className={cn(
                           "text-xs font-medium tabular-nums",
-                          isToday && "h-5 w-5 rounded-full bg-barrancas-red text-white grid place-items-center text-[10px] font-bold",
+                          isToday && "h-5 w-5 rounded-full bg-club text-white grid place-items-center text-[10px] font-bold",
                           !isToday && isWeekend && "text-red-500"
                         )}
                       >

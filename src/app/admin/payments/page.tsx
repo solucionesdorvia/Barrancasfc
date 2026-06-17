@@ -193,7 +193,7 @@ export default async function PaymentsPage({
             {!isCurrentMonth && (
               <Link
                 href={buildHref({ m: now.getMonth() + 1, y: now.getFullYear() })}
-                className="text-[10px] text-barrancas-red hover:underline"
+                className="text-[10px] text-club hover:underline"
               >
                 Volver al mes actual
               </Link>
@@ -257,7 +257,7 @@ export default async function PaymentsPage({
                   href={buildHref({ filter: k })}
                   className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
                     filter === k
-                      ? "bg-barrancas-red text-white"
+                      ? "bg-club text-white"
                       : "bg-background border text-muted-foreground hover:text-foreground"
                   }`}
                 >

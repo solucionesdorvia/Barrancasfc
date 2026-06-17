@@ -133,7 +133,7 @@ export function CreateNoticeButton() {
               type="button"
               onClick={() => setIsPoll((v) => !v)}
               className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
-                isPoll ? "border-barrancas-red bg-rose-50 text-barrancas-red" : "border-input hover:bg-muted/50"
+                isPoll ? "border-club bg-rose-50 text-club" : "border-input hover:bg-muted/50"
               }`}
             >
               <BarChart3 className="h-3.5 w-3.5" />

@@ -142,7 +142,7 @@ export function InstallmentPlanDialog({
             </div>
             <div className="flex items-baseline justify-between">
               <span className="text-sm">{installments} cuotas mensuales de</span>
-              <span className="text-xl font-bold text-barrancas-red tabular-nums">{formatARS(monthly)}</span>
+              <span className="text-xl font-bold text-club tabular-nums">{formatARS(monthly)}</span>
             </div>
           </div>
 

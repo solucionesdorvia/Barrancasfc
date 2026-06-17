@@ -93,7 +93,7 @@ export default async function PadreHomePage({ searchParams }: { searchParams: { 
 
       {/* Hero del hijo */}
       <Card className="overflow-hidden border-0 shadow-lg">
-        <div className="bg-gradient-to-br from-barrancas-red via-red-600 to-red-800 text-white p-5 relative">
+        <div className="bg-gradient-to-br from-club via-red-600 to-red-800 text-white p-5 relative">
           <div className="absolute top-0 right-0 -mr-12 -mt-12 h-32 w-32 rounded-full bg-white/10 blur-2xl pointer-events-none" />
           <div className="flex items-center gap-3 relative">
             <Avatar className="h-14 w-14 border-2 border-white shadow-lg">
@@ -230,7 +230,7 @@ export default async function PadreHomePage({ searchParams }: { searchParams: { 
       <div>
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-sm font-semibold">Avisos del club</h2>
-          <PadreLink href="/padre/avisos" className="text-xs text-barrancas-red font-medium">Ver todos</PadreLink>
+          <PadreLink href="/padre/avisos" className="text-xs text-club font-medium">Ver todos</PadreLink>
         </div>
         <div className="space-y-2">
           {notices.length === 0 ? (

@@ -187,7 +187,7 @@ export default async function DocumentsPage({
             href={vistaHref(k)}
             className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
               vista === k
-                ? "bg-barrancas-red text-white"
+                ? "bg-club text-white"
                 : "bg-background border text-muted-foreground hover:text-foreground"
             }`}
           >

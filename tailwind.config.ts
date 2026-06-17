@@ -76,12 +76,6 @@ const config: Config = {
           surface: "var(--nex-surface)",
           bg: "var(--nex-bg)",
         },
-        /* Legacy — preservados por compat durante migración.
-           Reemplazar progresivamente por `club.*`. */
-        barrancas: {
-          red: "var(--club-primary)",
-          dark: "#0B0B0F",
-        },
       },
       borderRadius: {
         lg: "var(--radius)",

@@ -72,7 +72,7 @@ export function OnboardingForm({ initialFirstName, initialLastName, email, child
   return (
     <div className="space-y-5">
       <div className="text-center">
-        <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-rose-100 text-barrancas-red mb-3">
+        <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-rose-100 text-club mb-3">
           <Heart className="h-5 w-5" />
         </div>
         <h1 className="text-xl font-bold leading-tight">Completá tus datos</h1>

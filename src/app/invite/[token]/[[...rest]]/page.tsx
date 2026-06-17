@@ -22,9 +22,9 @@ export default async function InvitePage({ params }: { params: { token: string; 
 
   // Shell oscuro común a las 3 vistas (válida / inválida / ya logueado)
   return (
-    <main className="min-h-dvh bg-gradient-to-br from-barrancas-dark via-zinc-950 to-zinc-900 text-white relative overflow-hidden">
+    <main className="min-h-dvh bg-gradient-to-br from-nex-ink via-zinc-950 to-zinc-900 text-white relative overflow-hidden">
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 -left-32 h-96 w-96 bg-barrancas-red/20 rounded-full blur-3xl" />
+        <div className="absolute top-0 -left-32 h-96 w-96 bg-club/20 rounded-full blur-3xl" />
         <div className="absolute bottom-0 -right-32 h-96 w-96 bg-red-600/15 rounded-full blur-3xl" />
       </div>
 
@@ -92,7 +92,7 @@ async function ValidContent({
       <div className="bg-white/5 border border-white/10 backdrop-blur rounded-2xl p-5 text-center space-y-2">
         <p className="text-[10px] uppercase tracking-widest text-zinc-400">Invitación a {club?.name ?? "Barrancas FC"}</p>
         <h1 className="text-2xl font-bold">
-          Te invitaron como <span className="text-barrancas-red">{ROLE_LABEL[invitation.role]}</span>
+          Te invitaron como <span className="text-club">{ROLE_LABEL[invitation.role]}</span>
         </h1>
         {invitation.title && <p className="text-sm text-zinc-300">{invitation.title}</p>}
         {contextLine && <p className="text-sm text-zinc-400">{contextLine}</p>}
@@ -101,7 +101,7 @@ async function ValidContent({
       {alreadyLogged ? (
         <div className="bg-white/5 border border-white/10 rounded-2xl p-5 text-center space-y-3">
           <p className="text-sm">Ya tenés sesión iniciada en Clerk.</p>
-          <Button asChild className="w-full bg-barrancas-red hover:bg-barrancas-red/90 gap-2">
+          <Button asChild className="w-full bg-club hover:bg-club/90 gap-2">
             <Link href={`/invite/${token}/accept`}>
               Aceptar invitación <ArrowRight className="h-4 w-4" />
             </Link>

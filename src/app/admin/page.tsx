@@ -151,7 +151,7 @@ export default async function AdminDashboardPage() {
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
-              <TrendingUp className="h-4 w-4 text-barrancas-red" /> Cobranza últimos 6 meses
+              <TrendingUp className="h-4 w-4 text-club" /> Cobranza últimos 6 meses
             </CardTitle>
             <CardDescription>Cuotas cobradas vs pendientes</CardDescription>
           </CardHeader>

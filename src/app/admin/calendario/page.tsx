@@ -90,7 +90,7 @@ function FilterLink({ active, href, label }: { active: boolean; href: string; la
     <a
       href={href}
       className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-        active ? "bg-barrancas-red text-white" : "text-muted-foreground hover:bg-muted"
+        active ? "bg-club text-white" : "text-muted-foreground hover:bg-muted"
       }`}
     >
       {label}

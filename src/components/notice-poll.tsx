@@ -62,7 +62,7 @@ export function NoticePoll({ noticeId, options, closesAt, myVote, counts, showRe
             disabled={voting || isClosed}
             className={cn(
               "relative w-full text-left rounded-md border overflow-hidden transition-all",
-              isMine ? "border-barrancas-red bg-rose-50" : "border-input bg-background hover:bg-muted/50",
+              isMine ? "border-club bg-rose-50" : "border-input bg-background hover:bg-muted/50",
               isClosed && "cursor-default opacity-90"
             )}
           >
@@ -71,7 +71,7 @@ export function NoticePoll({ noticeId, options, closesAt, myVote, counts, showRe
               <div
                 className={cn(
                   "absolute inset-y-0 left-0 transition-all",
-                  isMine ? "bg-barrancas-red/15" : "bg-zinc-200/60"
+                  isMine ? "bg-club/15" : "bg-zinc-200/60"
                 )}
                 style={{ width: `${pct}%` }}
               />
@@ -79,7 +79,7 @@ export function NoticePoll({ noticeId, options, closesAt, myVote, counts, showRe
             <div className="relative flex items-center gap-2 px-3 py-2.5">
               <div className={cn(
                 "h-5 w-5 rounded-full border-2 grid place-items-center shrink-0",
-                isMine ? "border-barrancas-red bg-barrancas-red text-white" : "border-zinc-300"
+                isMine ? "border-club bg-club text-white" : "border-zinc-300"
               )}>
                 {isMine && <Check className="h-3 w-3" />}
               </div>

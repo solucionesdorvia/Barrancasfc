@@ -68,13 +68,13 @@ export default function AcceptInvitationPage({ params }: { params: { token: stri
   }, [params.token, router]);
 
   return (
-    <main className="min-h-dvh bg-gradient-to-br from-barrancas-dark via-zinc-950 to-zinc-900 text-white grid place-items-center p-6">
+    <main className="min-h-dvh bg-gradient-to-br from-nex-ink via-zinc-950 to-zinc-900 text-white grid place-items-center p-6">
       <div className="max-w-sm w-full text-center space-y-5">
         <Image src="/logo.png" alt="Barrancas FC" width={70} height={92} priority className="mx-auto drop-shadow-2xl" />
 
         {status === "loading" && (
           <div className="bg-white/5 border border-white/10 rounded-2xl p-6 space-y-3">
-            <Loader2 className="h-10 w-10 animate-spin mx-auto text-barrancas-red" />
+            <Loader2 className="h-10 w-10 animate-spin mx-auto text-club" />
             <p className="text-sm">Activando tu cuenta…</p>
           </div>
         )}
@@ -87,7 +87,7 @@ export default function AcceptInvitationPage({ params }: { params: { token: stri
             <h1 className="text-xl font-bold">¡Listo!</h1>
             <p className="text-sm text-zinc-400">Tu cuenta quedó vinculada al club.</p>
             {/* Fallback por si el router.replace no se ejecuta (raro pero posible) */}
-            <Button asChild className="w-full bg-barrancas-red hover:bg-barrancas-red/90">
+            <Button asChild className="w-full bg-club hover:bg-club/90">
               <Link href={destination}>Continuar</Link>
             </Button>
           </div>

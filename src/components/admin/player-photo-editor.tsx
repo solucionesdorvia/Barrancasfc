@@ -107,7 +107,7 @@ export function PlayerPhotoEditor({ playerId, initialPhoto, initialsLabel, canEd
             type="button"
             onClick={() => { reset(); setOpen(true); }}
             aria-label="Cambiar foto del jugador"
-            className="absolute -bottom-1 -right-1 h-8 w-8 rounded-full bg-barrancas-red text-white grid place-items-center shadow-md hover:scale-105 transition-transform"
+            className="absolute -bottom-1 -right-1 h-8 w-8 rounded-full bg-club text-white grid place-items-center shadow-md hover:scale-105 transition-transform"
           >
             <Camera className="h-4 w-4" />
           </button>
@@ -129,7 +129,7 @@ export function PlayerPhotoEditor({ playerId, initialPhoto, initialsLabel, canEd
               type="button"
               onClick={() => setMode("upload")}
               className={`px-3 py-1 text-xs font-medium rounded gap-1.5 inline-flex items-center transition-colors ${
-                mode === "upload" ? "bg-barrancas-red text-white" : "text-muted-foreground hover:text-foreground"
+                mode === "upload" ? "bg-club text-white" : "text-muted-foreground hover:text-foreground"
               }`}
             >
               <Upload className="h-3 w-3" /> Subir archivo
@@ -138,7 +138,7 @@ export function PlayerPhotoEditor({ playerId, initialPhoto, initialsLabel, canEd
               type="button"
               onClick={() => setMode("url")}
               className={`px-3 py-1 text-xs font-medium rounded gap-1.5 inline-flex items-center transition-colors ${
-                mode === "url" ? "bg-barrancas-red text-white" : "text-muted-foreground hover:text-foreground"
+                mode === "url" ? "bg-club text-white" : "text-muted-foreground hover:text-foreground"
               }`}
             >
               <LinkIcon className="h-3 w-3" /> Pegar URL

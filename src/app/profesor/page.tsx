@@ -124,7 +124,7 @@ export default async function ProfesorPage({
                 key={c.id}
                 href={`/profesor?categoria=${c.id}${searchParams.fecha ? `&fecha=${searchParams.fecha}` : ""}`}
                 className={`shrink-0 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                  isActive ? "bg-barrancas-red text-white" : "bg-background border text-muted-foreground hover:text-foreground"
+                  isActive ? "bg-club text-white" : "bg-background border text-muted-foreground hover:text-foreground"
                 }`}
               >
                 {c.name}

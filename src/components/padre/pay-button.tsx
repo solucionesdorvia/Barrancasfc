@@ -66,7 +66,7 @@ export function PayButton({
   return (
     <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setStep("confirm"); }}>
       <DialogTrigger asChild>
-        <Button className="w-full h-12 gap-2 bg-barrancas-red hover:bg-barrancas-red/90 shadow-sm">
+        <Button className="w-full h-12 gap-2 bg-club hover:bg-club/90 shadow-sm">
           <CreditCard className="h-4 w-4" /> Pagar ahora
         </Button>
       </DialogTrigger>
@@ -87,7 +87,7 @@ export function PayButton({
             </div>
             <DialogFooter>
               <Button variant="ghost" onClick={() => setOpen(false)}>Cancelar</Button>
-              <Button onClick={pay} className="bg-barrancas-red hover:bg-barrancas-red/90 gap-2">
+              <Button onClick={pay} className="bg-club hover:bg-club/90 gap-2">
                 <CreditCard className="h-4 w-4" /> Continuar al pago
               </Button>
             </DialogFooter>
@@ -95,7 +95,7 @@ export function PayButton({
         )}
         {step === "loading" && (
           <div className="py-14 text-center space-y-4">
-            <Loader2 className="h-10 w-10 animate-spin mx-auto text-barrancas-red" />
+            <Loader2 className="h-10 w-10 animate-spin mx-auto text-club" />
             <p className="text-sm">Procesando pago seguro…</p>
             <p className="text-xs text-muted-foreground">No cierres esta ventana.</p>
           </div>

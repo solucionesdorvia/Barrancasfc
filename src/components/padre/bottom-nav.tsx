@@ -30,11 +30,11 @@ export function PadreBottomNav() {
               aria-current={active ? "page" : undefined}
               className={cn(
                 "relative flex flex-col items-center gap-0.5 py-2.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:bg-muted min-h-[56px] justify-center",
-                active ? "text-barrancas-red" : "text-muted-foreground hover:text-foreground"
+                active ? "text-club" : "text-muted-foreground hover:text-foreground"
               )}
             >
               {active && (
-                <span className="absolute top-0 inset-x-6 h-0.5 bg-barrancas-red rounded-full" />
+                <span className="absolute top-0 inset-x-6 h-0.5 bg-club rounded-full" />
               )}
               <Icon className={cn("h-5 w-5 transition-transform", active && "scale-110")} />
               {it.label}

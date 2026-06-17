@@ -113,7 +113,7 @@ export function CalendarList({
       ))}
       {emptyHref && (
         <p className="text-xs text-center text-muted-foreground pt-2">
-          ¿No encontrás un evento? <Link href={emptyHref} className="text-barrancas-red underline">Ver pasados</Link>
+          ¿No encontrás un evento? <Link href={emptyHref} className="text-club underline">Ver pasados</Link>
         </p>
       )}
     </div>
