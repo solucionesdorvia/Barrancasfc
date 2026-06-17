@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { headers } from "next/headers";
+import { notFound, redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import {
   ArrowRight,
@@ -11,15 +13,31 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NexClubWordmark } from "@/components/nex/wordmark";
+import { prisma } from "@/lib/prisma";
 
 // TODO: número/email real del CTA "Agendá una demo" — cuando lo tengas,
 // reemplazá WHATSAPP_DEMO por tu wa.me con el número de NexClub.
 const WHATSAPP_DEMO =
   "https://wa.me/5491100000000?text=Hola%20NEXCLUB%2C%20me%20gustar%C3%ADa%20agendar%20una%20demo.";
 
-export default function NexClubLandingPage() {
-  // Si el usuario está logueado, mostramos un atajo discreto al panel
-  // (no redirect automático: la landing es la cara pública del producto).
+export default async function NexClubLandingPage() {
+  // Si el host es un subdomain de club (`<slug>.nexclub.app`), la `/` no
+  // sirve la landing — la persona ya entró a "su club" y la queremos
+  // mandar directo al panel. El middleware inyecta `x-club-slug`.
+  const clubSlug = headers().get("x-club-slug");
+  if (clubSlug) {
+    const club = await prisma.club.findUnique({
+      where: { slug: clubSlug },
+      select: { id: true },
+    });
+    if (!club) notFound();
+    const { userId } = auth();
+    redirect(userId ? "/admin" : "/sign-in");
+  }
+
+  // Sin subdomain: estamos en `nexclub.app/` (o legacy URL). Servimos la
+  // landing pública. Si el usuario está logueado, le mostramos el atajo
+  // al panel arriba a la derecha (sin redirect automático).
   const { userId } = auth();
 
   return (
