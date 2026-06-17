@@ -251,6 +251,27 @@ export const playerProfileUpdateSchema = z.object({
   scholarshipPercent: z.number().int().min(0).max(100).optional().nullable(),
 });
 
+export const clubCreateSchema = z.object({
+  slug: z
+    .string()
+    .trim()
+    .min(2, "Slug muy corto")
+    .max(40)
+    .regex(/^[a-z0-9-]+$/, "Solo minúsculas, números y guiones"),
+  name: z.string().trim().min(2).max(120),
+  logo: z.string().url().optional().or(z.literal("")),
+  tagline: z.string().max(120).optional().or(z.literal("")),
+  primary: z.string().regex(/^#[0-9a-fA-F]{6}$/, "Hex inválido").optional().or(z.literal("")),
+  primaryHover: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional().or(z.literal("")),
+  primarySoft: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional().or(z.literal("")),
+  onPrimary: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional().or(z.literal("")),
+  accent: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional().or(z.literal("")),
+  contactWhatsapp: z.string().max(30).optional().or(z.literal("")),
+  contactEmail: z.string().email().optional().or(z.literal("")),
+});
+
+export const clubUpdateSchema = clubCreateSchema.partial();
+
 export const userUpdateSchema = z.object({
   name: z.string().min(1).max(120).optional(),
   title: z.string().max(80).optional().nullable(),

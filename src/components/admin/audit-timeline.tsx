@@ -64,6 +64,8 @@ const ICONS: Record<AuditAction, LucideIcon> = {
   PROFILE_COMPLETED: UserPlus,
   USER_UPDATED: Pencil,
   USER_DELETED: MailX,
+  CLUB_CREATED: UserPlus,
+  CLUB_UPDATED: Pencil,
 };
 
 const TONES: Record<AuditAction, string> = {
@@ -101,6 +103,8 @@ const TONES: Record<AuditAction, string> = {
   PROFILE_COMPLETED: "bg-emerald-100 text-emerald-700",
   USER_UPDATED: "bg-zinc-100 text-zinc-700",
   USER_DELETED: "bg-red-100 text-red-700",
+  CLUB_CREATED: "bg-emerald-100 text-emerald-700",
+  CLUB_UPDATED: "bg-zinc-100 text-zinc-700",
 };
 
 type LogEntry = AuditLog & {

@@ -34,7 +34,9 @@ export type AuditAction =
   | "FAMILY_GROUP_UPDATED"
   | "PROFILE_COMPLETED"
   | "USER_UPDATED"
-  | "USER_DELETED";
+  | "USER_DELETED"
+  | "CLUB_CREATED"
+  | "CLUB_UPDATED";
 
 export const AUDIT_ACTION_LABEL: Record<AuditAction, string> = {
   PAYMENT_MARKED_PAID: "Pago marcado como cobrado",
@@ -71,6 +73,8 @@ export const AUDIT_ACTION_LABEL: Record<AuditAction, string> = {
   PROFILE_COMPLETED: "Perfil completado por el usuario",
   USER_UPDATED: "Usuario modificado",
   USER_DELETED: "Usuario eliminado",
+  CLUB_CREATED: "Club creado en NEXCLUB",
+  CLUB_UPDATED: "Club modificado",
 };
 
 export type AuditEntityType =
@@ -85,7 +89,8 @@ export type AuditEntityType =
   | "Invitation"
   | "User"
   | "Notice"
-  | "StaffTask";
+  | "StaffTask"
+  | "Club";
 
 export async function logAudit(input: {
   userId: string;

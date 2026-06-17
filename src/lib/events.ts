@@ -21,9 +21,11 @@ export async function getVisibleEvents(opts: {
 }) {
   const { role, childrenCategoryIds = [], assignedCategoryIds = [], from, to } = opts;
 
-  const audienceOr: { audience: "ALL" | Role | "CATEGORY"; categoryId?: { in: string[] } | string }[] = [
+  type EventAudience = "ALL" | "ADMIN" | "PROFESOR" | "PADRE" | "CATEGORY";
+  const roleAudience = role as EventAudience;
+  const audienceOr: { audience: EventAudience; categoryId?: { in: string[] } | string }[] = [
     { audience: "ALL" },
-    { audience: role },
+    { audience: roleAudience },
   ];
   if (role === "PADRE" && childrenCategoryIds.length > 0) {
     audienceOr.push({ audience: "CATEGORY", categoryId: { in: childrenCategoryIds } });
