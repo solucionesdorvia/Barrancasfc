@@ -2,6 +2,45 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================================
+   NEXCLUB · DESIGN TOKENS — dos capas que NO se mezclan
+   1. --nex-*   marca NexClub (FIJA, esmeralda). Login, landing,
+                powered-by, loaders, footer.
+   2. --club-*  identidad del club (VARIABLE). Pisada en runtime
+                desde el <html style="..."> con los colores del
+                Club leído de DB. Default: hereda de --nex-*.
+   Regla: en el panel manda `--club-*`; en los bordes manda `--nex-*`.
+   ============================================================ */
+:root {
+  /* CAPA 1 · MARCA NEXCLUB (fija, esmeralda) */
+  --nex-primary:        #0F766E;
+  --nex-primary-hover:  #0B574F;
+  --nex-primary-soft:   #D7F0E8;
+  --nex-on-primary:     #E1F5EE;
+  --nex-accent:         #F97316;
+
+  --nex-ink:            #14211C;
+  --nex-text-secondary: #4B5A54;
+  --nex-text-tertiary:  #8A9691;
+  --nex-border:         #DDE5E1;
+  --nex-bg:             #EFFAF5;
+  --nex-surface:        #FFFFFF;
+
+  --nex-success:        #16A34A;
+  --nex-warning:        #CA8A04;
+  --nex-danger:         #DC2626;
+  --nex-info:           #2563EB;
+
+  /* CAPA 2 · IDENTIDAD DEL CLUB
+     Defaults heredan NexClub. El layout del panel los pisa con
+     `style="--club-primary: <DB.primary>; ..."` */
+  --club-primary:       var(--nex-primary);
+  --club-primary-hover: var(--nex-primary-hover);
+  --club-primary-soft:  var(--nex-primary-soft);
+  --club-on-primary:    var(--nex-on-primary);
+  --club-accent:        var(--nex-accent);
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

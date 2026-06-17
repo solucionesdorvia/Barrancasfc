@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { esES } from "@clerk/localizations";
 import { Toaster } from "sonner";
+import { getCurrentClub, clubCssVars } from "@/lib/club";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -83,12 +84,21 @@ const clerkLocalization: any = {
 };
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  // Resolvemos el club del request (subdomain o fallback al único club que hay
+  // hoy). Inyectamos sus colores como CSS vars en el <html> para que el resto
+  // de la UI los consuma via `bg-club`, `text-club`, etc.
+  const club = await getCurrentClub();
   return (
     <ClerkProvider localization={clerkLocalization}>
-      <html lang="es" suppressHydrationWarning>
+      <html
+        lang="es"
+        suppressHydrationWarning
+        data-club={club?.slug ?? "default"}
+        style={clubCssVars(club)}
+      >
         <body className={`${inter.variable} font-sans antialiased`}>
           {children}
           <Toaster position="top-right" richColors />

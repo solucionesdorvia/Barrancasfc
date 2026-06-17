@@ -54,8 +54,32 @@ const config: Config = {
           accent: "hsl(var(--sidebar-accent))",
           border: "hsl(var(--sidebar-border))",
         },
+        /* Identidad del club (variable, viene de DB vía CSS vars).
+           Usar en el panel: bg-club, text-club, hover:bg-club-hover. */
+        club: {
+          DEFAULT: "var(--club-primary)",
+          hover: "var(--club-primary-hover)",
+          soft: "var(--club-primary-soft)",
+          foreground: "var(--club-on-primary)",
+          accent: "var(--club-accent)",
+        },
+        /* Marca NEXCLUB (fija, esmeralda). Usar SOLO en login,
+           landing, footer, powered-by. */
+        nex: {
+          DEFAULT: "var(--nex-primary)",
+          hover: "var(--nex-primary-hover)",
+          soft: "var(--nex-primary-soft)",
+          foreground: "var(--nex-on-primary)",
+          accent: "var(--nex-accent)",
+          ink: "var(--nex-ink)",
+          muted: "var(--nex-text-secondary)",
+          surface: "var(--nex-surface)",
+          bg: "var(--nex-bg)",
+        },
+        /* Legacy — preservados por compat durante migración.
+           Reemplazar progresivamente por `club.*`. */
         barrancas: {
-          red: "#C8102E",
+          red: "var(--club-primary)",
           dark: "#0B0B0F",
         },
       },

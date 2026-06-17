@@ -108,15 +108,39 @@ enum InstallmentPlanStatus {
   CANCELLED
 }
 
+/// Cada Club es un tenant de NEXCLUB. Lo identificamos por `slug` para que
+/// pueda servir desde un subdominio (ej. barrancas.nexclub.app) o, en el
+/// futuro, desde un dominio propio (customDomain).
+///
+/// El branding (colores, logo, nombre, tagline) vive acá → el frontend lo
+/// lee y aplica como CSS vars en el <html>. Agregar un club nuevo en
+/// producción no requiere deploy, solo un INSERT.
 model Club {
-  id          String       @id @default(cuid())
-  name        String
-  logo        String?
-  createdAt   DateTime     @default(now())
-  players     Player[]
-  categories  Category[]
-  users       User[]
-  invitations Invitation[]
+  id            String       @id @default(cuid())
+  slug          String       @unique          // "barrancas" → barrancas.nexclub.app
+  name          String                         // "Barrancas FC"
+  logo          String?                        // URL del escudo
+  tagline       String?                        // bajada opcional ("Inferiores · Buenos Aires")
+  /// Paleta principal del club. Si quedan null, el frontend usa los
+  /// defaults --nex-* (esmeralda NexClub).
+  primary       String?      // ej "#0F6E56"
+  primaryHover  String?      // ej "#0A5443"
+  primarySoft   String?      // ej "#E1F5EE"
+  onPrimary     String?      // ej "#E1F5EE"
+  accent        String?      // ej "#F97316"
+  /// Contacto desde el que firman WhatsApp/mailer.
+  contactWhatsapp String?
+  contactEmail    String?
+  /// Para Pro: dominio propio del club. Cuando esté seteado, el middleware
+  /// también resuelve este host como este club.
+  customDomain  String?      @unique
+  createdAt     DateTime     @default(now())
+  players       Player[]
+  categories    Category[]
+  users         User[]
+  invitations   Invitation[]
+
+  @@index([slug])
 }
 
 model User {
