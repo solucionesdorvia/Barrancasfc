@@ -18,6 +18,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { KpiCard } from "@/components/admin/kpi-card";
 import { ApproveFitnessButton } from "@/components/admin/approve-fitness-button";
 import { UploadDocumentButton } from "@/components/admin/upload-document-button";
+import { PlayerFilterToolbar } from "@/components/admin/player-filter-toolbar";
 import { formatRelative, formatDate, initials, fullName, pluralize } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
@@ -54,11 +55,13 @@ const VISTA_LABEL: Record<VistaKey, string> = {
 export default async function DocumentsPage({
   searchParams,
 }: {
-  searchParams: { vista?: string };
+  searchParams: { vista?: string; q?: string; cat?: string };
 }) {
   const vista: VistaKey = (Object.keys(VISTA_LABEL) as VistaKey[]).includes(searchParams.vista as VistaKey)
     ? (searchParams.vista as VistaKey)
     : "todos";
+  const q = searchParams.q?.trim() ?? "";
+  const cat = searchParams.cat?.trim() ?? "";
 
   // where según vista. Mantenemos los counts del resto para los chips.
   const whereByVista = {
@@ -67,7 +70,7 @@ export default async function DocumentsPage({
     cobrables: { status: "ACTIVE" as const, category: { type: { not: "PROFESIONAL" as const } } },
   };
 
-  // Counts en paralelo para los chips
+  // Counts en paralelo para los chips (sobre la vista, sin filtros adicionales)
   const [cntTodos, cntActivos, cntCobrables] = await Promise.all([
     prisma.player.count({ where: whereByVista.todos }),
     prisma.player.count({ where: whereByVista.activos }),
@@ -79,10 +82,22 @@ export default async function DocumentsPage({
     cobrables: cntCobrables,
   };
 
-  // Plantel según la vista elegida
-  const players = await prisma.player.findMany({
-    where: whereByVista[vista],
-    select: {
+  // Componemos el where final: vista + filtros del toolbar (q + categoría)
+  const baseWhere = whereByVista[vista] as Record<string, unknown>;
+  const where: Record<string, unknown> = { ...baseWhere };
+  if (q) {
+    where.OR = [
+      { firstName: { contains: q, mode: "insensitive" } },
+      { lastName: { contains: q, mode: "insensitive" } },
+    ];
+  }
+  if (cat) where.categoryId = cat;
+
+  // Plantel según la vista elegida + filtros + categorías para el toolbar
+  const [players, categories] = await Promise.all([
+    prisma.player.findMany({
+      where,
+      select: {
       id: true,
       firstName: true,
       lastName: true,
@@ -96,7 +111,12 @@ export default async function DocumentsPage({
       _count: { select: { parents: true, documents: true } },
     },
     orderBy: [{ lastName: "asc" }],
-  });
+    }),
+    prisma.category.findMany({
+      orderBy: [{ type: "asc" }, { year: "desc" }],
+      select: { id: true, name: true },
+    }),
+  ]);
 
   const total = players.length;
   const now = new Date();
@@ -182,6 +202,9 @@ export default async function DocumentsPage({
           </Link>
         ))}
       </div>
+
+      {/* Filtros de búsqueda + división — mismo patrón que /admin/payments */}
+      <PlayerFilterToolbar categories={categories} searchPlaceholder="Buscar jugador…" />
 
       {/* KPIs de completitud */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">

@@ -31,6 +31,30 @@ export const POST = withErrorHandler(async (req: Request, { params }: { params: 
     data: { fitnessExpiry: expiry },
   });
 
+  // Si vino el certificado, lo guardamos como Document type=MEDICAL.
+  // Best-effort: si falla, igual el apto queda registrado (la fecha es lo
+  // que más importa para la operación del club).
+  let documentId: string | null = null;
+  if (parsed.data.documentDataUrl) {
+    try {
+      const docName =
+        parsed.data.documentName?.trim() ||
+        `Apto físico — vence ${expiry.toISOString().slice(0, 10)}`;
+      const doc = await prisma.document.create({
+        data: {
+          playerId: player.id,
+          name: docName,
+          type: "MEDICAL",
+          url: parsed.data.documentDataUrl,
+          uploadedBy: user.name,
+        },
+      });
+      documentId = doc.id;
+    } catch (e) {
+      console.error("[approve-fitness] failed to attach document:", e);
+    }
+  }
+
   await logAudit({
     userId: user.id,
     entityType: "Player",
@@ -40,8 +64,9 @@ export const POST = withErrorHandler(async (req: Request, { params }: { params: 
       previousExpiry: before?.toISOString() ?? null,
       newExpiry: expiry.toISOString(),
       notes: parsed.data.notes,
+      documentId,
     },
   });
 
-  return apiOk({ ok: true, expiry: expiry.toISOString() });
+  return apiOk({ ok: true, expiry: expiry.toISOString(), documentId });
 });

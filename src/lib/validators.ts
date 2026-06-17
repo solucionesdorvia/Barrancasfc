@@ -24,6 +24,20 @@ export const changePlayerStatusSchema = z.object({
 export const approveFitnessSchema = z.object({
   expiry: z.string().datetime().or(z.string().regex(/^\d{4}-\d{2}-\d{2}$/)),
   notes: z.string().max(500).optional(),
+  // Opcional: dataURL del certificado (imagen o PDF). Si viene, se crea un
+  // Document type=MEDICAL asociado al jugador.
+  documentDataUrl: z
+    .string()
+    .max(4_000_000)
+    .refine(
+      (v) =>
+        v === "" ||
+        /^data:(image\/(jpeg|jpg|png|webp|heic|heif|gif)|application\/pdf);base64,/i.test(v),
+      "El certificado tiene que ser imagen o PDF"
+    )
+    .optional()
+    .or(z.literal("")),
+  documentName: z.string().max(120).optional().or(z.literal("")),
 });
 
 export const updatePlayerFeeSchema = z.object({
