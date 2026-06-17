@@ -8,6 +8,7 @@ import { MarketingFooter } from "@/components/marketing/marketing-footer";
 import { HeroAsymmetric } from "@/components/marketing/hero-asymmetric";
 import { TrustedByStrip } from "@/components/marketing/trusted-by-strip";
 import { ThreeActsSection } from "@/components/marketing/three-acts-section";
+import { HeroDemoSlot } from "@/components/marketing/hero-demo-slot";
 import { ComparisonTable } from "@/components/marketing/comparison-table";
 import { BarrancasProofCard } from "@/components/marketing/barrancas-proof-card";
 import { FaqAccordion } from "@/components/marketing/faq-accordion";
@@ -81,7 +82,10 @@ export default async function NexClubLandingPage() {
       {/* 4. Cómo funciona — 3 actos con screenshots */}
       <ThreeActsSection />
 
-      {/* 5. Tabla comparativa — NEXCLUB vs Excel/ComET/ERP */}
+      {/* 5. Demo del producto — slot Remotion */}
+      <HeroDemoSlot />
+
+      {/* 6. Tabla comparativa — NEXCLUB vs Excel/ComET/ERP */}
       <ComparisonTable />
 
       {/* 6. Prueba social — card grande Barrancas FC */}
