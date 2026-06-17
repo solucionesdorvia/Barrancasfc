@@ -1,14 +1,16 @@
-import Image from "next/image";
 import { SignIn } from "@clerk/nextjs";
+import { NexClubWordmark } from "@/components/nex/wordmark";
+import { PoweredByNexClub } from "@/components/nex/powered-by";
 
 export default function Page() {
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-center gap-6 bg-gradient-to-br from-barrancas-dark via-zinc-950 to-zinc-900 p-6">
-      <Image src="/logo.png" alt="Barrancas FC" width={80} height={106} priority />
+    <div className="flex min-h-dvh flex-col items-center justify-center gap-6 bg-gradient-to-br from-nex-ink via-zinc-900 to-nex-primary p-6">
+      <NexClubWordmark size="lg" />
       <SignIn
         forceRedirectUrl="/"
-        appearance={{ variables: { colorPrimary: "#C8102E" } }}
+        appearance={{ variables: { colorPrimary: "#0F766E" } }}
       />
+      <PoweredByNexClub className="text-nex-soft/70 hover:text-white" />
     </div>
   );
 }

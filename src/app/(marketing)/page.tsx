@@ -14,11 +14,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { NexClubWordmark } from "@/components/nex/wordmark";
 import { prisma } from "@/lib/prisma";
+import { NEXCLUB_WHATSAPP_DEMO_URL } from "@/lib/constants";
 
-// TODO: número/email real del CTA "Agendá una demo" — cuando lo tengas,
-// reemplazá WHATSAPP_DEMO por tu wa.me con el número de NexClub.
-const WHATSAPP_DEMO =
-  "https://wa.me/5491100000000?text=Hola%20NEXCLUB%2C%20me%20gustar%C3%ADa%20agendar%20una%20demo.";
+const WHATSAPP_DEMO = NEXCLUB_WHATSAPP_DEMO_URL;
 
 export default async function NexClubLandingPage() {
   // Si el host es un subdomain de club (`<slug>.nexclub.app`), la `/` no
