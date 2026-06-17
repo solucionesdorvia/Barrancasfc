@@ -1,22 +1,15 @@
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
-import {
-  ArrowRight,
-  Users,
-  Wallet,
-  MessageCircle,
-  Sparkles,
-  Check,
-  ExternalLink,
-} from "lucide-react";
+import { Check, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MarketingHeader } from "@/components/marketing/marketing-header";
 import { MarketingFooter } from "@/components/marketing/marketing-footer";
+import { HeroAsymmetric } from "@/components/marketing/hero-asymmetric";
+import { TrustedByStrip } from "@/components/marketing/trusted-by-strip";
+import { ThreeActsSection } from "@/components/marketing/three-acts-section";
 import { prisma } from "@/lib/prisma";
 import { NEXCLUB_WHATSAPP_DEMO_URL } from "@/lib/constants";
-
-const WHATSAPP_DEMO = NEXCLUB_WHATSAPP_DEMO_URL;
 
 export default async function NexClubLandingPage() {
   // Si el host es un subdomain de club (`<slug>.nexclub.app`), la `/` no
@@ -33,131 +26,58 @@ export default async function NexClubLandingPage() {
     redirect(userId ? "/admin" : "/sign-in");
   }
 
-  // Sin subdomain: estamos en `nexclub.app/` (o legacy URL). Servimos la
-  // landing pública. El header lee el estado de auth internamente.
-
   return (
     <main>
       <MarketingHeader />
 
-      {/* 1. HERO */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute -top-32 -left-32 h-96 w-96 rounded-full bg-nex-soft blur-3xl opacity-60" />
-          <div className="absolute -bottom-40 -right-32 h-96 w-96 rounded-full bg-nex-soft blur-3xl opacity-50" />
-        </div>
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 pt-16 pb-24 sm:pt-24 sm:pb-32 text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-nex-border bg-white/80 px-3 py-1 text-xs font-medium text-nex-muted">
-            <span className="h-1.5 w-1.5 rounded-full bg-nex animate-pulse" />
-            El sistema operativo de tu club
-          </div>
-          <h1 className="mt-6 text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-nex-ink leading-[1.05]">
-            Todo tu club,<br />
-            <span className="text-nex">en un solo lugar.</span>
-          </h1>
-          <p className="mt-6 mx-auto max-w-2xl text-base sm:text-lg text-nex-muted leading-relaxed">
-            NEXCLUB ordena las categorías, las cuotas y la comunicación con las familias.
-            Dejá el Excel y gestioná tu club como la institución que es.
-          </p>
-          <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
-            <Button
-              asChild
-              size="lg"
-              className="bg-nex hover:bg-nex-hover text-white gap-2 shadow-lg shadow-nex/20 h-12 text-base px-6"
-            >
-              <a href={WHATSAPP_DEMO} target="_blank" rel="noopener noreferrer">
-                Agendá una demo <ArrowRight className="h-4 w-4" />
-              </a>
-            </Button>
-            <Button
-              asChild
-              size="lg"
-              variant="outline"
-              className="border-nex-border bg-white hover:bg-nex-soft text-nex-ink h-12 text-base px-6"
-            >
-              <a href="#features">Ver cómo funciona</a>
-            </Button>
-          </div>
+      {/* 1. HERO asimétrico con mockup */}
+      <HeroAsymmetric />
 
-          {/* Confianza visual: chips de "qué hace" */}
-          <div className="mt-12 flex flex-wrap items-center justify-center gap-2 text-xs text-nex-muted">
-            <Pill>Padrón unificado</Pill>
-            <Pill>Cobranza con MercadoPago</Pill>
-            <Pill>Portal para familias</Pill>
-            <Pill>Asistencia y planteles</Pill>
-          </div>
-        </div>
-      </section>
+      {/* 2. Bar de instituciones */}
+      <TrustedByStrip />
 
-      {/* 2. EL PROBLEMA */}
-      <section className="bg-white border-y border-nex-border">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-20 sm:py-24">
-          <p className="text-[11px] uppercase tracking-widest text-nex-muted font-semibold">
-            El problema
-          </p>
-          <h2 className="mt-3 text-3xl sm:text-4xl font-bold tracking-tight text-nex-ink">
-            El Excel ya no te alcanza
-          </h2>
-          <p className="mt-6 text-base sm:text-lg text-nex-muted leading-relaxed max-w-3xl">
-            Cientos de chicos en una decena de categorías. Cuotas que se persiguen por WhatsApp.
-            Plata que no se sabe bien dónde está. Familias que no se enteran de nada.
-            <strong className="text-nex-ink"> Cuando el club crece, las planillas se caen.</strong>
-          </p>
-        </div>
-      </section>
-
-      {/* 3. SOLUCIÓN */}
-      <section className="relative">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-20 sm:py-24 text-center">
-          <p className="text-[11px] uppercase tracking-widest text-nex-muted font-semibold">
-            La solución
-          </p>
-          <h2 className="mt-3 text-3xl sm:text-4xl font-bold tracking-tight text-nex-ink">
-            Un sistema, todo el club
-          </h2>
-          <p className="mt-6 text-base sm:text-lg text-nex-muted leading-relaxed">
-            NEXCLUB reúne la gestión deportiva, la administrativa y la comunicación con las
-            familias en una sola plataforma, <strong className="text-nex-ink">con la cara de tu club</strong>.
-          </p>
-        </div>
-      </section>
-
-      {/* 4. FEATURES */}
-      <section id="features" className="bg-nex-soft/40">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-20 sm:py-24">
-          <div className="text-center mb-12">
+      {/* 3. El problema — tipografía editorial */}
+      <section className="bg-white">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-20 sm:py-28 grid grid-cols-1 md:grid-cols-12 gap-10">
+          <div className="md:col-span-4">
             <p className="text-[11px] uppercase tracking-widest text-nex-muted font-semibold">
-              Producto
+              El problema
             </p>
-            <h2 className="mt-3 text-3xl sm:text-4xl font-bold tracking-tight text-nex-ink">
-              Lo que NEXCLUB hace por tu club
+            <h2 className="mt-3 font-serif text-4xl sm:text-5xl text-nex-ink leading-[1.05] tracking-tight">
+              El Excel<br />
+              <span className="italic">ya no te alcanza.</span>
             </h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <FeatureCard
-              icon={Users}
-              title="Padrón por categorías"
-              body="Todas tus divisiones y jugadores ordenados: altas, fichas y categorías en un solo lugar."
-            />
-            <FeatureCard
-              icon={Wallet}
-              title="Cuotas y finanzas"
-              body="Cobrá las cuotas con MercadoPago, seguí a los morosos y mirá las finanzas del club en tiempo real."
-            />
-            <FeatureCard
-              icon={MessageCircle}
-              title="Portal de familias"
-              body="Cada familia ve su estado de cuenta, paga online y recibe las novedades del club."
-            />
+          <div className="md:col-span-8 md:pl-8 md:border-l border-nex-border">
+            <ul className="space-y-5 text-base sm:text-lg text-nex-ink/85 leading-relaxed">
+              <li className="flex gap-4">
+                <span className="font-serif text-2xl text-nex/60 shrink-0 leading-none">→</span>
+                <span>Una planilla por categoría. Cuando alguien edita la de Sub-15, nadie se entera.</span>
+              </li>
+              <li className="flex gap-4">
+                <span className="font-serif text-2xl text-nex/60 shrink-0 leading-none">→</span>
+                <span>11 grupos de WhatsApp para cobrar 11 cuotas. La tesorería persigue, las familias se quejan.</span>
+              </li>
+              <li className="flex gap-4">
+                <span className="font-serif text-2xl text-nex/60 shrink-0 leading-none">→</span>
+                <span>30% de cuotas atrasadas en promedio. Plata que el club no ve porque nadie la rastrea.</span>
+              </li>
+              <li className="flex gap-4">
+                <span className="font-serif text-2xl text-nex/60 shrink-0 leading-none">→</span>
+                <span>Cero visibilidad en vivo. Para saber cuánto entró este mes hay que armar un informe a mano.</span>
+              </li>
+            </ul>
+            <p className="mt-8 text-sm text-nex-muted italic max-w-xl">
+              Cuando el club crece, las planillas se caen. NEXCLUB es lo que las reemplaza.
+            </p>
           </div>
-          <p className="mt-8 text-center text-xs text-nex-muted">
-            <Sparkles className="inline h-3 w-3 mr-1 text-nex-accent" />
-            Próximamente: control médico, asistencia y más.
-          </p>
         </div>
       </section>
 
-      {/* 5. PRUEBA SOCIAL */}
+      {/* 4. Cómo funciona — 3 actos con screenshots */}
+      <ThreeActsSection />
+
+      {/* 5. Prueba social profunda */}
       <section className="bg-white border-y border-nex-border">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-20 sm:py-24">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
@@ -165,13 +85,13 @@ export default async function NexClubLandingPage() {
               <p className="text-[11px] uppercase tracking-widest text-nex-muted font-semibold">
                 Confían en NEXCLUB
               </p>
-              <h2 className="mt-3 text-2xl sm:text-3xl font-bold tracking-tight text-nex-ink">
-                Ya lo usa Barrancas FC
+              <h2 className="mt-3 font-serif text-3xl sm:text-4xl text-nex-ink leading-tight">
+                Ya lo usa <span className="italic">Barrancas FC</span>
               </h2>
             </div>
             <div className="md:col-span-2">
               <blockquote className="relative pl-6 border-l-4 border-nex">
-                <p className="text-base sm:text-lg text-nex-ink leading-relaxed italic">
+                <p className="text-base sm:text-lg text-nex-ink leading-relaxed">
                   &ldquo;Pasamos de perseguir cuotas por WhatsApp a tener el club entero
                   ordenado en una sola pantalla. Las familias pagan online, los profes
                   ven su categoría, y nosotros vemos todo.&rdquo;
@@ -180,17 +100,17 @@ export default async function NexClubLandingPage() {
                   — Dirigencia, Barrancas FC
                 </footer>
               </blockquote>
-              {/* Espacio para futuros clubes */}
               <p className="mt-6 text-xs text-nex-muted">
-                <Sparkles className="inline h-3 w-3 mr-1 text-nex-accent" />
-                Sumate y aparecé acá con tu club.
+                <a href="#contacto" className="hover:text-nex-ink underline underline-offset-2">
+                  ¿Querés aparecer acá con tu club? →
+                </a>
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 6. PARA QUIÉN */}
+      {/* 6. Para quién */}
       <section id="para-quien" className="bg-nex-bg">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-20 sm:py-24">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-start">
@@ -198,17 +118,18 @@ export default async function NexClubLandingPage() {
               <p className="text-[11px] uppercase tracking-widest text-nex-muted font-semibold">
                 Para quién
               </p>
-              <h2 className="mt-3 text-3xl sm:text-4xl font-bold tracking-tight text-nex-ink">
-                Pensado para tu club
+              <h2 className="mt-3 font-serif text-4xl sm:text-5xl text-nex-ink leading-[1.05] tracking-tight">
+                Pensado para <span className="italic text-nex">tu club</span>.
               </h2>
               <p className="mt-6 text-base sm:text-lg text-nex-muted leading-relaxed">
-                Ideal para clubes de fútbol formativo y de inferiores. Listo para escalar
-                a cualquier club, de la liga de barrio a Primera División.
+                Si tu club tiene entre 80 y 800 chicos en formativas, NEXCLUB te
+                alcanza desde el día 1. Si tenés menos, te alcanza con Excel un
+                rato más. Si tenés más, hablamos en serio.
               </p>
             </div>
             <ul className="space-y-3">
               {[
-                "Clubes con 50 a 500 jugadores activos",
+                "Clubes con 80 a 800 jugadores activos",
                 "Categorías por edad o división",
                 "Tesorería que cobra cuotas mes a mes",
                 "Dirigencia que quiere ver el club entero en una pantalla",
@@ -228,11 +149,11 @@ export default async function NexClubLandingPage() {
       {/* 7. CTA FINAL */}
       <section id="contacto" className="bg-nex-ink text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-20 sm:py-28 text-center">
-          <h2 className="text-3xl sm:text-5xl font-bold tracking-tight">
-            Profesionalizá tu club
+          <h2 className="font-serif text-4xl sm:text-6xl tracking-tight leading-[1.05]">
+            Profesionalizá <span className="italic text-nex-soft">tu club.</span>
           </h2>
           <p className="mt-5 text-base sm:text-lg text-white/70 max-w-2xl mx-auto">
-            Mostranos cómo trabajás hoy y te armamos una demo con tu club cargado.
+            Mostranos cómo trabajás hoy y te armamos una demo con tu club ya cargado.
             Sin compromiso, sin tarjeta.
           </p>
           <div className="mt-10 flex flex-col sm:flex-row gap-3 justify-center">
@@ -241,7 +162,7 @@ export default async function NexClubLandingPage() {
               size="lg"
               className="bg-nex hover:bg-nex-hover text-white gap-2 h-12 text-base px-8"
             >
-              <a href={WHATSAPP_DEMO} target="_blank" rel="noopener noreferrer">
+              <a href={NEXCLUB_WHATSAPP_DEMO_URL} target="_blank" rel="noopener noreferrer">
                 Agendá una demo <ExternalLink className="h-4 w-4" />
               </a>
             </Button>
@@ -251,33 +172,5 @@ export default async function NexClubLandingPage() {
 
       <MarketingFooter />
     </main>
-  );
-}
-
-function Pill({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="inline-flex items-center px-2.5 py-1 rounded-full border border-nex-border bg-white/80 text-nex-muted text-xs font-medium">
-      {children}
-    </span>
-  );
-}
-
-function FeatureCard({
-  icon: Icon,
-  title,
-  body,
-}: {
-  icon: typeof Users;
-  title: string;
-  body: string;
-}) {
-  return (
-    <div className="bg-white rounded-2xl border border-nex-border p-6 hover:shadow-lg hover:shadow-nex/5 transition-shadow">
-      <div className="h-10 w-10 rounded-lg bg-nex-soft text-nex grid place-items-center mb-4">
-        <Icon className="h-5 w-5" />
-      </div>
-      <h3 className="text-lg font-semibold text-nex-ink">{title}</h3>
-      <p className="mt-2 text-sm text-nex-muted leading-relaxed">{body}</p>
-    </div>
   );
 }
