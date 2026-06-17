@@ -8,6 +8,10 @@ import { MarketingFooter } from "@/components/marketing/marketing-footer";
 import { HeroAsymmetric } from "@/components/marketing/hero-asymmetric";
 import { TrustedByStrip } from "@/components/marketing/trusted-by-strip";
 import { ThreeActsSection } from "@/components/marketing/three-acts-section";
+import { ComparisonTable } from "@/components/marketing/comparison-table";
+import { BarrancasProofCard } from "@/components/marketing/barrancas-proof-card";
+import { FaqAccordion } from "@/components/marketing/faq-accordion";
+import { HumanTeamBlock } from "@/components/marketing/human-team-block";
 import { prisma } from "@/lib/prisma";
 import { NEXCLUB_WHATSAPP_DEMO_URL } from "@/lib/constants";
 
@@ -77,38 +81,11 @@ export default async function NexClubLandingPage() {
       {/* 4. Cómo funciona — 3 actos con screenshots */}
       <ThreeActsSection />
 
-      {/* 5. Prueba social profunda */}
-      <section className="bg-white border-y border-nex-border">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-20 sm:py-24">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
-            <div className="md:col-span-1 text-center md:text-left">
-              <p className="text-[11px] uppercase tracking-widest text-nex-muted font-semibold">
-                Confían en NEXCLUB
-              </p>
-              <h2 className="mt-3 font-serif text-3xl sm:text-4xl text-nex-ink leading-tight">
-                Ya lo usa <span className="italic">Barrancas FC</span>
-              </h2>
-            </div>
-            <div className="md:col-span-2">
-              <blockquote className="relative pl-6 border-l-4 border-nex">
-                <p className="text-base sm:text-lg text-nex-ink leading-relaxed">
-                  &ldquo;Pasamos de perseguir cuotas por WhatsApp a tener el club entero
-                  ordenado en una sola pantalla. Las familias pagan online, los profes
-                  ven su categoría, y nosotros vemos todo.&rdquo;
-                </p>
-                <footer className="mt-4 text-sm text-nex-muted">
-                  — Dirigencia, Barrancas FC
-                </footer>
-              </blockquote>
-              <p className="mt-6 text-xs text-nex-muted">
-                <a href="#contacto" className="hover:text-nex-ink underline underline-offset-2">
-                  ¿Querés aparecer acá con tu club? →
-                </a>
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* 5. Tabla comparativa — NEXCLUB vs Excel/ComET/ERP */}
+      <ComparisonTable />
+
+      {/* 6. Prueba social — card grande Barrancas FC */}
+      <BarrancasProofCard />
 
       {/* 6. Para quién */}
       <section id="para-quien" className="bg-nex-bg">
@@ -146,7 +123,13 @@ export default async function NexClubLandingPage() {
         </div>
       </section>
 
-      {/* 7. CTA FINAL */}
+      {/* 8. FAQ */}
+      <FaqAccordion />
+
+      {/* 9. Equipo humano */}
+      <HumanTeamBlock />
+
+      {/* 10. CTA FINAL */}
       <section id="contacto" className="bg-nex-ink text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-20 sm:py-28 text-center">
           <h2 className="font-serif text-4xl sm:text-6xl tracking-tight leading-[1.05]">
