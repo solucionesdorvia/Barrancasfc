@@ -29,9 +29,6 @@ const isClubOnly = createRouteMatcher([
   "/onboarding(.*)",
 ]);
 
-/** Rutas que solo tienen sentido en el root (`nexclub.app/super`). */
-const isRootOnly = createRouteMatcher(["/super(.*)"]);
-
 export default clerkMiddleware((auth, req) => {
   const host = (req.headers.get("host") ?? "").toLowerCase();
   const cleanHost = host.split(":")[0];
@@ -62,16 +59,9 @@ export default clerkMiddleware((auth, req) => {
   if (isRoot && isClubOnly(req)) {
     return NextResponse.redirect(new URL("/", req.url));
   }
-  if (subdomain && isRootOnly(req)) {
-    // Redirigimos a `www.<root>` en lugar del apex porque algunos hosts (GoDaddy
-    // Forwarding) sirven el apex via 301 que NO preserva el path. El wildcard
-    // cert de Railway cubre `www`, y isRootHost() ya considera www como root.
-    const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || "nexclub.app";
-    const url = new URL(req.url);
-    url.host = `www.${rootDomain}`;
-    url.port = "";
-    return NextResponse.redirect(url);
-  }
+  // /super se sirve desde cualquier host. La seguridad va por role
+  // (requireRole("SUPERADMIN") en el layout), no por host. Antes redirigíamos
+  // subdomain → root pero generaba dependencia frágil del DNS apex.
 
   // 4) Auth: las rutas protegidas requieren login (sin cambios).
   if (!isPublic(req)) {

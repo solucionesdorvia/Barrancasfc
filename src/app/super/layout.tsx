@@ -1,24 +1,16 @@
 import Link from "next/link";
-import { headers } from "next/headers";
-import { notFound } from "next/navigation";
 import { SignOutButton } from "@clerk/nextjs";
 import { LayoutDashboard, Building2, LogOut } from "lucide-react";
 import { requireRole } from "@/lib/auth";
-import { extractSubdomainFromHost } from "@/lib/club";
 import { Button } from "@/components/ui/button";
 import { NexClubWordmark } from "@/components/nex/wordmark";
 
 /**
- * Panel SUPERADMIN — solo accesible desde el root domain (nexclub.app/super).
- * Si alguien intenta entrar desde un subdomain de club, 404.
+ * Panel SUPERADMIN — accesible desde cualquier host. La seguridad es por
+ * role, no por host: requireRole("SUPERADMIN") rechaza a quien no lo tenga.
  * Layout monocromo NEXCLUB: nunca toma colores del tenant.
  */
 export default async function SuperLayout({ children }: { children: React.ReactNode }) {
-  // El middleware ya redirige subdomain → root, pero defendemos por si el
-  // bypass ocurre (legacy URLs, dev local, etc.).
-  const host = headers().get("x-host") ?? "";
-  if (extractSubdomainFromHost(host)) notFound();
-
   await requireRole("SUPERADMIN");
 
   return (
