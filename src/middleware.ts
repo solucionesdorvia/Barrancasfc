@@ -63,9 +63,12 @@ export default clerkMiddleware((auth, req) => {
     return NextResponse.redirect(new URL("/", req.url));
   }
   if (subdomain && isRootOnly(req)) {
+    // Redirigimos a `www.<root>` en lugar del apex porque algunos hosts (GoDaddy
+    // Forwarding) sirven el apex via 301 que NO preserva el path. El wildcard
+    // cert de Railway cubre `www`, y isRootHost() ya considera www como root.
     const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || "nexclub.app";
     const url = new URL(req.url);
-    url.host = rootDomain;
+    url.host = `www.${rootDomain}`;
     url.port = "";
     return NextResponse.redirect(url);
   }
