@@ -75,6 +75,8 @@ export async function requireUser() {
 export async function requireRole(role: Role | Role[]) {
   const user = await requireUser();
   const allowed = Array.isArray(role) ? role : [role];
+  // SUPERADMIN tiene acceso a todo (admin, profesor, padre, super).
+  if (user.role === "SUPERADMIN") return user;
   if (allowed.includes(user.role)) return user;
 
   const dest =
