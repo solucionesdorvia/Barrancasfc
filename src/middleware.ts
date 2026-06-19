@@ -15,6 +15,11 @@ const isPublic = createRouteMatcher([
   "/api/health(.*)",
   "/invite/(.*)",
   "/api/invitations/by-token/(.*)",
+  // SEO / assets accesibles sin auth
+  "/robots.txt",
+  "/sitemap.xml",
+  "/opengraph-image(.*)",
+  "/favicon.ico",
 ]);
 
 /**
