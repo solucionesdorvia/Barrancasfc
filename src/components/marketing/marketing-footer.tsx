@@ -30,6 +30,8 @@ export function MarketingFooter() {
           <FooterLink href={`mailto:${NEXCLUB_CONTACT_EMAIL}`}>
             {NEXCLUB_CONTACT_EMAIL}
           </FooterLink>
+          <FooterLink href="/legal/terms">Términos y condiciones</FooterLink>
+          <FooterLink href="/legal/privacy">Política de privacidad</FooterLink>
         </FooterCol>
       </div>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pb-8 pt-2 flex flex-col sm:flex-row gap-2 sm:gap-4 justify-between text-xs text-nex-muted">

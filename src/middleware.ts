@@ -20,6 +20,7 @@ const isPublic = createRouteMatcher([
   "/sitemap.xml",
   "/opengraph-image(.*)",
   "/favicon.ico",
+  "/legal/(.*)",
 ]);
 
 /**
