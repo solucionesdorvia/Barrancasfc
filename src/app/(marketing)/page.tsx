@@ -13,6 +13,7 @@ import { ComparisonTable } from "@/components/marketing/comparison-table";
 import { BarrancasProofCard } from "@/components/marketing/barrancas-proof-card";
 import { FaqAccordion } from "@/components/marketing/faq-accordion";
 import { HumanTeamBlock } from "@/components/marketing/human-team-block";
+import { RevealOnScroll } from "@/components/marketing/reveal-on-scroll";
 import { prisma } from "@/lib/prisma";
 import { NEXCLUB_WHATSAPP_DEMO_URL } from "@/lib/constants";
 
@@ -39,9 +40,10 @@ export default async function NexClubLandingPage() {
       <HeroAsymmetric />
 
       {/* 2. Bar de instituciones */}
-      <TrustedByStrip />
+      <RevealOnScroll><TrustedByStrip /></RevealOnScroll>
 
       {/* 3. El problema — tipografía editorial */}
+      <RevealOnScroll>
       <section className="bg-white">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-20 sm:py-28 grid grid-cols-1 md:grid-cols-12 gap-10">
           <div className="md:col-span-4">
@@ -78,20 +80,22 @@ export default async function NexClubLandingPage() {
           </div>
         </div>
       </section>
+      </RevealOnScroll>
 
       {/* 4. Cómo funciona — 3 actos con screenshots */}
-      <ThreeActsSection />
+      <RevealOnScroll><ThreeActsSection /></RevealOnScroll>
 
       {/* 5. Demo del producto — slot Remotion */}
-      <HeroDemoSlot />
+      <RevealOnScroll><HeroDemoSlot /></RevealOnScroll>
 
       {/* 6. Tabla comparativa — NEXCLUB vs Excel/ComET/ERP */}
-      <ComparisonTable />
+      <RevealOnScroll><ComparisonTable /></RevealOnScroll>
 
-      {/* 6. Prueba social — card grande Barrancas FC */}
-      <BarrancasProofCard />
+      {/* 7. Prueba social — card grande Barrancas FC */}
+      <RevealOnScroll><BarrancasProofCard /></RevealOnScroll>
 
-      {/* 6. Para quién */}
+      {/* 8. Para quién */}
+      <RevealOnScroll>
       <section id="para-quien" className="bg-nex-bg">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-20 sm:py-24">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-start">
@@ -126,14 +130,16 @@ export default async function NexClubLandingPage() {
           </div>
         </div>
       </section>
+      </RevealOnScroll>
 
-      {/* 8. FAQ */}
-      <FaqAccordion />
+      {/* 9. FAQ */}
+      <RevealOnScroll><FaqAccordion /></RevealOnScroll>
 
-      {/* 9. Equipo humano */}
-      <HumanTeamBlock />
+      {/* 10. Equipo humano */}
+      <RevealOnScroll><HumanTeamBlock /></RevealOnScroll>
 
-      {/* 10. CTA FINAL */}
+      {/* 11. CTA FINAL */}
+      <RevealOnScroll>
       <section id="contacto" className="bg-nex-ink text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-20 sm:py-28 text-center">
           <h2 className="font-serif text-4xl sm:text-6xl tracking-tight leading-[1.05]">
@@ -156,6 +162,7 @@ export default async function NexClubLandingPage() {
           </div>
         </div>
       </section>
+      </RevealOnScroll>
 
       <MarketingFooter />
     </main>
