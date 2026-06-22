@@ -23,6 +23,8 @@ type SendInput = {
   text?: string;
   /** From override, default a noreply@<RESEND_FROM_DOMAIN> */
   from?: string;
+  /** Reply-To override por call. Pisa el global RESEND_REPLY_TO. */
+  replyTo?: string;
 };
 
 type SendResult =
@@ -32,6 +34,34 @@ type SendResult =
 
 const FROM_DEFAULT = process.env.RESEND_FROM_EMAIL || "NEXCLUB <noreply@nexclub.app>";
 const REPLY_TO = process.env.RESEND_REPLY_TO;
+const MAIL_DOMAIN = process.env.RESEND_DOMAIN || "nexclub.app";
+
+/**
+ * Devuelve el From address personalizado por club:
+ *   "Barrancas FC <barrancas@nexclub.app>"
+ *
+ * Funciona porque el SPF/DKIM de nexclub.app cubre cualquier `*@nexclub.app`,
+ * así que no hace falta verificar cada subdomain en Resend.
+ *
+ * - Si el club tiene `customSenderEmail` (white-label Enterprise), gana.
+ * - Si tiene `slug` y `name`, usa "Name <slug@nexclub.app>".
+ * - Si no, fallback al FROM_DEFAULT (noreply@nexclub.app).
+ */
+export function clubFromAddress(club?: {
+  slug?: string | null;
+  name?: string | null;
+  customSenderEmail?: string | null;
+} | null): string {
+  if (!club) return FROM_DEFAULT;
+  if (club.customSenderEmail) {
+    return club.name ? `${club.name} <${club.customSenderEmail}>` : club.customSenderEmail;
+  }
+  if (club.slug) {
+    const display = club.name ?? "NEXCLUB";
+    return `${display} <${club.slug}@${MAIL_DOMAIN}>`;
+  }
+  return FROM_DEFAULT;
+}
 
 export function isMailerEnabled(): boolean {
   return !!process.env.RESEND_API_KEY;
@@ -55,7 +85,8 @@ export async function sendMail(input: SendInput): Promise<SendResult> {
     html: input.html,
   };
   if (input.text) payload.text = input.text;
-  if (REPLY_TO) payload.reply_to = REPLY_TO;
+  const replyTo = input.replyTo ?? REPLY_TO;
+  if (replyTo) payload.reply_to = replyTo;
 
   try {
     const res = await fetch("https://api.resend.com/emails", {
@@ -93,6 +124,12 @@ export async function sendNoticeNotification(opts: {
   clubName?: string;
   /** Color primario del club para el botón del mail. Default: NexClub. */
   clubPrimaryHex?: string;
+  /** Slug del club: se usa para construir From `<slug>@nexclub.app`. */
+  clubSlug?: string | null;
+  /** Email de contacto del club: se usa como Reply-To para que las respuestas vayan al club. */
+  clubContactEmail?: string | null;
+  /** Override Enterprise: dominio propio del club (ya verificado en Resend). */
+  clubCustomSenderEmail?: string | null;
 }) {
   const valid = opts.recipients.filter((r) => /\S+@\S+\.\S+/.test(r));
   if (valid.length === 0) return { ok: false, skipped: true, reason: "no recipients" } as const;
@@ -115,6 +152,13 @@ export async function sendNoticeNotification(opts: {
     </div>
   `;
 
+  const from = clubFromAddress({
+    slug: opts.clubSlug,
+    name: opts.clubName,
+    customSenderEmail: opts.clubCustomSenderEmail,
+  });
+  const replyTo = opts.clubContactEmail ?? undefined;
+
   // Para evitar exponer la lista, mandamos uno a uno (Resend acepta bulk pero
   // así cada padre recibe un mail personal sin ver al resto).
   const results = await Promise.all(
@@ -123,6 +167,8 @@ export async function sendNoticeNotification(opts: {
         to,
         subject: opts.isPoll ? `🗳️ ${opts.noticeTitle}` : `📣 ${opts.noticeTitle}`,
         html,
+        from,
+        replyTo,
       })
     )
   );

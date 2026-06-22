@@ -57,6 +57,8 @@ export const POST = withErrorHandler(async (req: Request) => {
           appUrl: getBaseUrl(),
           clubName: club?.name,
           clubPrimaryHex: club?.primary,
+          clubSlug: club?.slug,
+          clubContactEmail: club?.contactEmail,
         });
       }
     } catch (e) {
