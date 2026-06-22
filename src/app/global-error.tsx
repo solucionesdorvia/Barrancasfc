@@ -1,8 +1,6 @@
 "use client";
-import { useEffect } from "react";
 import { Inter } from "next/font/google";
 import { AlertTriangle, RotateCcw } from "lucide-react";
-import * as Sentry from "@sentry/nextjs";
 import { Button } from "@/components/ui/button";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -14,9 +12,6 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  useEffect(() => {
-    Sentry.captureException(error);
-  }, [error]);
   // eslint-disable-next-line no-console
   console.error("[global-error]", error);
   return (
