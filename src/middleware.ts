@@ -24,35 +24,6 @@ const isPublic = createRouteMatcher([
 ]);
 
 /**
- * Lista EXPLÍCITA de zonas que requieren login. Todo lo que no caiga acá
- * (404s, paths random) pasa al app router para que devuelva not-found.tsx
- * en vez de redirigir a sign-in (UX confusa + malo para SEO).
- *
- * APIs no listadas validan auth en su propio handler con requireUser().
- */
-const isProtected = createRouteMatcher([
-  "/admin(.*)",
-  "/profesor(.*)",
-  "/padre(.*)",
-  "/super(.*)",
-  "/onboarding(.*)",
-  "/api/admin(.*)",
-  "/api/profesor(.*)",
-  "/api/padre(.*)",
-  "/api/super(.*)",
-  "/api/notices(.*)",
-  "/api/events(.*)",
-  "/api/tasks(.*)",
-  "/api/players(.*)",
-  "/api/categories(.*)",
-  "/api/invitations(?!/by-token)(.*)",
-  "/api/users(.*)",
-  "/api/payments(.*)",
-  "/api/documents(.*)",
-  "/api/attendance(.*)",
-]);
-
-/**
  * Rutas que solo tienen sentido en un subdomain de club. Si entran a estas
  * desde el root (`nexclub.app/admin`) las redirigimos al landing.
  */
@@ -98,12 +69,8 @@ export default clerkMiddleware((auth, req) => {
   // (requireRole("SUPERADMIN") en el layout), no por host. Antes redirigíamos
   // subdomain → root pero generaba dependencia frágil del DNS apex.
 
-  // 4) Auth: solo protegemos zonas EXPLÍCITAS. Rutas random pasan al app router
-  //    para que renderice not-found.tsx (mejor UX que redirigir a sign-in).
-  //    isPublic queda como afirmación documental de qué rutas son "intencionalmente
-  //    públicas"; el guard real es isProtected.
-  void isPublic;
-  if (isProtected(req)) {
+  // 4) Auth: las rutas protegidas requieren login (sin cambios).
+  if (!isPublic(req)) {
     auth().protect();
   }
 

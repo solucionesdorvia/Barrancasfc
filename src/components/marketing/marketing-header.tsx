@@ -19,11 +19,11 @@ export function MarketingHeader() {
         <Link href="/" className="flex items-center gap-2">
           <NexClubWordmark size="md" />
         </Link>
-        <nav className="hidden sm:flex items-center gap-2 text-sm text-nex-muted">
-          <a href="#producto" className="hover:text-nex-ink transition-colors inline-flex items-center min-h-[44px] px-2">Producto</a>
-          <a href="#comparativa" className="hover:text-nex-ink transition-colors inline-flex items-center min-h-[44px] px-2">Por qué NEXCLUB</a>
-          <a href="#para-quien" className="hover:text-nex-ink transition-colors inline-flex items-center min-h-[44px] px-2">Para quién</a>
-          <a href="#faq" className="hover:text-nex-ink transition-colors inline-flex items-center min-h-[44px] px-2">FAQ</a>
+        <nav className="hidden sm:flex items-center gap-6 text-sm text-nex-muted">
+          <a href="#producto" className="hover:text-nex-ink transition-colors">Producto</a>
+          <a href="#comparativa" className="hover:text-nex-ink transition-colors">Por qué NEXCLUB</a>
+          <a href="#para-quien" className="hover:text-nex-ink transition-colors">Para quién</a>
+          <a href="#faq" className="hover:text-nex-ink transition-colors">FAQ</a>
         </nav>
         <div className="flex items-center gap-2">
           {userId ? (
