@@ -68,7 +68,7 @@ function FooterLink({
         href={href}
         target={external ? "_blank" : undefined}
         rel={external ? "noopener noreferrer" : undefined}
-        className="text-nex-ink/80 hover:text-nex transition-colors"
+        className="text-nex-ink/80 hover:text-nex transition-colors inline-flex items-center min-h-[44px] py-2"
       >
         {children}
       </a>
