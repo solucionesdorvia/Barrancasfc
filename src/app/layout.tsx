@@ -15,7 +15,12 @@ const instrumentSerif = Instrument_Serif({
   display: "swap",
 });
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://barrancas-fc.up.railway.app";
+// Canonical base para metadata (OG image, Twitter cards, etc.). Hardcoded
+// a www.nexclub.app — la env var NEXT_PUBLIC_APP_URL quedó obsoleta y
+// estaba apuntando a localhost en prod, rompiendo los previews de OG.
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL && !process.env.NEXT_PUBLIC_APP_URL.includes("localhost")
+  ? process.env.NEXT_PUBLIC_APP_URL
+  : "https://www.nexclub.app";
 
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
