@@ -37,4 +37,23 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+// Wrappear con Sentry solo si está configurado. Sin SENTRY_AUTH_TOKEN, withSentryConfig
+// sigue funcionando — solo no sube sourcemaps. El SDK runtime es no-op sin DSN.
+async function buildConfig() {
+  if (!process.env.SENTRY_DSN && !process.env.NEXT_PUBLIC_SENTRY_DSN) {
+    return nextConfig;
+  }
+  const { withSentryConfig } = await import("@sentry/nextjs");
+  return withSentryConfig(nextConfig, {
+    org: process.env.SENTRY_ORG,
+    project: process.env.SENTRY_PROJECT,
+    authToken: process.env.SENTRY_AUTH_TOKEN,
+    silent: true,
+    widenClientFileUpload: true,
+    tunnelRoute: "/monitoring",
+    disableLogger: true,
+    automaticVercelMonitors: false,
+  });
+}
+
+export default await buildConfig();
