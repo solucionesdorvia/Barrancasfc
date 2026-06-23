@@ -17,7 +17,13 @@ export default function Page() {
         </p>
       }
     >
-      <SignUp fallbackRedirectUrl="/api/dispatch" appearance={{ variables: { colorPrimary: "#0F766E" } }} />
+      <SignUp
+        fallbackRedirectUrl="/api/dispatch"
+        appearance={{
+          variables: { colorPrimary: "#0F766E" },
+          elements: { headerSubtitle: { display: "none" } },
+        }}
+      />
       <ClerkLoadFallback />
     </AuthShell>
   );

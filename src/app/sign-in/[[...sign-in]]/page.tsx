@@ -15,7 +15,15 @@ export default function Page() {
         </div>
       }
     >
-      <SignIn fallbackRedirectUrl="/api/dispatch" appearance={{ variables: { colorPrimary: "#0F766E" } }} />
+      <SignIn
+        fallbackRedirectUrl="/api/dispatch"
+        appearance={{
+          variables: { colorPrimary: "#0F766E" },
+          // Ocultamos el "para continuar a <App name>" del form — el branding
+          // del club ya lo damos arriba con logo y nombre.
+          elements: { headerSubtitle: { display: "none" } },
+        }}
+      />
       <ClerkLoadFallback />
     </AuthShell>
   );
