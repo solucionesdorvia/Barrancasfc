@@ -1,4 +1,6 @@
-import { ScreenshotFrame } from "@/components/marketing/screenshot-frame";
+import { MockAdminPadron } from "@/components/marketing/mock-admin-padron";
+import { MockPadreCuotas } from "@/components/marketing/mock-padre-cuotas";
+import { MockAdminDashboard } from "@/components/marketing/mock-admin-dashboard";
 
 /**
  * "Cómo funciona" narrativo en 3 actos, layout alterno (izq/der/izq).
@@ -70,9 +72,14 @@ type Act = {
   body: string;
   bullets: string[];
   screenshotLabel: string;
-  screenshotSrc?: string;
   reverse: boolean;
 };
+
+function MockForAct({ number }: { number: string }) {
+  if (number === "01") return <MockAdminPadron />;
+  if (number === "02") return <MockPadreCuotas />;
+  return <MockAdminDashboard />;
+}
 
 function ActRow({ act }: { act: Act }) {
   return (
@@ -93,7 +100,9 @@ function ActRow({ act }: { act: Act }) {
         </ul>
       </div>
       <div className={act.reverse ? "md:order-1" : ""}>
-        <ScreenshotFrame label={act.screenshotLabel} src={act.screenshotSrc} ratio="video" />
+        <div className="relative aspect-video rounded-2xl overflow-hidden border border-nex-border bg-white shadow-2xl shadow-nex-ink/10">
+          <MockForAct number={act.number} />
+        </div>
       </div>
     </div>
   );

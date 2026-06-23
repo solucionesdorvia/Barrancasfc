@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ScreenshotFrame } from "@/components/marketing/screenshot-frame";
+import { MockAdminDashboard } from "@/components/marketing/mock-admin-dashboard";
 import { NEXCLUB_WHATSAPP_DEMO_URL } from "@/lib/constants";
 
 /**
@@ -76,11 +76,9 @@ export function HeroAsymmetric() {
         {/* Columna derecha — mockup 7/12 */}
         <div className="lg:col-span-7 relative">
           <div className="relative lg:-mr-12 xl:-mr-20">
-            <ScreenshotFrame
-              label="Dashboard admin · Barrancas FC"
-              ratio="video"
-              className="rotate-[0.6deg] hover:rotate-0 transition-transform duration-700"
-            />
+            <div className="relative aspect-video rounded-2xl overflow-hidden border border-nex-border bg-white shadow-2xl shadow-nex-ink/10 rotate-[0.6deg] hover:rotate-0 transition-transform duration-700">
+              <MockAdminDashboard />
+            </div>
             {/* Card flotante sobre el mockup — refuerza realismo */}
             <div className="hidden sm:flex absolute -left-6 lg:-left-10 bottom-8 lg:bottom-12 items-center gap-3 rounded-xl bg-white border border-nex-border shadow-xl shadow-nex-ink/10 px-4 py-3">
               <div className="h-8 w-8 rounded-full bg-emerald-100 text-emerald-700 grid place-items-center text-xs font-bold">
