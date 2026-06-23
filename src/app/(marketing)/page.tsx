@@ -107,15 +107,15 @@ export default async function NexClubLandingPage() {
                 Pensado para <span className="italic text-nex">tu club</span>.
               </h2>
               <p className="mt-6 text-base sm:text-lg text-nex-muted leading-relaxed">
-                Si tu club tiene entre 80 y 800 chicos en formativas, NEXCLUB te
-                alcanza desde el día 1. Si tenés menos, te alcanza con Excel un
-                rato más. Si tenés más, hablamos en serio.
+                Desde infantiles hasta Primera, desde clubes de barrio hasta
+                instituciones con miles de socios. Si tu club mueve gente,
+                cuotas y comunicación todas las semanas, NEXCLUB es para vos.
               </p>
             </div>
             <ul className="space-y-3">
               {[
-                "Clubes con 80 a 800 jugadores activos",
-                "Categorías por edad o división",
+                "Clubes desde 80 hasta miles de socios",
+                "Infantiles, juveniles, reserva y primera",
                 "Tesorería que cobra cuotas mes a mes",
                 "Dirigencia que quiere ver el club entero en una pantalla",
               ].map((item) => (

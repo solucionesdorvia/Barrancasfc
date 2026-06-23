@@ -33,7 +33,7 @@ export function HeroAsymmetric() {
           </h1>
           <p className="mt-6 max-w-lg text-base sm:text-lg text-nex-muted leading-relaxed">
             NEXCLUB ordena el padrón, las cuotas y la comunicación con las familias.
-            Hecho para clubes de fútbol formativo.
+            Hecho para clubes de fútbol — desde infantiles hasta Primera.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-3">
             <Button

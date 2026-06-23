@@ -32,7 +32,7 @@ export function BarrancasProofCard() {
                 Barrancas FC
               </h3>
               <p className="mt-2 text-sm text-nex-muted leading-relaxed">
-                Club de fútbol formativo. Activo en NEXCLUB desde febrero de 2026.
+                Club de fútbol argentino. Activo en NEXCLUB desde febrero de 2026.
               </p>
             </div>
 

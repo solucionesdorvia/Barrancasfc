@@ -13,7 +13,7 @@ export function MarketingFooter() {
         <div className="col-span-2">
           <NexClubWordmark size="lg" />
           <p className="mt-3 text-sm text-nex-muted leading-relaxed max-w-xs">
-            El sistema operativo de tu club de fútbol formativo.
+            El sistema operativo de tu club de fútbol.
             Padrón, cuotas y comunicación con familias en un solo lugar.
           </p>
         </div>

@@ -15,7 +15,7 @@ export function TrustedByStrip() {
             Confían en NEXCLUB
           </p>
           <p className="text-sm text-nex-ink mt-0.5">
-            Clubes argentinos de formativas, ya en producción.
+            Clubes argentinos que ya confían en NEXCLUB.
           </p>
         </div>
         <ul className="flex flex-wrap items-center gap-x-10 gap-y-4 md:justify-end">

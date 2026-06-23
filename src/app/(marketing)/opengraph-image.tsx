@@ -84,7 +84,7 @@ export default async function OgImage() {
             }}
           >
             Padrón, cuotas y comunicación con las familias. Hecho para clubes de
-            fútbol formativo argentinos.
+            fútbol argentinos.
           </div>
         </div>
 

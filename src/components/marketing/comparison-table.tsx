@@ -92,7 +92,7 @@ export function ComparisonTable() {
           </h2>
           <p className="mt-5 text-base sm:text-lg text-nex-muted leading-relaxed">
             Las planillas, los CRMs y los sistemas federativos resuelven pedazos.
-            NEXCLUB resuelve el día a día — la operación entera de un club de formativas.
+            NEXCLUB resuelve el día a día — la operación entera de un club de fútbol.
           </p>
         </div>
 
