@@ -7,7 +7,7 @@ import { ClerkLoadFallback } from "@/components/clerk-load-fallback";
 export default function Page() {
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center gap-6 bg-gradient-to-br from-nex-ink via-zinc-900 to-nex-primary p-6">
-      <NexClubWordmark size="lg" />
+      <NexClubWordmark size="lg" variant="light" />
       <div className="relative">
         <SignIn
           forceRedirectUrl="/"
