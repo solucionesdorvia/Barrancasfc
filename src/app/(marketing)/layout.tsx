@@ -8,9 +8,9 @@ import type { Metadata } from "next";
  * los colores del club del request, la landing nunca los lee.
  */
 
-const TITLE = "NEXCLUB · El sistema operativo de tu club deportivo";
+const TITLE = "NEXCLUB · Toda la gestión de tu club deportivo";
 const DESCRIPTION =
-  "Plataforma SaaS argentina para clubes deportivos — fútbol, futsal, hockey, rugby, vóley y más. Padrón por categorías, cuotas con MercadoPago, portal para familias y comunicación, en una sola plataforma con la cara de tu club.";
+  "Hecho en Argentina para clubes deportivos — fútbol, futsal, hockey, rugby, vóley y más. Padrón por categorías, cuotas con MercadoPago, portal para familias y comunicación, en un solo lugar con la cara de tu club.";
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -54,7 +54,7 @@ const JSON_LD = {
       "@id": "https://nexclub.app/#organization",
       name: "NEXCLUB",
       url: "https://nexclub.app",
-      slogan: "El sistema operativo de tu club",
+      slogan: "Toda la gestión de tu club",
       areaServed: { "@type": "Country", name: "Argentina" },
       sameAs: [],
     },

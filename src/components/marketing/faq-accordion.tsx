@@ -19,7 +19,7 @@ const FAQ: FaqItem[] = [
   },
   {
     q: "¿Migramos del Excel?",
-    a: "Sí, lo migramos nosotros. Es parte del onboarding. Vos nos mandás las planillas que tengas y el padrón queda cargado en un par de días.",
+    a: "Sí, lo migramos nosotros. Es parte del setup inicial. Vos nos mandás las planillas que tengas y el padrón queda cargado en un par de días.",
   },
   {
     q: "¿Y si el club cambia de comisión?",

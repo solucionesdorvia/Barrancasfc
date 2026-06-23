@@ -8,7 +8,7 @@ import { ImageResponse } from "next/og";
  * CSS vars de Tailwind.
  */
 export const runtime = "edge";
-export const alt = "NEXCLUB · El sistema operativo de tu club";
+export const alt = "NEXCLUB · Toda la gestión de tu club";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 

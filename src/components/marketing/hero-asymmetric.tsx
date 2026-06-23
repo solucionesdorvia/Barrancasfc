@@ -25,7 +25,7 @@ export function HeroAsymmetric() {
         <div className="lg:col-span-5">
           <div className="inline-flex items-center gap-2 rounded-full border border-nex-border bg-white/80 px-3 py-1 text-xs font-medium text-nex-muted">
             <span className="h-1.5 w-1.5 rounded-full bg-nex animate-pulse" />
-            El sistema operativo de tu club
+            Toda la gestión de tu club
           </div>
           <h1 className="mt-6 font-serif text-5xl sm:text-6xl md:text-7xl text-nex-ink leading-[0.95] tracking-tight">
             El club entero,<br />

@@ -4,8 +4,7 @@ import { NEXCLUB_WHATSAPP_DEMO_URL } from "@/lib/constants";
 
 /**
  * Bloque "humano": refuerza que detrás hay un equipo argentino que atiende
- * por WhatsApp. Sin formularios, sin SDRs. Es la anti-tesis del SaaS
- * gringo con form de 12 campos.
+ * por WhatsApp. Sin formularios infinitos, sin call centers.
  */
 export function HumanTeamBlock() {
   return (
@@ -22,7 +21,7 @@ export function HumanTeamBlock() {
               <span className="italic text-nex">en menos de 24 horas.</span>
             </h2>
             <p className="mt-5 text-base sm:text-lg text-nex-muted leading-relaxed max-w-2xl">
-              Sin formularios infinitos, sin SDRs, sin chatbots que te
+              Sin formularios infinitos, sin call centers, sin chatbots que te
               hacen 9 preguntas antes de mandarte con alguien.
               Te escribimos por WhatsApp y arrancamos.
             </p>

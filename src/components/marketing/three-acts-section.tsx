@@ -16,7 +16,7 @@ export function ThreeActsSection() {
       number: "01",
       title: "Cargás tu club",
       body:
-        "Importás el padrón desde Excel o COMET, armás las categorías y le ponés la cara del club. En una tarde queda andando — sin formularios infinitos, sin onboarding de tres semanas.",
+        "Importás el padrón desde Excel o COMET, armás las categorías y le ponés la cara del club. En una tarde queda andando — sin formularios infinitos.",
       bullets: ["Padrón unificado", "Multi-categoría por jugador", "Tu logo y tus colores en todas las pantallas"],
       screenshotLabel: "Padrón con categorías · admin",
       reverse: false,
@@ -35,7 +35,7 @@ export function ThreeActsSection() {
       title: "Vos ves todo en tiempo real",
       body:
         "Cuánto entró este mes, qué categorías están al día, quién falta a entrenar. Sin reportes que armar a mano. Los números del club están a un click — y los podés exportar cuando quieras.",
-      bullets: ["KPIs en vivo", "Asistencia con foto y geo", "Auditoría de todo lo que pasa"],
+      bullets: ["Números del club al instante", "Asistencia con foto y geo", "Historial completo de cambios"],
       screenshotLabel: "Dashboard del club · admin",
       reverse: false,
     },
@@ -53,7 +53,7 @@ export function ThreeActsSection() {
           </h2>
           <p className="mt-5 text-base sm:text-lg text-nex-muted leading-relaxed">
             Gestión deportiva, administrativa y comunicación con las familias en
-            una sola plataforma. Con la cara de tu club.
+            un solo lugar. Con la cara de tu club.
           </p>
         </div>
         <div className="mt-16 space-y-20 sm:space-y-28">
