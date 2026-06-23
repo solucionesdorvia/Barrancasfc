@@ -6,7 +6,7 @@ import { ClerkLoadFallback } from "@/components/clerk-load-fallback";
 export default function Page() {
   return (
     <AuthShell
-      subtitle="Ingresá a tu cuenta"
+      mode="sign-in"
       footer={
         <div className="flex items-center gap-4 text-[11px] text-zinc-500">
           <Link href="/legal/terms" className="hover:text-zinc-800">Términos</Link>

@@ -6,7 +6,7 @@ import { ClerkLoadFallback } from "@/components/clerk-load-fallback";
 export default function Page() {
   return (
     <AuthShell
-      subtitle="Creá tu cuenta"
+      mode="sign-up"
       footer={
         <p className="text-[11px] text-zinc-500 text-center max-w-xs leading-relaxed">
           Al crear tu cuenta aceptás los{" "}

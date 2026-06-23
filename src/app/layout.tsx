@@ -75,14 +75,9 @@ export const viewport: Viewport = {
 const esBase = esES as any;
 const clerkLocalization: any = {
   ...esBase,
-  signUp: {
-    ...esBase.signUp,
-    start: {
-      ...(esBase.signUp?.start ?? {}),
-      title: "Creá tu cuenta",
-      subtitle: "para entrar a NEXCLUB Barrancas",
-    },
-  },
+  // El "para continuar a <X>" lo genera Clerk desde el Application Name del
+  // dashboard. No lo hardcodeo acá para que al sumar más clubes no quede
+  // pegado a uno; el branding por club lo da el AuthShell con logo+colores.
   unstable__errors: {
     ...esBase.unstable__errors,
     passwords_helper_text: "La contraseña cumple con los requisitos.",

@@ -44,22 +44,32 @@ type AuthClub = Awaited<ReturnType<typeof resolveAuthClub>>;
 /**
  * Wrapper común para sign-in y sign-up:
  * - Si la pantalla se sirve desde un subdomain de club, muestra logo + nombre
- *   del club, gradient con sus colores, copy "Ingresá a <club>".
- * - Si se sirve desde root, muestra wordmark NEXCLUB con paleta nex original.
+ *   del club, gradient con sus colores.
+ * - Si se sirve desde root, muestra wordmark NEXCLUB con paleta nex original
+ *   y un copy genérico "Ingresá a tu club" (el club lo identifica luego el dispatch).
  *
- * Cada call-site pasa el `children` (el componente <SignIn/> o <SignUp/>) y
- * un slot opcional de footer (términos, "ya tenés cuenta?", etc).
+ * Cada call-site pasa el `mode` para que el subtítulo se genere apropiado.
  */
+type Mode = "sign-in" | "sign-up";
+
+function subtitleFor(mode: Mode, club: AuthClub): string {
+  if (club) {
+    return mode === "sign-in" ? "Ingresá a tu cuenta" : `Creá tu cuenta en ${club.name}`;
+  }
+  return mode === "sign-in" ? "Ingresá a tu club" : "Creá tu cuenta en NEXCLUB";
+}
+
 export async function AuthShell({
   children,
-  subtitle,
+  mode,
   footer,
 }: {
   children: React.ReactNode;
-  subtitle: string;
+  mode: Mode;
   footer?: React.ReactNode;
 }) {
   const club = await resolveAuthClub();
+  const subtitle = subtitleFor(mode, club);
 
   if (club) {
     return <ClubAuthScreen club={club} subtitle={subtitle} footer={footer}>{children}</ClubAuthScreen>;
