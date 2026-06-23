@@ -19,9 +19,19 @@ export default function Page() {
         fallbackRedirectUrl="/api/dispatch"
         appearance={{
           variables: { colorPrimary: "#0F766E" },
-          // Ocultamos el "para continuar a <App name>" del form — el branding
-          // del club ya lo damos arriba con logo y nombre.
-          elements: { headerSubtitle: { display: "none" } },
+          // - headerSubtitle: ocultamos el "para continuar a <App name>",
+          //   el branding ya está arriba.
+          // - socialButtonsBlockButton: ocultamos "Continuar con Google"
+          //   hasta configurar custom OAuth credentials en Google Cloud
+          //   (las shared credentials de Clerk no funcionan en prod).
+          // - dividerRow: el "o" entre social y email queda colgado sin
+          //   sociales, lo ocultamos también.
+          elements: {
+            headerSubtitle: { display: "none" },
+            socialButtonsBlockButton: { display: "none" },
+            socialButtons: { display: "none" },
+            dividerRow: { display: "none" },
+          },
         }}
       />
       <ClerkLoadFallback />

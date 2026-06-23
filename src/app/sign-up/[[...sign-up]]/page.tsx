@@ -21,7 +21,12 @@ export default function Page() {
         fallbackRedirectUrl="/api/dispatch"
         appearance={{
           variables: { colorPrimary: "#0F766E" },
-          elements: { headerSubtitle: { display: "none" } },
+          elements: {
+            headerSubtitle: { display: "none" },
+            socialButtonsBlockButton: { display: "none" },
+            socialButtons: { display: "none" },
+            dividerRow: { display: "none" },
+          },
         }}
       />
       <ClerkLoadFallback />
