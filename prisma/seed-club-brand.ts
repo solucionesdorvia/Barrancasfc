@@ -23,15 +23,15 @@ async function main() {
     data: {
       slug: "barrancas",
       name: "Barrancas FC",
-      tagline: "Inferiores · Buenos Aires",
-      primary:      "#0F6E56",  // verde Barrancas (acordamos del tokens.css)
-      primaryHover: "#0A5443",
-      primarySoft:  "#E1F5EE",
-      onPrimary:    "#E1F5EE",
-      accent:       "#F97316",
-      // contactos si querés que las plantillas firmen con número/email del club
-      contactWhatsapp: null,
-      contactEmail:    null,
+      tagline: "Liga Profesional Argentina",
+      // Colores REALES del club (rojo institucional). Anteriormente este seed
+      // tenía verde y pisaba cualquier edición manual en cada deploy.
+      primary:      "#C8102E",
+      primaryHover: "#A30D24",
+      primarySoft:  "#FEE7EA",
+      onPrimary:    "#FFFFFF",
+      accent:       "#0F172A",
+      logo:         "/logo.png",
     },
   });
 
