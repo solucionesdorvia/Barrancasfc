@@ -28,11 +28,11 @@ export function MarketingHeader() {
         <div className="flex items-center gap-2">
           {userId ? (
             <Button asChild size="sm" className="bg-nex hover:bg-nex-hover text-white gap-1.5">
-              <Link href="/admin">Ir al panel <ArrowRight className="h-3.5 w-3.5" /></Link>
+              <Link href="/api/dispatch">Ir al panel <ArrowRight className="h-3.5 w-3.5" /></Link>
             </Button>
           ) : (
             <Button asChild size="sm" variant="ghost" className="text-nex-ink hover:text-nex">
-              <Link href="/sign-in">Ingresar</Link>
+              <Link href="/sign-in?redirect_url=/api/dispatch">Ingresar</Link>
             </Button>
           )}
         </div>
