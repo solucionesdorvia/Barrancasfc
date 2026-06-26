@@ -26,12 +26,17 @@ const ROLE_TO_PATH: Record<string, string> = {
 
 export async function GET(req: Request) {
   const { userId } = auth();
-  const url = new URL(req.url);
+
+  // Railway sirve detrás de un proxy: req.url tiene `0.0.0.0:8080` (host
+  // interno del container). Usamos x-forwarded-host / x-forwarded-proto que
+  // el edge inyecta con los valores reales antes de llegar al server.
+  const hdrHost = req.headers.get("x-forwarded-host") ?? req.headers.get("host") ?? "";
+  const hdrProto = req.headers.get("x-forwarded-proto") ?? "https";
+  const publicOrigin = `${hdrProto}://${hdrHost}`;
   const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || "nexclub.app";
-  const proto = url.protocol;
 
   if (!userId) {
-    return NextResponse.redirect(new URL("/sign-in", req.url));
+    return NextResponse.redirect(`${publicOrigin}/sign-in`);
   }
 
   const user = await prisma.user.findUnique({
@@ -40,29 +45,30 @@ export async function GET(req: Request) {
   });
 
   if (!user) {
-    // El user existe en Clerk pero no en DB. Lo más probable: webhook pendiente
-    // o cuenta nueva sin asociar. Lo mandamos a sign-in con un hint.
-    return NextResponse.redirect(new URL("/sign-in?reason=account_pending", req.url));
+    return NextResponse.redirect(`${publicOrigin}/sign-in?reason=account_pending`);
   }
 
   // SUPERADMIN tiene panel propio en root.
   if (user.role === "SUPERADMIN") {
-    return NextResponse.redirect(new URL("/super", req.url));
+    return NextResponse.redirect(`${publicOrigin}/super`);
   }
 
   const panel = ROLE_TO_PATH[user.role];
   if (!panel || !user.club?.slug) {
-    // Role sin panel mapeado (no debería pasar) o user sin club asignado.
-    return NextResponse.redirect(new URL("/sign-in?reason=no_club", req.url));
+    return NextResponse.redirect(`${publicOrigin}/sign-in?reason=no_club`);
   }
 
-  // Construimos URL al subdomain del club. En dev (localhost) saltamos el
-  // subdomain switch y vamos al path directo — el middleware del root sirve.
-  const isLocal = url.hostname === "localhost" || url.hostname.endsWith(".localhost");
+  // En localhost (dev), nos mantenemos en el mismo host con el path del panel.
+  const isLocal = hdrHost.startsWith("localhost") || hdrHost.startsWith("127.") || hdrHost === "0.0.0.0";
   if (isLocal) {
-    return NextResponse.redirect(new URL(panel, req.url));
+    return NextResponse.redirect(`${publicOrigin}${panel}`);
   }
 
-  const target = `${proto}//${user.club.slug}.${rootDomain}${panel}`;
-  return NextResponse.redirect(target);
+  // En prod, si ya estamos en el subdomain correcto del club no cambiamos
+  // de host — sólo ajustamos el path. Si estamos en root, saltamos al subdomain.
+  const targetHost = `${user.club.slug}.${rootDomain}`;
+  if (hdrHost === targetHost) {
+    return NextResponse.redirect(`${publicOrigin}${panel}`);
+  }
+  return NextResponse.redirect(`${hdrProto}://${targetHost}${panel}`);
 }
