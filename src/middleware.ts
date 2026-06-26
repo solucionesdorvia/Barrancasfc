@@ -13,6 +13,7 @@ const isPublic = createRouteMatcher([
   "/sign-up(.*)",
   "/api/uploadthing(.*)",
   "/api/health(.*)",
+  "/api/dispatch(.*)",
   "/invite/(.*)",
   "/api/invitations/by-token/(.*)",
   // SEO / assets accesibles sin auth
