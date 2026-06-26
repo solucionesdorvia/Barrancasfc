@@ -16,7 +16,7 @@ export default function Page() {
       }
     >
       <SignIn
-        fallbackRedirectUrl="/api/dispatch"
+        forceRedirectUrl="/api/dispatch"
         appearance={{
           variables: { colorPrimary: "#0F766E" },
           // - headerSubtitle: ocultamos el "para continuar a <App name>",

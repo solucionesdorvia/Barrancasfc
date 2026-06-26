@@ -18,7 +18,7 @@ export default function Page() {
       }
     >
       <SignUp
-        fallbackRedirectUrl="/api/dispatch"
+        forceRedirectUrl="/api/dispatch"
         appearance={{
           variables: { colorPrimary: "#0F766E" },
           elements: {
